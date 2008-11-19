@@ -26,7 +26,13 @@ python_data = []
 for i in range(0, params[3]): 
     size = wave.struct.calcsize(fmt)
     data = wave.struct.unpack(fmt, wavdata[i:i+size])
+
     python_data.append(data[0]) # The above function returns 1-tuples
 
-pylab.plot(python_data)
+assert(len(wavdata) == params[0]*params[1]*len(python_data))
+
+x = pylab.arange(0, float(params[3])/params[2], 1/float(params[2]))
+pylab.xlabel("time (s)")
+
+pylab.plot(x, python_data)
 pylab.show()
