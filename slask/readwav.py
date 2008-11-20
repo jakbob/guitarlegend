@@ -15,8 +15,9 @@ wf = wave.open(WAVE_INPUT_FILE, "rb")
 
 params = wf.getparams()
 
-fmt = FORMAT[str(params[0]) + # nchannels
-             str(params[1])]  # sampwidth
+# < == little endian
+fmt = "<" + FORMAT[str(params[0]) + # nchannels
+                   str(params[1])]  # sampwidth
 
 wavdata = wf.readframes(params[3]) # params[3] is nframes; Of course, don't attempt this with a large file
 wf.close()
@@ -24,10 +25,12 @@ wf.close()
 # Time to unpack
 python_data = []
 for i in range(0, params[3]): 
-    size = wave.struct.calcsize(fmt)
-    data = wave.struct.unpack(fmt, wavdata[i:i+size])
+    size = wave.struct.calcsize( fmt)
+    data = wave.struct.unpack(fmt, wavdata[i:i+size]) # Little endian
 
     python_data.append(data[0]) # The above function returns 1-tuples
+
+print python_data[0:20]
 
 assert(len(wavdata) == params[0]*params[1]*len(python_data))
 
