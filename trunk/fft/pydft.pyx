@@ -1,3 +1,11 @@
+# See the discussion in the definition of DFT
+#cdef extern from "Python.h":
+#    object PyTuple_GET_ITEM(object p, int pos)
+#    void Py_INCREF(object)
+
+cdef extern from "math.h":
+    double sqrt(double)
+
 cdef extern from "stdlib.h":
     ctypedef int size_t
     ctypedef long intptr_t
@@ -24,20 +32,27 @@ def DFT(data):
     cdef int i, N
 
     N = len(data)
-    
+
     # Convert python list to C array of floats
     cdata = <float *>malloc(sizeof(float)*N)
     for i from 0 <= i < N:
+        # Apparently, this method is slow. One should use PyTuple_GET_ITEM and PyMem_Malloc
+        # from Python.h unless you use a new version of Cython. The former gives me a 
+        # segfault, though. 
+        # TODO: Fix this.
         cdata[i] = data[i]
-        
+
     # Perform the DFT
     freqs = c_DFT(cdata, N)
 
-    # Copy the data back to a Python list
+    # Copy the data back to a Python list. I know that calculating the 
+    # magnitude means extra overhead, but this is for testing purposes.
+    # TODO: Fix this.
     pyfreqs = []
     for i from 0 <= i < N:
-        pyfreqs.append(freqs[i].re**2 + freqs[i].im**2)
+        pyfreqs.append(sqrt(freqs[i].re**2 + freqs[i].im**2))
 
+    # Free those little fuckers
     free(freqs)
     free(cdata)
        
