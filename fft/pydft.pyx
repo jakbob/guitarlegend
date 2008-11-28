@@ -11,6 +11,14 @@ cdef struct complex:
 cdef extern complex* c_DFT "DFT" (float * data_points, int N)
 
 def DFT(data):
+    """Perform the Discrete Fourier Transform.
+
+    Arguments
+    data -- iterable of the samples on which to perform the transform
+
+    Returns
+    freq -- list of the magnitudes of the frequencies. Yes, we need to change this."""
+
     cdef complex * freqs
     cdef float * cdata
     cdef int i, N
@@ -28,7 +36,7 @@ def DFT(data):
     # Copy the data back to a Python list
     pyfreqs = []
     for i from 0 <= i < N:
-        pyfreqs.append(freqs[i].re + freqs[i].im)
+        pyfreqs.append(freqs[i].re**2 + freqs[i].im**2)
 
     free(freqs)
     free(cdata)
