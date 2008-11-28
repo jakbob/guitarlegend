@@ -18,14 +18,7 @@ cdef struct complex:
 
 cdef extern complex* c_DFT "DFT" (float * data_points, int N)
 
-def DFT(data):
-    """Perform the Discrete Fourier Transform.
-
-    Arguments
-    data -- iterable of the samples on which to perform the transform
-
-    Returns
-    freq -- list of the magnitudes of the frequencies. Yes, we need to change this."""
+cdef _DFT(object data):
 
     cdef complex * freqs
     cdef float * cdata
@@ -57,3 +50,15 @@ def DFT(data):
     free(cdata)
        
     return pyfreqs
+
+def DFT(data):
+    # Use early binding for speedup in other modules
+    """Perform the Discrete Fourier Transform.
+
+    Arguments
+    data -- iterable of the samples on which to perform the transform
+
+    Returns
+    freq -- list of the magnitudes of the frequencies. Yes, we need to change this."""
+
+    return _DFT(data)
