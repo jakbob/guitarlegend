@@ -31,7 +31,7 @@ complex* DFT(float * data_points, int N)
     {
       freq.re = 0;
       freq.im = 0;
-
+      printf("%f, %f\n", data_points[k], data_points[k]);
       for (n = 0; n < N; n++)
 	{
 	  // TODO: Define sin and cos by means of a lookup table instead
