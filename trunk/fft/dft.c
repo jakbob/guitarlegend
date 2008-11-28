@@ -14,12 +14,9 @@
 #include <stdio.h>
 #endif
 
-#define PI 3.14159265359
+#include "dft.h"
 
-typedef struct {
-  double re;
-  double im;
-} complex;
+#define PI 3.14159265359
 
 complex* DFT(float * data_points, int N)
 {

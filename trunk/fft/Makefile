@@ -1,17 +1,23 @@
+#PYREX = pyrexc
+PYREX = cython
+LDFLAGS = -lm
+CFLAGS =
+CC = gcc
+
 all : pydft.so
 
 pydft.so : pydft.o dft.o
-	gcc -shared pydft.o dft.o -lm -o pydft.so
+	$(CC) -shared pydft.o dft.o -lm -o $@
 
 pydft.o : pydft.pyx
-	pyrexc pydft.pyx
-	gcc -c -fPIC -I/usr/include/python2.6/ pydft.c
+	$(PYREX) pydft.pyx
+	$(CC) -c -fPIC -I/usr/include/python2.6/ pydft.c
 
 dft.o : dft.c dft.h
-	gcc -c -fPIC dft.c
+	$(CC) -c -fPIC dft.c
 
 clean :
-	rm *.o
+	-rm *.o
 
 developer-clean : clean
-	rm pydft.c
+	-rm pydft.c

@@ -1,6 +1,6 @@
 import math
 import pydft
-from pylab import plot, show
+#from pylab import plot, show
 
 a = []
 for i in range(1024):
@@ -11,5 +11,5 @@ b = pydft.DFT(a)
 
 #print b
 
-plot(b)
-show()
+#plot(b)
+#show()
