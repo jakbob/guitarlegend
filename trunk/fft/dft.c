@@ -23,17 +23,33 @@ complex* DFT(float * data_points, int N)
   int k, n;
   complex * frequencies = malloc(N*sizeof(complex));
   complex freq;
+
+  float w = 2 * PI / N;
+  int mod;
+  
+  float * sin_table = malloc(N*sizeof(float));
+  float * cos_table = malloc(N*sizeof(float));
+
+  for (k = 0; k < N; k++)
+    {
+      sin_table[k] = sin(w*k);
+      cos_table[k] = cos(w*k);
+    }
   
   for (k = 0; k < N; k++) // Iterate over the frequencies
     {
       freq.re = 0;
       freq.im = 0;
 
-      for (n = 0; n < N; n++)
+      for (n = 0; n < N; n++) // Iterate over the samples
 	{
-	  // TODO: Define sin and cos by means of a lookup table instead
-	  freq.re += data_points[n] * sin(2 * PI / N * k * n);
-	  freq.im -= data_points[n] * cos(2 * PI / N * k * n);
+	  // DONE: Define sin and cos by means of a lookup table instead. 
+	  // Is this correct?
+	  // Seems to be
+	  mod = k*n % N;
+	  
+	  freq.re += data_points[n] * cos_table[mod];	  
+	  freq.im -= data_points[n] * sin_table[mod];
 	}
 
       frequencies[k] = freq;

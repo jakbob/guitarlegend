@@ -54,11 +54,11 @@ cdef _DFT(object data):
 def DFT(data):
     # Use early binding for speedup in other modules
     """Perform the Discrete Fourier Transform.
-
+    
     Arguments
     data -- iterable of the samples on which to perform the transform
-
+    
     Returns
     freq -- list of the magnitudes of the frequencies. Yes, we need to change this."""
-
+    
     return _DFT(data)
