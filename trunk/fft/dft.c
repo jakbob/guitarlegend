@@ -21,14 +21,14 @@
 complex* DFT(float * data_points, int N)
 {
   int k, n;
-  complex * frequencies = malloc(N*sizeof(complex));
+  complex * frequencies = malloc(N*sizeof(complex)); // FREEME, caller
   complex freq;
 
   float w = 2 * PI / N;
   int mod;
   
-  float * sin_table = malloc(N*sizeof(float));
-  float * cos_table = malloc(N*sizeof(float));
+  float * sin_table = malloc(N*sizeof(float)); // FREEME
+  float * cos_table = malloc(N*sizeof(float)); // FREEME
 
   for (k = 0; k < N; k++)
     {
@@ -54,7 +54,11 @@ complex* DFT(float * data_points, int N)
 
       frequencies[k] = freq;
     }
+
+  free(sin_table);
+  free(cos_table);
   
+  // Responsibility over frequencies is passed on to the caller
   return frequencies;
 }
 
