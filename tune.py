@@ -83,6 +83,27 @@ def f_filter(data):
     #data[0] = 0
     return data
 
+def t_filter(data):
+    f = 512
+    a = [] 
+
+    for i in xrange(len(data)):
+        try:
+            a.append(a[i-1] + data[i] - data[i-f])
+        except IndexError:
+            a.append(data[i])
+    #for i in range(len(data)):
+    #    b = 0
+    #    for j in range(i - f, i):
+    #        try:
+    #            b += data[j]
+    #        except IndexError:
+    #            pass
+    #    a.append(b/f)
+
+    return a
+    
+
 def freq(data):
     disected = disect(data)
     freqs = dft.DFT(disected)
@@ -104,19 +125,20 @@ def main():
     
     #data = instream.read(chunk*5) # Read some data and throw it away. Not sure this is necessary
     data = instream.read(chunk)
-    f = freq(data)
+    d = t_filter(disect(data))
+    f = dft.DFT(d)
 
     pylab.ion()
     n = range(len(f))
     pylab.subplot(211)
-    line, = pylab.plot(n, disect(data)) #http://www.scipy.org/Cookbook/Matplotlib/Animations
+    line, = pylab.plot(n, d) #http://www.scipy.org/Cookbook/Matplotlib/Animations
     pylab.subplot(212)
-    line2, = pylab.plot(n, f_filter(f)) 
+    line2, = pylab.plot(n, f) 
 
     while True:
         tstart = time.time()
         data = instream.read(chunk)
-        d = disect(data)
+        d = t_filter(disect(data))
         f = dft.DFT(d)
         line.set_ydata(d)
         line2.set_ydata(f_filter(f))
