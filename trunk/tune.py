@@ -147,7 +147,7 @@ def main():
     ax1.set_autoscale_on(False)
     ax1.set_xlim(xmin=-10, xmax=len(d)+10)  # We pad the graph on the sides so we can
                                             # see better
-    ax1.set_ylim((-5000, 5000))         # Starts out with just noise, hopefully. 
+    ax1.set_ylim((-5000, 5000))             # Starts out with just noise, hopefully. 
                                             # This should be set manually to match the 
                                             # expectedmaximum amplitude, but I'm not 
                                             # sure what level that is.
@@ -156,7 +156,7 @@ def main():
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
     ax2.set_xlim(xmin=-10, xmax=len(f1)+10)
-    ax2.set_ylim((0, max(f1)/100))
+    ax2.set_ylim((0, max(f1)))
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
     n = range(len(f1))
@@ -167,7 +167,7 @@ def main():
         try:
             data = instream.read(chunk) # Read data from the mic
             d = disect(data)            # Convert this data to values that python can understand
-            d = t_filter(d, 512)        # Filter data in the time domain to remove noise
+            #d = t_filter(d, 512)        # Filter data in the time domain to remove noise
 
             #d = multiply(d)
 
