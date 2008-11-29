@@ -27,7 +27,7 @@ cdef _DFT(object data):
     N = len(data)
 
     # Convert python list to C array of floats
-    cdata = <float *>malloc(sizeof(float)*N)
+    cdata = <float *>malloc(sizeof(float)*N) # FREEME
     for i from 0 <= i < N:
         # Apparently, this method is slow. One should use PyTuple_GET_ITEM and PyMem_Malloc
         # from Python.h unless you use a new version of Cython. The former gives me a 
@@ -36,7 +36,7 @@ cdef _DFT(object data):
         cdata[i] = data[i]
 
     # Perform the DFT
-    freqs = c_DFT(cdata, N)
+    freqs = c_DFT(cdata, N) # FREEME
 
     # Copy the data back to a Python list. I know that calculating the 
     # magnitude means extra overhead, but this is for testing purposes.

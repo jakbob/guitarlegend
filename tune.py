@@ -41,7 +41,7 @@ chunk = 1024               # samples per buffer, i.e. number of samples to fetch
 FORMAT = pyaudio.paInt16   # 16 bits per sample
 struct_format = "1h"       # same as above
 CHANNELS = 1               # mono
-RATE = 11025               # Hz, samples per second
+RATE = 44100               # Hz, samples per second
 #RECORD_SECONDS = 5
 
 def tone_freq(num):
@@ -78,23 +78,51 @@ def t_filter(data, f=512):
     """Filter out noise in the time domain. Argument is the frequency of 
     the noise."""
 
-    filtered = [] 
+    filtered = []
 
     if f == 0:
         return data
 
-    # We use a recursice moving average filter
     for i in xrange(len(data)):
-        try:
-            filtered.append(filtered[i-1] + (data[i] - data[i-f])/f)   # Last value, off with the value f steps ago, 
-                                                                       # on with a new value.
-        except IndexError:    
-            filtered.append(data[i])   # Now, this is probably wrong
-                                       # What we do is we set the filtered data to be 
-                                       # equal to the unfiltered data for the first f
-                                       # samples.
+        if i-f < 0: rem = 0
+        else: rem = data[i-f]
+        if i < 1: last = 0
+        else: last = filtered[i-1]
+        
+        w = last - (rem + data[i])/f
+        filtered.append(w)
+
     return filtered
+
+#     filtered = [] 
+
+#     if f == 0:
+#         return data
+
+#     # We use a recursice moving average filter
+#     for i in xrange(len(data)):
+#         #try:
+#         if i-f < 0:
+#             rem = 0
+#         else:
+#             rem = data[i-f]
+            
+#         if i is 0:
+#             last = 0
+#         else:
+#             last = filtered[i-1]
+            
+#         filtered.append(last + float(data[i])/f - float(rem)/f)   # Last value, off with the value f steps ago, 
+#                                                                    # on with a new value.
+#         #except IndexError:
+#         #    print i, f
+#         #    filtered.append(data[i]/f)   # Now, this is probably wrong
+#                                          # What we do is we set the filtered data to be 
+#                                          # equal to the unfiltered data for the first f
+#                                          # samples.
+#     return filtered
     
+
 
 def freq(data):
     """Deprecated. Convert data to python objects, then perform 
@@ -147,7 +175,7 @@ def main():
     ax1.set_autoscale_on(False)
     ax1.set_xlim(xmin=-10, xmax=len(d)+10)  # We pad the graph on the sides so we can
                                             # see better
-    ax1.set_ylim((-5000, 5000))             # Starts out with just noise, hopefully. 
+    ax1.set_ylim((-200000, 200000))             # Starts out with just noise, hopefully. 
                                             # This should be set manually to match the 
                                             # expectedmaximum amplitude, but I'm not 
                                             # sure what level that is.
@@ -156,18 +184,18 @@ def main():
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
     ax2.set_xlim(xmin=-10, xmax=len(f1)+10)
-    ax2.set_ylim((0, max(f1)))
+    ax2.set_ylim((0, max(f1)/100))
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
     n = range(len(f1))
     line1, = ax1.plot(n, d) #http://www.scipy.org/Cookbook/Matplotlib/Animations
-    line2, = ax2.plot(n[5:], f1[5:]) 
+    line2, = ax2.plot(n, f1) 
 
     while True:
         try:
             data = instream.read(chunk) # Read data from the mic
             d = disect(data)            # Convert this data to values that python can understand
-            #d = t_filter(d, 512)        # Filter data in the time domain to remove noise
+            d = t_filter(d, 512)        # Filter data in the time domain to remove noise
 
             #d = multiply(d)
 
@@ -179,7 +207,7 @@ def main():
             #f1 = f2
 
             line1.set_ydata(d)          # Update the plots
-            line2.set_ydata(f2[5:])
+            line2.set_ydata(f2)
             pylab.draw()                # Draw it, and then repeat
 
         except KeyboardInterrupt:
