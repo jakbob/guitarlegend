@@ -37,11 +37,11 @@ notes = [ u"C",
           u"a\u266f",
           u"h" ]
 
-chunk = 1024 # samples per buffer, i.e. number of samples to fetch every time read is called
-FORMAT = pyaudio.paInt16 # 16 bits per sample
-struct_format = "1h" # same as above
-CHANNELS = 1 # mono
-RATE = 44100 # Hz, samples per second
+chunk = 1024               # samples per buffer, i.e. number of samples to fetch every time read is called
+FORMAT = pyaudio.paInt16   # 16 bits per sample
+struct_format = "1h"       # same as above
+CHANNELS = 1               # mono
+RATE = 11025               # Hz, samples per second
 #RECORD_SECONDS = 5
 
 def tone_freq(num):
@@ -80,11 +80,14 @@ def t_filter(data, f=512):
 
     filtered = [] 
 
+    if f == 0:
+        return data
+
     # We use a recursice moving average filter
     for i in xrange(len(data)):
         try:
-            filtered.append(filtered[i-1] + data[i] - data[i-f])   # Last value, off with the value f steps ago, 
-                                                                   # on with a new value.
+            filtered.append(filtered[i-1] + (data[i] - data[i-f])/f)   # Last value, off with the value f steps ago, 
+                                                                       # on with a new value.
         except IndexError:    
             filtered.append(data[i])   # Now, this is probably wrong
                                        # What we do is we set the filtered data to be 
@@ -102,6 +105,21 @@ def freq(data):
     #return maxindex(freqs)
     return freqs
 
+def average(l1, l2):
+    """Return a list that is the average of the two lists l1 
+    and l2 elementwise."""
+    if len(l1) != len(l2):
+        raise ValueError, "List sizes not equal!"
+
+    r = [(a + b)/2 for a, b in zip(l1, l2)]
+    
+    return r
+
+def multiply(data, magnitude=1000):
+    for i in range(len(data)):
+        data[i] *= 0.1
+    return data
+
 def main():
     for num, name in enumerate(notes):
         print "%s\t: %.2f Hz" % (name, tone_freq(num-len(notes)+3))
@@ -111,7 +129,7 @@ def main():
     instream = p.open(format=FORMAT,
                       channels=CHANNELS,
                       rate=RATE,
-                      input=True, # It is, indeed, an input stream
+                      input=True,             # It is, indeed, an input stream
                       frames_per_buffer=chunk)
 
     # Make matplotlib interactive. It says "interactive", at least, but I don't see
@@ -122,14 +140,14 @@ def main():
     # Read data one time first
     data = instream.read(chunk)
     d = t_filter(disect(data))
-    f = dft.DFT(d)
+    f1 = dft.DFT(d)
 
     # Set up the two subplots and make their scales fixed
     ax1 = pylab.subplot(211)
     ax1.set_autoscale_on(False)
     ax1.set_xlim(xmin=-10, xmax=len(d)+10)  # We pad the graph on the sides so we can
                                             # see better
-    ax1.set_ylim((-max(d)*100, max(d)*100)) # Starts out with just noise, hopefully. 
+    ax1.set_ylim((-5000, 5000))         # Starts out with just noise, hopefully. 
                                             # This should be set manually to match the 
                                             # expectedmaximum amplitude, but I'm not 
                                             # sure what level that is.
@@ -137,23 +155,33 @@ def main():
 
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
-    ax2.set_xlim(xmin=-10, xmax=len(f)+10)
-    ax2.set_ylim((0, max(f)))
+    ax2.set_xlim(xmin=-10, xmax=len(f1)+10)
+    ax2.set_ylim((0, max(f1)/100))
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
-    n = range(len(f))
+    n = range(len(f1))
     line1, = ax1.plot(n, d) #http://www.scipy.org/Cookbook/Matplotlib/Animations
-    line2, = ax2.plot(n, f) 
+    line2, = ax2.plot(n[5:], f1[5:]) 
 
     while True:
         try:
             data = instream.read(chunk) # Read data from the mic
-            d = disect(data)  # Convert this data to values that python can understand
-            d = t_filter(d)   # Filter data in the time domain to remove noise
-            f = dft.DFT(d)    # Perform the DFT on the filtered data
-            line1.set_ydata(d) # Update the plots
-            line2.set_ydata(f)
-            pylab.draw()       # Draw it, and then repeat
+            d = disect(data)            # Convert this data to values that python can understand
+            d = t_filter(d, 512)        # Filter data in the time domain to remove noise
+
+            #d = multiply(d)
+
+            f2 = dft.DFT(d)             # Perform the DFT on the filtered data
+
+            #f2 = average(f2, f1)        # Okay, I don't know if this is an established 
+                                        # method, but it's an attempt att reducing fluctuations
+                                        # by averaging with the last spectrum. Pretty slow, I guess (O(n)).
+            #f1 = f2
+
+            line1.set_ydata(d)          # Update the plots
+            line2.set_ydata(f2[5:])
+            pylab.draw()                # Draw it, and then repeat
+
         except KeyboardInterrupt:
             print "C-c was pressed. Exiting."
             break
