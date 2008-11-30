@@ -81,6 +81,12 @@ def t_filter(data, N=512):
     """Filter out noise in the time domain. Argument is the frequency of 
     the noise."""
 
+    # FIXME: I reverted it to the non-recursive definition to 
+    # see if there was something wrong with it. 
+    # OH! I JUST REALIZED! We are just doing the average of the 
+    # real part/the absolute value. That has got to have something
+    # to do with it. Stupid me.
+
     def hejsum(d, a, b):
         if a < 0:
             a = 0
@@ -222,7 +228,7 @@ def main():
     ax1.set_autoscale_on(False)
     ax1.set_xlim(xmin=-10, xmax=len(d)+10)  # We pad the graph on the sides so we can
                                             # see better
-    ax1.set_ylim((-30000, 30000))             # Starts out with just noise, hopefully. 
+    ax1.set_ylim((0, 20000))             # Starts out with just noise, hopefully. 
                                             # This should be set manually to match the 
                                             # expectedmaximum amplitude, but I'm not 
                                             # sure what level that is.
@@ -231,7 +237,7 @@ def main():
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
     ax2.set_xlim(xmin=-100, xmax=RATE+100)
-    ax2.set_ylim((0, max(f1)/100))
+    ax2.set_ylim((0, max(f1)/10))
     ax2.set_xlabel("Hz")
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
@@ -244,10 +250,36 @@ def main():
         try:
             data = instream.read(chunk) # Read data from the mic
             d = disect(data)            # Convert this data to values that python can understand
-            d = t_filter(d, 52)        # Filter data in the time domain to remove noise
+            d = t_filter(d, 32)         # Filter data in the time domain to remove noise
 
-            #f2 = dft.DFT(d)             # Perform the DFT on the filtered data
-            f2 = pylab.fft(d)
+            # Okay, I found this, and I think it's a little strange:
+            # If you just plot the real part of the output data, you
+            # get a graph that looks just as the normal one with the
+            # fft from pylab (with the noise removed, of course...).           # Look! 4 rows lining up!
+            # However, the imaginary part seems to be very loud and
+            # with the 1/x look. The magnitude, of course, has the 
+            # same problem. I have no idea what's causing this, and
+            # it might just be normal noise, but the strange part              # I love long ass-comments
+            # is that without the filter, this does not show up, all
+            # you see is some white noise. 
+            # Hmm. Matplotlib seems to default to plotting the real
+            # part of the data.
+            # Pylab shows the same results. The code works as intended.
+            # I still don't know what's causing it, maybe just the
+            # periodic noise from the computer fan (which still
+            # doesn't explain why it only shows up after filtering.
+            # Maybe the filter is wrong?)
+            # We do have a way of separating harmonics from the sound
+            # wave, so maybe that doesn't matter, at least not for the
+            # time being.
+            #
+            # The last Metroid is in captivity. The galaxy is at peace.
+
+            f2 = dft.DFT(d)             # Perform the DFT on the filtered data
+            
+            #f2 = pylab.fft(d)           # See? Same problem.
+            #f2 = pylab.absolute(f2)     # See? Different code.
+
             #f2 = multiply(f2, make_bandpass(20.0/RATE, 20000.0/RATE))
 
             #f2 = average(f2, f1)        # Okay, I don't know if this is an established 

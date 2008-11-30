@@ -41,9 +41,11 @@ cdef _DFT(object data):
     # Copy the data back to a Python list. I know that calculating the 
     # magnitude means extra overhead, but this is for testing purposes.
     # TODO: Fix this.
+    # Update and more TODO. Apparently, filtering the magnitude messes up
+    # the complex values. You need to fix this stuff right away.
     pyfreqs = []
     for i from 0 <= i < N:
-        pyfreqs.append(sqrt(freqs[i].re**2 + freqs[i].im**2))
+        pyfreqs.append(freqs[i].re)
 
     # Free those little fuckers
     free(freqs)
