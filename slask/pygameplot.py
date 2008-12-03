@@ -14,7 +14,8 @@ from pygame.locals import *
 import os
 
 ver = pygame.version.vernum
-if ver[0] <= 1 and ver[1] < 8 and os.uname == "x86_64":
+
+if (ver[0] < 1 or (ver[0] == 1 and ver[1] < 8)) and os.uname()[4] == "x86_64":
     raise EnvironmentError("This module does not work on 64-bit machines, due to a bug in Pygame releases before version 1.8.0. Please upgrade to the latest version of Pygame and try again.")
 
 import matplotlib
