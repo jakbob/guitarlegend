@@ -1,17 +1,27 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Demonstrates how to interface to Matplotlib using Pygame.
 # Could be further abstracted, of course. All Matplotlib functions
 # work as in all other interfaces, of course.
 #
+# Don't use this on a 64-bit architecture and pygame <= 1.8.0
+#
 # (c) Jonne Mickelin 2008
+
+import pygame
+from pygame.locals import *
+
+import os
+
+ver = pygame.version.vernum
+if ver[0] <= 1 and ver[1] < 8 and os.uname == "x86_64":
+    raise EnvironmentError("This module does not work on 64-bit machines, due to a bug in Pygame releases before version 1.8.0. Please upgrade to the latest version of Pygame and try again.")
 
 import matplotlib
 import matplotlib.backends.backend_agg as agg
 matplotlib.use("Agg")
 
 import pylab
-import pygame
-from pygame.locals import *
 
 # Plot
 fig = pylab.figure(figsize=[4, 4], # Inches
@@ -38,7 +48,7 @@ surf = pygame.image.fromstring(raw_data, size, "RGB")
 screen.blit(surf, (0,0))
 pygame.display.flip()
 
-# Plätt (fast inte lätt som en, märkte jag. Hata Pygame 1.7)
+# Pltt (fast inte lätt som en, mrkte jag. Hata Pygame 1.7)
 while True:
     pass
 
