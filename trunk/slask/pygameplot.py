@@ -23,12 +23,17 @@ matplotlib.use("Agg")
 
 import pylab
 
+import math
+y = []
+for el in range(100):
+    y.append(math.sin(2*math.pi * el / 100.0))
+
 # Plot
 fig = pylab.figure(figsize=[4, 4], # Inches
                    dpi=100,        # 100 dots per inch, so the resulting buffer is 400x400 pixels
                    )
 ax = fig.gca()
-ax.plot([1, 2, 4])
+ax.plot(y)
 
 # Platt
 canvas = agg.FigureCanvasAgg(fig)
