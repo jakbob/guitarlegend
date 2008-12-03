@@ -48,7 +48,7 @@ surf = pygame.image.fromstring(raw_data, size, "RGB")
 screen.blit(surf, (0,0))
 pygame.display.flip()
 
-# Pltt (fast inte lätt som en, mrkte jag. Hata Pygame 1.7)
+# Plätt (fast inte lätt som en, mrkte jag. Hata Pygame 1.7)
 while True:
     pass
 
