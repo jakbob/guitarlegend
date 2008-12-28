@@ -37,7 +37,7 @@ notes = [ u"C",
           u"a\u266f",
           u"h" ]
 
-chunk = 4000               # samples per buffer, i.e. number of samples to fetch every time read is called
+chunk = 1024               # samples per buffer, i.e. number of samples to fetch every time read is called
 FORMAT = pyaudio.paInt16   # 16 bits per sample
 struct_format = "1h"       # same as above
 CHANNELS = 1               # mono
@@ -50,7 +50,7 @@ def tone_freq(num):
     return 2**(num/12.0) * 440.0
 
 def freq_tone(freq):
-    return log(f/440.0)/log(2) * 12
+    return math.log(freq/440.0)/math.log(2) * 12
 
 def disect(data):
     """Return an array of Python values, by unpacking the given C-data 
@@ -98,8 +98,8 @@ def t_filter(data, N=512):
         return data
 
     #for i in xrange(len(data)): # Recursive definition. Broken.
-    #    if i-f < 0: rem = 0
-    #    else: rem = data[i-f]
+    #    if i-N < 0: rem = 0
+    #    else: rem = data[i-N]
     #    if i < 1: last = 0
     #    else: last = filtered[i-1]
     #    
@@ -200,6 +200,16 @@ def make_highpass(n):
 def make_bandpass(a, b):
     return lambda n: bandpass(n, a, b)
 
+def print_freq(freqs, threshold=1000):
+    for num, f in enumerate(freqs):
+        if f > threshold and num is not 0 and num < len(freqs)/2.0:
+            try:
+                f = num/(chunk/float(RATE))
+                tone = int(freq_tone(f))
+                print "%.2f Hz, %i, %s" % (f, tone, notes[tone-len(notes)+3])
+            except IndexError:
+                print "Not in notes"
+
 def main():
     for num, name in enumerate(notes):
         print "%s\t: %.2f Hz" % (name, tone_freq(num-len(notes)+3))
@@ -237,7 +247,7 @@ def main():
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
     ax2.set_xlim(xmin=-100, xmax=RATE+100)
-    ax2.set_ylim((0, max(f1)/10))
+    ax2.set_ylim((0, max(f1)/100))
     ax2.set_xlabel("Hz")
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
@@ -250,7 +260,7 @@ def main():
         try:
             data = instream.read(chunk) # Read data from the mic
             d = disect(data)            # Convert this data to values that python can understand
-            d = t_filter(d, 32)         # Filter data in the time domain to remove noise
+            #d = t_filter(d, 2*64)    # Filter data in the time domain to remove noise
 
             # Okay, I found this, and I think it's a little strange:
             # If you just plot the real part of the output data, you
@@ -290,7 +300,9 @@ def main():
             line1.set_ydata(d)          # Update the plots
             line2.set_ydata(f2)
             pylab.draw()                # Draw it, and then repeat
-
+            
+            print_freq(f2)
+            
         except KeyboardInterrupt:
             print "C-c was pressed. Exiting."
             break
