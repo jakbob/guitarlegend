@@ -5,6 +5,7 @@
 
 cdef extern from "math.h":
     double sqrt(double)
+    double tan(double)
 
 cdef extern from "stdlib.h":
     ctypedef int size_t
@@ -45,7 +46,7 @@ cdef _DFT(object data):
     # the complex values. You need to fix this stuff right away.
     pyfreqs = []
     for i from 0 <= i < N:
-        pyfreqs.append(freqs[i].re)
+        pyfreqs.append(freqs[i].im**2 + freqs[i].re**2)
 
     # Free those little fuckers
     free(freqs)
