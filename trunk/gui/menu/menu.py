@@ -71,6 +71,33 @@ class TextMenuItem(MenuItem):
                                        anchor_x="left",
                                        anchor_y="top")
 
+class VertexMenuItem(MenuItem):
+    def __init__(self, cb, vertices):
+        self.vertex_list = pyglet.graphics.vertex_list(len(vertices), "v2f", "c4B")
+        #vertices[0], vertices[1]
+        #vertices[1], vertices[2]
+        #vertices[2], vertices[3]
+        #vertices[3], vertices[4]
+        self.vertex_list.colors = (255, 255, 0, 0) *len(vertices)
+        print len(vertices)
+        for i in range(len(vertices)):
+            print i
+            self._add_nth_vertex(i, vertices[i])
+            #if i is not 0 and i is not len(vertices): self._add_nth_vertex(i + 1, vertices[i])
+            #print i, i+1
+    def _add_nth_vertex(self, n, vertex):
+        #print 2*n, 2*n + 2
+        print vertex
+        self.vertex_list.vertices[2*n : 2*n + 2] = vertex
+        #for num, vertex in enumerate(vertices):
+        #    self.vertex_list.vertices[2*num:2*num+2] = vertex
+        #    self.vertex_list.vertices[2*num+2:2*num+4] = vertex
+        #for vertex in vertices:
+        #    print vertex
+    def draw(self):
+        self.vertex_list.draw(pyglet.graphics.GL_LINE_LOOP)
+        #pyglet.graphics.draw(2, pyglet.graphics.GL_LINES, ("v2f", self.vertices[0] + self.vertices[1]))
+
 class Borg:
     _shared_state = {"items": [], "selected" : -1}
     def __init__(self):
@@ -158,5 +185,10 @@ current_menu.append(entry1)
 current_menu.append(entry2)
 current_menu.append(entry_on_the_side)
 current_menu.select(0)
+
+vertex_entry = VertexMenuItem(None, ((0.0, 0.0), (window.width/2, window.height/2), (window.width, 0.0)))
+current_menu.append(vertex_entry)
+
+print dir(window)
 
 pyglet.app.run()

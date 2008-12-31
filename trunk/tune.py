@@ -247,7 +247,7 @@ def main():
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
     ax2.set_xlim(xmin=-100, xmax=RATE+100)
-    ax2.set_ylim((0, max(f1)/100))
+    ax2.set_ylim((0, max(f1)/1000))
     ax2.set_xlabel("Hz")
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
