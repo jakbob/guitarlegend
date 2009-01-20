@@ -37,7 +37,7 @@ notes = [ u"C",
           u"a\u266f",
           u"h" ]
 
-chunk = 1024               # samples per buffer, i.e. number of samples to fetch every time read is called
+chunk = 2048               # samples per buffer, i.e. number of samples to fetch every time read is called
 FORMAT = pyaudio.paInt16   # 16 bits per sample
 struct_format = "1h"       # same as above
 CHANNELS = 1               # mono
@@ -246,13 +246,13 @@ def main():
 
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
-    ax2.set_xlim(xmin=-100, xmax=RATE+100)
+    ax2.set_xlim(xmin=-100, xmax=RATE-10000)
     ax2.set_ylim((0, max(f1)/1000))
     ax2.set_xlabel("Hz")
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
     n = range(len(d))
-    n2 = pylab.arange(0, RATE, float(RATE)/chunk)
+    n2 = pylab.arange(0, RATE, step=float(RATE)/chunk)
     line1, = ax1.plot(n, d) #http://www.scipy.org/Cookbook/Matplotlib/Animations
     line2, = ax2.plot(n2, f1) 
 
@@ -285,9 +285,9 @@ def main():
             #
             # The last Metroid is in captivity. The galaxy is at peace.
 
-            f2 = dft.DFT(d)             # Perform the DFT on the filtered data
+            #f2 = dft.DFT(d)             # Perform the DFT on the filtered data
             
-            #f2 = pylab.fft(d)           # See? Same problem.
+            f2 = pylab.fft(d)           # See? Same problem.
             #f2 = pylab.absolute(f2)     # See? Different code.
 
             #f2 = multiply(f2, make_bandpass(20.0/RATE, 20000.0/RATE))
@@ -301,7 +301,7 @@ def main():
             line2.set_ydata(f2)
             pylab.draw()                # Draw it, and then repeat
             
-            print_freq(f2)
+            #print_freq(f2)
             
         except KeyboardInterrupt:
             print "C-c was pressed. Exiting."

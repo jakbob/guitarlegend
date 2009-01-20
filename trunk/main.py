@@ -29,18 +29,52 @@ import error
 #  Standard library  #
 ######################
 import sys, os
+import optparse
 
 ######################
 # Required libraries #
 ######################
 
+try:
+    import pyglet
+except ImportError, err:
+    # put an error on the log
+    error.critical("This game requires pyglet. If you are using Windows, seeing this message is a BUG. Please file a bug report on http://guitarlegend.googlecode.com. Linux and OS X users should download Pyglet from http://www.pyglet.org.")
+    error.bail_out(err)
+
 ######################
 #    Game modules    #
 ######################
-import graphics
+import options
+from manager import game_manager, BasicWindow
+import scene
 
 def main():
-    pass
+    # Parse the command line options
+    parser = optparse.OptionParser()
+    parser.add_option("--debug", 
+                      action="store_true", 
+                      dest="debug", 
+                      default=False,
+                      help="start game in debugging mode")
+    (opts, args) = parser.parse_args()
+
+    options.DEBUG = opts.debug
+
+    # Setup a custom data directory
+    pyglet.resource.path = ["data"]
+    pyglet.resource.reindex()
+
+    # Add two windows
+    game_manager.add_window(BasicWindow(caption=options.__appname__), "game_draw")
+    if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
+    
+    # Add one scene
+    game_manager.push(scene.TestScene())
+    game_manager.pop()
+
+    # Hand control over to the Game manager
+    game_manager.run()
 
 if __name__ == "__main__":
     main()
