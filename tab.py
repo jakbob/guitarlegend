@@ -5,24 +5,28 @@ import midi
 
 class Note:
   def __init__(self, pitch, string, start, stop):
+        print string
+
         self.pitch=pitch
         self.string=string
         self.start=start
         self.stop=stop
         
-        if string==0:
+        if string==1:
             base = 64
-        elif string==1:
-            base = 59
         elif string==2:
-            base = 55
+            base = 59
         elif string==3:
-            base = 50
+            base = 55
         elif string==4:
+            base = 50
+        elif string==5:
             base = 45
-        else:
+        elif string==6:
             base = 40
-        self.fret=base-self.pitch
+        else:
+            print "fräs"
+        self.fret=self.pitch-base
     
   def __repr__(self):
       return "<NOTE! String: " + str(self.string+1) + " Fret: " + str(self.fret) + " Start: " + str(self.start) + " Stop: " + str(self.stop) + ">"
@@ -51,7 +55,7 @@ class Tab:
                 else:
                     if (event.type=="NOTE_OFF" and startevent.pitch==event.pitch)\
                     or event.type=="NOTE_ON":
-                        self.string[event.channel-1].append(Note(startevent.pitch, startevent.channel-1, startevent.time, event.time))
+                        self.string[event.channel-1].append(Note(startevent.pitch, startevent.channel, startevent.time, event.time))
                         startevent=None
                     if event.type=="NOTE_ON":
                         startevent=event
