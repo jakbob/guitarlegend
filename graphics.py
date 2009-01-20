@@ -8,9 +8,3 @@
 
 import error
 
-try:
-    import pyglet
-except ImportError, err:
-    # put an error on the log
-    error.critical("This game requires pyglet. If you are using Windows, seeing this message is a BUG. Please file a bug report on http://guitarlegend.googlecode.com. Linux and OS X users should download Pyglet from http://www.pyglet.org.")
-    error.bail_out(err)

@@ -1,5 +1,10 @@
-#coding:utf8
-#tab.py
+# -*- coding: utf-8 -*-
+#
+# tab.py
+#
+# Functions for tabs 'n' shit, yo.
+#
+# (c) Jakob Florell 2009
 
 import midi
 
@@ -59,6 +64,3 @@ class Tab:
                         startevent=None
                     if event.type=="NOTE_ON":
                         startevent=event
-                        
-                    
-                
