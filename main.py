@@ -46,7 +46,7 @@ except ImportError, err:
 #    Game modules    #
 ######################
 import options
-from manager import game_manager, BasicWindow
+from manager import game_manager, BasicWindow, MainWindow
 import scene
 
 def main():
@@ -66,7 +66,7 @@ def main():
     pyglet.resource.reindex()
 
     # Add two windows
-    game_manager.add_window(BasicWindow(caption=options.__appname__), "game_draw")
+    game_manager.add_window(MainWindow(caption=options.__appname__), "game_draw")
     if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
     
     # Add one scene
