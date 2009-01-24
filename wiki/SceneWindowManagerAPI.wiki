@@ -2,7 +2,7 @@
 
 = Introduktion =
 
-Vi har tre objekttyper: fönster (BasicWindow och MainWindow, för närvarande. Det är ingen stor skillnad på dem), scener och en GameManager som håller reda på de båda. GameManagern är en singleton, så alla scener kommer åt den genom att skriva manager.scene_manager, i stället för att initiera en ny instans.
+  Vi har tre objekttyper: fönster (BasicWindow och MainWindow, för närvarande. Det är ingen stor skillnad på dem), scener och en GameManager som håller reda på de båda. GameManagern är en singleton, så alla scener kommer åt den genom att skriva manager.scene_manager, i stället för att initiera en ny instans.
 
 = Fönster =
 
@@ -17,4 +17,4 @@ Vi har tre objekttyper: fönster (BasicWindow och MainWindow, för närvarande. 
 
 = Bjas =
 
-Det blev lite rörigt. Jag sparar det här på wikin för framtida referens. Bajs.
+  Det blev lite rörigt. Jag sparar det här på wikin för framtida referens. Bajs.
