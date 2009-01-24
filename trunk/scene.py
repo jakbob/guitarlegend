@@ -27,7 +27,7 @@ class Scene(object):
     (see manager.py for details on defining windows). The drawing 
     functions _should only_ define objects that they themselves 
     are supposed to use for drawing, and _may not_ change the
-    state of the scene. The state is updated using the logic()
+    state of the scene. The state is updated using the do_logic()
     method, which is run at a specific interval by the scene
     manager. 
 
@@ -103,8 +103,10 @@ class TestScene(object):
 
     @staticmethod
     def do_logic(scene):
+
         """Handles the scene's logic."""
-        pass
+        
+        print "ahooga"
 
 class ErrorScene(object):
     """Defines an isolated environment for a specific scene, 

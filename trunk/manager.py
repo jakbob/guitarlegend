@@ -18,6 +18,11 @@ class BasicWindow(pyglet.window.Window):
     a GameManager. Draws the scene to the screen in 
     a manner pre-defined by a method within the scene.
     """
+    
+    def __init__(self, *args, **kwargs):
+        pyglet.window.Window.__init__(self, *args, **kwargs)
+        self.scene = None # Which scene the window is currently looking at
+
     def change_scene(self, scene, method):
 
         """Change the scene to draw.
@@ -47,6 +52,15 @@ class BasicWindow(pyglet.window.Window):
         else:
             self.on_draw = self.clear                    # If there is no such method, just clear the window
 
+        self.scene = scene
+
+class MainWindow(BasicWindow):
+    
+    """A window that exits the program when it is closed."""
+
+    def on_close(self):
+        pyglet.app.exit()
+                 
 class GameManager(object):
 
     """Handles the scenes of the game. Runs the logic and controls
@@ -71,6 +85,9 @@ class GameManager(object):
         self.windows = []                            # Contains pairs of (window instances, rendering method in the scene)
         self.scenes = []
         self.current_scene = None
+
+    def handle_scene_logic(self):
+        pass
 
     def add_window(self, window, method):
 
@@ -157,6 +174,7 @@ class GameManager(object):
         return top
 
     def run(self):
+
         """Hand control over to the manager."""
         
         pyglet.app.run()
