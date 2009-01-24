@@ -19,7 +19,24 @@ import options
 class Scene(object):
     """Defines an isolated environment for a specific scene, 
     providing methods for handling of input, logic and rendering
-    of the scene."""
+    of the scene.
+
+    To define a new scene, derive this class and overload the
+    methods debug_draw, game_draw and logic. You may also create other
+    drawing functions, depending on what the game's windows expect
+    (see manager.py for details on defining windows). The drawing 
+    functions _should only_ define objects that they themselves 
+    are supposed to use for drawing, and _may not_ change the
+    state of the scene. The state is updated using the logic()
+    method, which is run at a specific interval by the scene
+    manager. 
+
+    To add a scene, initialize it, and pass it to the (singleton) 
+    scene manager, using scene_manager.push(scene). To end a scene,
+    call the scene's end() method, which takes care of removing it
+    from the scene manager.
+    """
+
     def __init__(self):
         self.name = "Abstract scene"
 
@@ -41,6 +58,13 @@ class Scene(object):
     def do_logic(scene):
         """Handles the scene's logic."""
         pass
+
+    def end(self):
+        topscene = scene_manager.pop()
+        if topscene != self:
+            scene_manager.push(topscene)
+        else:
+            del topscene
 
 class TestScene(object):
     """Defines an isolated environment for a specific scene, 
