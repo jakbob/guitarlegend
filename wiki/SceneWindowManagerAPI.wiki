@@ -15,4 +15,6 @@ Vi har tre objekttyper: fönster (BasicWindow och MainWindow, för närvarande. 
 = manager.game_manager =
   Hur gör man då för att hålla reda på scener och fönster? Jo, det sker med vår lilla vän game_managern. Den fungerar dels som en lista av fönster (add_window(fönsterinstans, scenens_funktion_som_sträng) för att lägga till ett fönster. Nu när jag skriver det här kommer jag på att det kan vara bra att kunna ta bort fönster också, eller att toggla deras synlighet. Jag fixar det snarast.). game_manager fungerar också som en stack av scener, liknande den som cocos2d använder sig av i sin Director-klass. För att lägga till en scen ovanpå den nuvarande, kalla på game_manager.push(scene). Scenen startar då så fort den nuvarande scenen har avslutat sin do_logic-loop. pop gör det motsatta och tar bort en scen permanent (om man inte skriver scene = game_manager.pop() och sedan game_manager.push(scene) igen). Det finns ett antal andra trevliga funktioner för att hantera scenerna också.
 
+= Bjas =
+
 Det blev lite rörigt. Jag sparar det här på wikin för framtida referens. Bajs.
