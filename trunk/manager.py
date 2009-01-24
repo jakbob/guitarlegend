@@ -86,8 +86,17 @@ class GameManager(object):
         self.scenes = []
         self.current_scene = None
 
-    def handle_scene_logic(self):
-        pass
+        # Handle the scene's logic at a fixed interval
+        pyglet.clock.schedule_interval(self.handle_scene_logic, 1/30.0) 
+
+    def handle_scene_logic(self, dt):
+        
+        """This function is scheduled to run periodically,
+        updating the current scene by calling it's do_logic
+        method.
+        """
+
+        self.current_scene.do_logic(dt)
 
     def add_window(self, window, method):
 

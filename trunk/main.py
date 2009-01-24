@@ -71,7 +71,6 @@ def main():
     
     # Add one scene
     game_manager.push(scene.TestScene())
-    game_manager.pop()
 
     # Hand control over to the Game manager
     game_manager.run()

@@ -54,8 +54,7 @@ class Scene(object):
         """Draws the game view of the scene."""
         glClear(GL_COLOR_BUFFER_BIT)
 
-    @staticmethod
-    def do_logic(scene):
+    def do_logic(self, dt):
         """Handles the scene's logic."""
         pass
 
@@ -72,6 +71,7 @@ class TestScene(object):
     of the scene."""
     def __init__(self):
         self.name = "Test scene"
+        self.time = "0"
 
     @staticmethod
     def debug_draw(scene, window):
@@ -87,7 +87,12 @@ class TestScene(object):
                                   font_name="Times New Roman", font_size=46, 
                                   anchor_x="center", anchor_y="center")
 
+        label2 = pyglet.text.Label("dt = " + scene.time,
+                                   x=100, y=window.height//2 - 100, 
+                                   anchor_x="left", anchor_y="top",
+                                   font_name="Times New Roman", font_size=36)
         label.draw()
+        label2.draw()
 
     @staticmethod
     def game_draw(scene, window):
@@ -101,12 +106,11 @@ class TestScene(object):
 
         label.draw()
 
-    @staticmethod
-    def do_logic(scene):
+    def do_logic(self, dt):
 
         """Handles the scene's logic."""
         
-        print "ahooga"
+        self.time = str(dt)
 
 class ErrorScene(object):
     """Defines an isolated environment for a specific scene, 
@@ -134,7 +138,6 @@ class ErrorScene(object):
 
     game_draw = debug_draw
     
-    @staticmethod
-    def do_logic(scene):
+    def do_logic(self, dt):
         """Handles the scene's logic."""
         pass
