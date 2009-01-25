@@ -38,9 +38,9 @@ work, I'm stumped."""
 ######################
 from options import kb
 
-from manager import game_manager
+#from manager import game_manager
 
-class Scene(object):
+class Scene(pyglet.window.Window):
     """Defines an isolated environment for a specific scene, 
     providing methods for handling of input, logic and rendering
     of the scene.
@@ -63,6 +63,7 @@ class Scene(object):
 
     def __init__(self):
         self.name = "Abstract scene"
+        pyglet.window.Window.__init__(self)
 
     @staticmethod
     def debug_draw(scene, window):
@@ -73,8 +74,8 @@ class Scene(object):
                                            # lingo is. Anyways. No window. No clear(). If, however, a window
                                            # is passed using a lambda, we may use it.
 
-    @staticmethod
-    def game_draw(scene, window):
+    #@staticmethod
+    def on_draw(self):
         """Draws the game view of the scene."""
         glClear(GL_COLOR_BUFFER_BIT)
 
@@ -89,24 +90,13 @@ class Scene(object):
         else:
             del topscene
 
-    def on_key_press(self, window, symbol, modifiers):
-        
-        """Handles keyboard input. The keys are defined in options.py and are
-        sorted according to namespaces. See that file for further information.
-
-        Arguments:
-        window -- the window that recieved the keypress
-        symbol -- the key that was pressed
-        modifiers -- the modifiers (ctrl, alt, etc.) that were down 
-                     when the keypress occurred
-        """
-        pyglet.window.Window.on_key_press(window, symbol, modifiers)
-
 class TestScene(Scene):
     """Defines an isolated environment for a specific scene, 
     providing methods for handling of input, logic and rendering
     of the scene."""
     def __init__(self):
+        Scene.__init__(self)
+
         self.name = "Test scene"
         self.time = "0"
 
@@ -131,13 +121,12 @@ class TestScene(Scene):
         label.draw()
         label2.draw()
 
-    @staticmethod
-    def game_draw(scene, window):
+    def on_draw(self):
         """Draws the game view of the scene."""
         glClear(GL_COLOR_BUFFER_BIT)
 
-        label = pyglet.text.Label("Game " + scene.name, 
-                                  x=window.width//2, y=window.height//2, 
+        label = pyglet.text.Label("Game " + self.name, 
+                                  x=self.width//2, y=self.height//2, 
                                   font_name="Times New Roman", font_size=46, 
                                   anchor_x="center", anchor_y="center")
 
@@ -149,7 +138,7 @@ class TestScene(Scene):
         
         self.time = str(dt)
 
-    def on_key_press(self, window, symbol, modifiers):
+    def on_key_press(self, symbol, modifiers):
         
         """Handles keyboard input. The keys are defined in options.py and are
         sorted according to namespaces. See that file for further information.
@@ -163,13 +152,13 @@ class TestScene(Scene):
         """
         
         if symbol == kb.test.exit:
-            window.close()
+            self.close()
         elif symbol == kb.test.soundtest:
             game_manager.push(SoundTestScene())
         else:
             print "Recieved keypress:", symbol, "\t\tModifiers:", modifiers
 
-class SoundTestScene(Scene):
+class SoundTestScene(TestScene):
     
     """Get sound input and display the time and frequency graphs
     in real-time.
@@ -180,7 +169,7 @@ class SoundTestScene(Scene):
                  channels=options.INPUT_CHANNELS, 
                  rate=options.INPUT_RATE, 
                  frames_per_buffer=options.INPUT_CHUNK_SIZE):
-        
+        TestScene.__init__(self)
         p = pyaudio.PyAudio()
         self.instream = p.open(format=format,
                                channels=channels,

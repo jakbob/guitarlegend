@@ -46,35 +46,36 @@ except ImportError, err:
 #    Game modules    #
 ######################
 import options
-from manager import game_manager, BasicWindow, MainWindow
+#from manager import game_manager, BasicWindow, MainWindow
 
 def main():
     # Parse the command line options
-    parser = optparse.OptionParser()
-    parser.add_option("--debug", 
-                      action="store_true", 
-                      dest="debug", 
-                      default=False,
-                      help="start game in debugging mode")
-    (opts, args) = parser.parse_args()
+    #parser = optparse.OptionParser()
+    #parser.add_option("--debug", 
+    #                  action="store_true", 
+    #                  dest="debug", 
+    #                  default=False,
+    #                  help="start game in debugging mode")
+    #(opts, args) = parser.parse_args()
 
-    options.DEBUG = opts.debug
+    options.DEBUG = True
 
     # Setup a custom data directory
-    pyglet.resource.path = ["data"]
-    pyglet.resource.reindex()
+    #pyglet.resource.path = ["data"]
+    #pyglet.resource.reindex()
 
     import scene # Imported here, because it depends on the options used
     
     # Add two windows
-    game_manager.add_window(MainWindow(caption=options.__appname__), "game_draw")
-    if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
-    
+    #game_manager.add_window(MainWindow(caption=options.__appname__), "game_draw")
+    #if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
+    s = scene.SoundTestScene()
     # Add one scene
-    game_manager.push(scene.TestScene())
+    #game_manager.push(scene.TestScene())
 
     # Hand control over to the Game manager
-    game_manager.run()
+    #game_manager.run()
+    pyglet.app.run()
 
 if __name__ == "__main__":
     main()
