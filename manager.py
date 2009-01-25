@@ -54,6 +54,10 @@ class BasicWindow(pyglet.window.Window):
 
         self.scene = scene
 
+    def on_key_press(self, symbol, modifiers):
+        
+        self.scene.on_key_press(self, symbol, modifiers)
+
 class MainWindow(BasicWindow):
     
     """A window that exits the program when it is closed."""
@@ -165,7 +169,7 @@ class GameManager(object):
         for window, method in self.windows:
             window.change_scene(scene, method)
         self.current_scene = scene
-        
+
     def swap_top(self):
 
         """Swaps the two scenes at the top so that the topmost
@@ -185,7 +189,7 @@ class GameManager(object):
     def run(self):
 
         """Hand control over to the manager."""
-        
+
         pyglet.app.run()
 
 # Singleton instance of the game. Use this instead of

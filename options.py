@@ -29,6 +29,17 @@ __appname__ = "bosseonfire"
 ########################## 
 DEBUG = False
 
+##########################
+#   Microphone settings  #
+##########################
+#import pyaudio
+
+#INPUT_FORMAT         = pyaudio.paInt16 # 16 bit sample format.
+#STRUCT_INPUT_FORMAT  = "1h"            # The setting for struct.unpack. 16 bits per sample.
+#INPUT_CHANNELS       = 1               # Number of channels to record.
+#INPUT_RATE           = 22050           # Sampling rate.
+#INPUT_CHUNK_SIZE     = 2048            # Number of samples to be captured and analyzed at a time.
+
 from pyglet.window import key
 
 #################################################
@@ -37,13 +48,13 @@ from pyglet.window import key
 # namespaces. For example, to set the key for   #
 # bringing up the menu in-game, change the      #
 # value of kb.game.menu.                        #
-# Two keys can be used for the same action.     #
-# This is done by OR:ing the keys together.     #
-# For example, to make both the P and the Pause #
-# key pause the game, type                      #
-# kb.game.pause = key.P | key.PAUSE             #
-#                                               #
-#################################################
+### Two keys can be used for the same action.     #  ## Apparently not.
+### This is done by OR:ing the keys together.     #
+### For example, to make both the P and the Pause #
+### key pause the game, type                      #
+### kb.game.pause = key.P | key.PAUSE             #
+###                                               #
+###################################################
 
 ######################
 kb = AttrDict()      #
@@ -62,3 +73,9 @@ kb.game = AttrDict() #
 ######################
 kb.game.menu = key.ESCAPE
 kb.game.pause = key.P
+
+######################
+kb.test = AttrDict() #
+######################
+kb.test.exit = key.ESCAPE
+kb.test.soundtest = key.S
