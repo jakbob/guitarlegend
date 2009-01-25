@@ -10,8 +10,6 @@
 import pyglet
 from pyglet.gl import *
 
-import scene as game_scenes
-
 class BasicWindow(pyglet.window.Window):
     
     """Basic window type to be used with scenes and 
