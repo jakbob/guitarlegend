@@ -25,7 +25,8 @@ import pylab # strange bug! from pylab import plot DOES NOT WORK. X yells and sc
 import error
 import options
 from options import kb
-#from manager import game_manager
+
+from manager import game_manager
 
 class Scene(object):
     """Defines an isolated environment for a specific scene, 
@@ -87,9 +88,7 @@ class Scene(object):
         modifiers -- the modifiers (ctrl, alt, etc.) that were down 
                      when the keypress occurred
         """
-        
-        if (symbol & kb.test.exit) == symbol:
-            window.close()
+        pyglet.window.Window.on_key_press(window, symbol, modifiers)
 
 class TestScene(Scene):
     """Defines an isolated environment for a specific scene, 
@@ -151,54 +150,54 @@ class TestScene(Scene):
 
         """
         
-        if (symbol & kb.test.exit) == symbol:
+        if symbol == kb.test.exit:
             window.close()
-        elif (symbol & kb.test.soundtest) == symbol:
+        elif symbol == kb.test.soundtest:
             game_manager.push(SoundTestScene())
         else:
             print "Recieved keypress:", symbol, "\t\tModifiers:", modifiers
 
-# class SoundTestScene(Scene):
+class SoundTestScene(Scene):
     
-#     """Get sound input and display the time and frequency graphs
-#     in real-time.
-#     """
+     """Get sound input and display the time and frequency graphs
+     in real-time.
+     """
 
-#     def __init__(self, 
-#                  format=options.INPUT_FORMAT, 
-#                  channels=options.INPUT_CHANNELS, 
-#                  rate=options.INPUT_RATE, 
-#                  frames_per_buffer=options.INPUT_CHUNK_SIZE):
+     def __init__(self, 
+                  format=options.INPUT_FORMAT, 
+                  channels=options.INPUT_CHANNELS, 
+                  rate=options.INPUT_RATE, 
+                  frames_per_buffer=options.INPUT_CHUNK_SIZE):
 
-#         p = pyaudio.PyAudio()
-#         self.instream = p.open(format=format,
-#                                channels=channels,
-#                                rate=rate,
-#                                input=True,             # It is, indeed, an input stream
-#                                frames_per_buffer=frames_per_buffer)
-#         pylab.ion()  # Makes pylab interactive. Plotting does not blockthe application.
+         p = pyaudio.PyAudio()
+         self.instream = p.open(format=format,
+                                channels=channels,
+                                rate=rate,
+                                input=True,             # It is, indeed, an input stream
+                                frames_per_buffer=frames_per_buffer)
+         pylab.ion()  # Makes pylab interactive. Plotting does not blockthe application.
         
-#         # Set up the axes for plotting
-#         self.time_plane = pylab.subplot(211)
-#         self.freq_plane = pylab.subplot(212)
+         # Set up the axes for plotting
+         self.time_plane = pylab.subplot(211)
+         self.freq_plane = pylab.subplot(212)
 
-#         self.time_plane.set_autoscale_on(False) # Do not change the scale to match the graph
-#         self.freq_plane.set_autoscale_on(False)
+         self.time_plane.set_autoscale_on(False) # Do not change the scale to match the graph
+         self.freq_plane.set_autoscale_on(False)
         
-#         # Set the scales of the plot. TODO They use magic numbers. Fix this.
-#         self.time_plane.set_xlim(xmin=-10, xmax=options.INPUT_CHUNK_SIZE + 10)
-#         self.time_plane.set_ylim((0, 20000))
+         # Set the scales of the plot. TODO They use magic numbers. Fix this.
+         self.time_plane.set_xlim(xmin=-10, xmax=options.INPUT_CHUNK_SIZE + 10)
+         self.time_plane.set_ylim((0, 20000))
 
-#         self.freq_plane.set_xlim(xmin=-100, xmax=options.INPUT_CHUNK_SIZE-10000)
-#         self.freq_plane.set_ylim((0, 100000))
+         self.freq_plane.set_xlim(xmin=-100, xmax=options.INPUT_CHUNK_SIZE-10000)
+         self.freq_plane.set_ylim((0, 100000))
 
-#         time_x = range(options.INPUT_CHUNK_SIZE)
-#         freq_x = pylab.arange(0, options.INPUT_RATE, step=float(options.INPUT_RATE)/options.INPUT_CHUNK_SIZE)
+         time_x = range(options.INPUT_CHUNK_SIZE)
+         freq_x = pylab.arange(0, options.INPUT_RATE, step=float(options.INPUT_RATE)/options.INPUT_CHUNK_SIZE)
 
-#         # Set up initial data, so that we get instances of the plots' data,
-#         # that we can edit
-#         self.time_data, = self.time_plane.plot(time_x, [0]*options.INPUT_CHUNK_SIZE)
-#         self.freq_data, = self.freq_plane.plot(freq_x, [0]*options.INPUT_CHUNK_SIZE)
+         # Set up initial data, so that we get instances of the plots' data,
+         # that we can edit
+         self.time_data, = self.time_plane.plot(time_x, [0]*options.INPUT_CHUNK_SIZE)
+         self.freq_data, = self.freq_plane.plot(freq_x, [0]*options.INPUT_CHUNK_SIZE)
 
 class ErrorScene(Scene):
     """Defines an isolated environment for a specific scene, 
