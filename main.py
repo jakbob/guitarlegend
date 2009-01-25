@@ -47,7 +47,6 @@ except ImportError, err:
 ######################
 import options
 from manager import game_manager, BasicWindow, MainWindow
-import scene
 
 def main():
     # Parse the command line options
@@ -65,6 +64,8 @@ def main():
     pyglet.resource.path = ["data"]
     pyglet.resource.reindex()
 
+    import scene # Imported here, because it depends on the options used
+    
     # Add two windows
     game_manager.add_window(MainWindow(caption=options.__appname__), "game_draw")
     if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
