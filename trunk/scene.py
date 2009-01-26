@@ -22,16 +22,10 @@ from pyglet.graphics import vertex_list
 import pyaudio
 
 import matplotlib
-import matplotlib.backends.backend_agg as agg
 matplotlib.use("Agg")
+import matplotlib.backends.backend_agg as agg
 
-if options.DEBUG:
-    message = """This program crashes on some occasions when using the --debug flag and an older version\
-of Matplotlib (it has been reported for Matplotlib 0.91.2). Try upgrading to the latest version. If that doesnt\
-work, I'm stumped."""
-    error.warning(message)
-    print message
-    import pylab
+import pylab
 
 ######################
 #    Game modules    #
