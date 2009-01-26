@@ -10,21 +10,41 @@ import pyglet
 
 import error
 
-circle = pyglet.imgage.load("data/circle.bmp") #ja, det är ett hack, jag pallarnte
-straight = pyglet.imgage.load("data/straight.bmp")
+quarterlen = 400 #The lenght (in pixels) of a quarter note
+
+start_circle = pyglet.image.load("data/circle1.bmp") #ja, det ï¿½r ett hack, jag pallarnte
+end_circle = pyglet.image.load("data/circle2.bmp")
+straight = pyglet.image.load("data/straight.bmp")
 
 
 class DeathNote:
-	def __init__(self, note, ticksPerQuarter):
-		quarters = float(note.stop-note.start)/ticksPerQuarter
-		width = int(quarters*40) #magiskt nummer... jag pallarinte. Längden på en fjärdedelsnot
-		img = pyglet.image.AbstractImage(width, circle.height)
-		img.blit_into(circle, 0,0,0)
-		if width>=80: #80=40*2 jag borde verkligen sluta med det här.
-			for x in xrange((width-80)/straight.width):
-				img.blit_into(straight, x*straight.width,0,0)
-			img.blit_into(circle, width-circle.width,0,0)#det här är under *host* konstruktion
-			
-			
-		
+    def __init__(self, note, ticksPerQuarter):
+        self.note = note
+        quarters = float(note.stop-note.start)/ticksPerQuarter
+        width = int(quarters*quarterlen) #magiskt nummer... jag pallarinte. Lï¿½ngden pï¿½ en fjï¿½rdedelsnot
+        img = pyglet.image.Texture.create(width, start_circle.height)
 
+
+        img.blit_into(end_circle, width-end_circle.width,0,0)
+        img.blit_into(start_circle, 0,0,0)
+        
+        if width>=2*start_circle.width: #80=40*2 jag borde verkligen sluta med det hï¿½r.
+            for x in xrange((width-2*start_circle.width)/straight.width):
+                img.blit_into(straight, start_circle.width+x*straight.width,0,0)
+            #det hï¿½r ï¿½r under *host* konstruktion
+        self.sprite = pyglet.sprite.Sprite(img)	
+        
+        self.sprite.color = (40*self.note.string,30*self.note.string,35*self.note.string)
+    
+if __name__ == "__main__":
+    import tab
+    window = pyglet.window.Window()
+    tab = tab.Tab("data/pokemon-melody.mid")
+    olle = DeathNote(tab.string[2][10], tab.ticksPerQuarter)
+
+    @window.event
+    def on_draw():
+        window.clear()
+        olle.sprite.draw()
+
+    pyglet.app.run()
