@@ -58,8 +58,7 @@ class Scene(object):
     def __init__(self):
         self.name = "Abstract scene"
 
-    @staticmethod
-    def debug_draw(scene, window):
+    def debug_draw(self, window):
         """Draws the debug view of the scene."""
         glClear(GL_COLOR_BUFFER_BIT)       # We are not bound to a window, all the functions and methods are
                                            # merely abstractions for lower level GL calls. If I understand
@@ -67,8 +66,7 @@ class Scene(object):
                                            # lingo is. Anyways. No window. No clear(). If, however, a window
                                            # is passed using a lambda, we may use it.
 
-    @staticmethod
-    def game_draw(scene, window):
+    def game_draw(self, window):
         """Draws the game view of the scene."""
         glClear(GL_COLOR_BUFFER_BIT)
 
@@ -104,8 +102,7 @@ class TestScene(Scene):
         self.name = "Test scene"
         self.time = "0"
 
-    @staticmethod
-    def debug_draw(scene, window):
+    def debug_draw(self, window):
         """Draws the debug view of the scene."""
         glClear(GL_COLOR_BUFFER_BIT)       # We are not bound to a window, all the functions and methods are
                                            # merely abstractions for lower level GL calls. If I understand
@@ -113,24 +110,23 @@ class TestScene(Scene):
                                            # lingo is. Anyways. No window. No clear(). If, however, a window
                                            # is passed using a lambda, we may use it.
     
-        label = pyglet.text.Label("Debug " + scene.name, 
+        label = pyglet.text.Label("Debug " + self.name, 
                                   x=window.width//2, y=window.height//2, 
                                   font_name="Times New Roman", font_size=46, 
                                   anchor_x="center", anchor_y="center")
     
-        label2 = pyglet.text.Label("dt = " + scene.time,
+        label2 = pyglet.text.Label("dt = " + self.time,
                                    x=100, y=window.height//2 - 100, 
                                    anchor_x="left", anchor_y="top",
                                    font_name="Times New Roman", font_size=36)
         label.draw()
         label2.draw()
 
-    @staticmethod
-    def game_draw(scene, window):
+    def game_draw(self, window):
         """Draws the game view of the scene."""
         glClear(GL_COLOR_BUFFER_BIT)
 
-        label = pyglet.text.Label("Game " + scene.name, 
+        label = pyglet.text.Label("Game " + self.name, 
                                   x=window.width//2, y=window.height//2, 
                                   font_name="Times New Roman", font_size=46, 
                                   anchor_x="center", anchor_y="center")
@@ -182,12 +178,25 @@ class SoundTestScene(Scene):
                                input=True,             # It is, indeed, an input stream
                                frames_per_buffer=frames_per_buffer)
         pylab.ion()  # Makes pylab interactive. Plotting does not blockthe application.
+
+        # The figure lets us define the physical size of the plot, so that we can create a texture from it
+        self.graph_dpi = 50
+        self.graph_width = 4
+        self.graph_height = 4
+
+        self.fig = pylab.figure(figsize=[self.graph_width, self.graph_height], # Inches
+                                dpi=self.graph_dpi,        # 100 dots per inch, so the resulting buffer is 400x400 pixels
+                                )
         
         # Set up the axes for plotting
         self.time_plane = pylab.subplot(211)
         self.freq_plane = pylab.subplot(212)
         
-        self.time_plane.set_autoscale_on(False) # Do not change the scale to match the graph
+        self.fig.add_axes(self.time_plane)
+        self.fig.add_axes(self.freq_plane)
+
+        # Do not change the scale to match the graph
+        self.time_plane.set_autoscale_on(False) 
         self.freq_plane.set_autoscale_on(False)
         
         # Set the scales of the plot. TODO They use magic numbers. Fix this.
@@ -204,6 +213,31 @@ class SoundTestScene(Scene):
         # that we can edit
         self.time_data, = self.time_plane.plot(time_x, [0]*options.INPUT_CHUNK_SIZE)
         self.freq_data, = self.freq_plane.plot(freq_x, [0]*options.INPUT_CHUNK_SIZE)
+        
+        self.pyglet_plot = pyglet.image.create(self.graph_dpi * self.graph_width, 
+                                               self.graph_dpi * self.graph_width)
+
+        self.graph_updated = True
+
+    def debug_draw(self, window):
+        #ax = fig.gca()
+        #ax.plot(y)
+        # Update the data
+        window.clear()
+        # Platt
+        self.pyglet_plot.blit(0,0)
+
+    def do_logic(self, dt):
+        if self.graph_updated:
+            canvas = agg.FigureCanvasAgg(self.fig)
+            canvas.draw()
+            renderer = canvas.get_renderer()
+            self.raw_data = renderer.tostring_argb() # Why isn't rgb and pitch=-3*400 below working?
+            
+            raw_pyglet_image = self.pyglet_plot.get_image_data()
+            raw_pyglet_image.set_data("ARGB", -4*(self.graph_width*self.graph_dpi),
+                                      self.raw_data)
+        self.graph_updated = False
 
 class ErrorScene(Scene):
     """Defines an isolated environment for a specific scene, 
@@ -212,7 +246,6 @@ class ErrorScene(Scene):
     def __init__(self):
         self.name = "Error scene"
 
-    @staticmethod
     def debug_draw(scene, window):
         """Draws the debug view of the scene."""
         glClearColor(174/255.0, 23/255.0, 23/255.0, 0)

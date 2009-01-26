@@ -45,7 +45,7 @@ class BasicWindow(pyglet.window.Window):
 
         if hasattr(scene, method):                       # The method is optional.
             m = getattr(scene, method)
-            self.on_draw = (lambda: m(scene, self))      # Lambda, because the window does not
+            self.on_draw = (lambda: m(self))      # Lambda, because the window does not
                                                          # accept any arguments.
         else:
             self.on_draw = self.clear                    # If there is no such method, just clear the window
@@ -99,6 +99,8 @@ class GameManager(object):
         """
 
         self.current_scene.do_logic(dt)
+        #pyglet.clock.tick()
+        print pyglet.clock.get_fps()
 
     def add_window(self, window, method):
 
