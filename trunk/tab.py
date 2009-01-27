@@ -45,6 +45,7 @@ class Tab:
         self.ticksPerSec = f.ticksPerSecond
         self.ticksPerQuarter = f.ticksPerQuarterNote
         self.string=[[],[],[],[],[],[],] #array to hold all notes, grouped in strings
+        self.all_notes = [] #self explanatory?
         #for t in xrange(1,7):
         for track in f.tracks:
             startevent=None
@@ -61,7 +62,9 @@ class Tab:
                 else:#when the corresponding NOTE_OFF event shows up, make the note
                     if (event.type=="NOTE_OFF" and startevent.pitch==event.pitch)\
                     or event.type=="NOTE_ON": #or if we get a new note on message before. This isn't supposed to happen so I implemented this as a sequrity messure.
-                        self.string[event.channel-1].append(Note(startevent.pitch, startevent.channel, startevent.time, event.time))
+                        note = Note(startevent.pitch, startevent.channel, startevent.time, event.time)
+                        self.string[event.channel-1].append(note)
+                        self.all_notes.append(note)
                         startevent=None
                     if event.type=="NOTE_ON": #If we got a new NOTE_ON before the NOTE_OFF stop the old note and start a new
                         startevent=event

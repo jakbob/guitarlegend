@@ -11,6 +11,8 @@
 
 import error
 import options
+import tab
+import graphics
 
 ######################
 # Required libraries #
@@ -267,3 +269,27 @@ class ErrorScene(Scene):
     def do_logic(self, dt):
         """Handles the scene's logic."""
         pass
+
+class TestinNotes(Scene): #a NoteTestScene 
+    def __init__(self, midifile):
+        self.tab = tab.Tab(midifile)
+        self.note_batch = pyglet.graphics.Batch()
+
+        #begin speed and memory unoptimized code
+        self.death_notes = []
+        for note in self.tab.all_notes:
+            bolle = graphics.DeathNote(note,self.tab.ticksPerQuarter,self.note_batch)
+            bolle.sprite.x = bolle.note.start
+            bolle.sprite.y = bolle.note.string * 50
+            self.death_notes.append(bolle)
+    def game_draw(self, window):
+        window.clear()
+        self.note_batch.draw()
+    def do_logic(self,dt):
+        for olle in self.death_notes:
+            olle.sprite.x -= 500*dt
+            
+
+            
+
+
