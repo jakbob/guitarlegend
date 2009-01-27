@@ -18,7 +18,7 @@ straight = pyglet.image.load("data/straight.bmp")
 
 
 class DeathNote:
-    def __init__(self, note, ticksPerQuarter):
+    def __init__(self, note, ticksPerQuarter, batch=None):
         self.note = note
         quarters = float(note.stop-note.start)/ticksPerQuarter
         width = int(quarters*quarterlen) #magiskt nummer... jag pallarinte. L�ngden p� en fj�rdedelsnot
@@ -35,9 +35,10 @@ class DeathNote:
             rest = width-(2*start_circle.width+(x+1)*straight.width)
             if rest>0:
                 img.blit_into(straight.get_region(0,0,rest,straight.height), start_circle.width+(x+1)*straight.width,0,0)
-        self.sprite = pyglet.sprite.Sprite(img)	
+
+        self.sprite = pyglet.sprite.Sprite(img, batch=batch)	
         
-        self.sprite.color = (40*self.note.string,30*self.note.string,35*self.note.string)
+        self.sprite.color = (40*self.note.string+7*self.note.fret,30*self.note.string+5*self.note.fret,35*self.note.string+2*self.note.fret)
     
 if __name__ == "__main__":
     import tab

@@ -71,7 +71,7 @@ def main():
     if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
     
     # Add one scene
-    game_manager.push(scene.TestScene())
+    game_manager.push(scene.TestinNotes("data/pokemon-melody.mid"))
 
     # Hand control over to the Game manager
     game_manager.run()
