@@ -32,7 +32,7 @@ class Note:
         self.fret=self.pitch-base
     
     def __repr__(self):
-        return "<NOTE! String: " + str(self.string+1) + " Fret: " + str(self.fret) + " Start: " + str(self.start) + " Stop: " + str(self.stop) + ">"
+        return "<NOTE! String: " + str(self.string) + " Fret: " + str(self.fret) + " Start: " + str(self.start) + " Stop: " + str(self.stop) + ">"
 
 class Tab:
     """Opens up a midifile and converts all midi events into Notes"""
@@ -44,7 +44,7 @@ class Tab:
 
         self.ticksPerSec = f.ticksPerSecond
         self.ticksPerQuarter = f.ticksPerQuarterNote
-        self.string=[[],[],[],[],[],[],]
+        self.string=[[],[],[],[],[],[],] #array to hold all notes, grouped in strings
         #for t in xrange(1,7):
         for track in f.tracks:
             startevent=None
@@ -53,7 +53,7 @@ class Tab:
             #except IndexError:
                 #break
             for event in track.events:
-                if event.channel<1 or event.channel>6 or event.velocity==0: #these events shuoldn't be in the file, but if they are, skip them.
+                if event.channel<1 or event.channel>6 or event.velocity==0: #most of these events shuoldn't be in the file, but if they are, skip them.
                     continue #else
                 if not startevent:
                     if event.type=="NOTE_ON":

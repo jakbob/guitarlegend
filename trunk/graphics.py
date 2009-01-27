@@ -32,6 +32,9 @@ class DeathNote:
             for x in xrange((width-2*start_circle.width)/straight.width):
                 img.blit_into(straight, start_circle.width+x*straight.width,0,0)
             #det h�r �r under *host* konstruktion
+            rest = width-(2*start_circle.width+(x+1)*straight.width)
+            if rest>0:
+                img.blit_into(straight.get_region(0,0,rest,straight.height), start_circle.width+(x+1)*straight.width,0,0)
         self.sprite = pyglet.sprite.Sprite(img)	
         
         self.sprite.color = (40*self.note.string,30*self.note.string,35*self.note.string)
