@@ -365,17 +365,21 @@ class TestinNotes(TestScene): #a NoteTestScene
 
         #begin speed and memory unoptimized code
         self.death_notes = []
+        #self.note_count = 0
         for note in self.tab.all_notes:
             bolle = graphics.DeathNote(note,self.tab.ticksPerQuarter,self.note_batch)
-            bolle.sprite.x = bolle.note.start
-            bolle.sprite.y = bolle.note.string * 50
+            bolle.x = bolle.note.start
+            bolle.y = 20+(6-bolle.note.string) * 50
             self.death_notes.append(bolle)
+            #self.note_count+=1
+        print "All done!"
     def game_draw(self, window):
         window.clear()
         self.note_batch.draw()
     def do_logic(self,dt):
         for olle in self.death_notes:
-            olle.sprite.x -= 500*dt
+            olle.x -= 500*dt
+            olle.update()
             
 
             
