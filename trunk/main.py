@@ -56,9 +56,16 @@ def main():
                       dest="debug", 
                       default=False,
                       help="start game in debugging mode")
+    parser.add_option("--show-fps", 
+                      action="store_true", 
+                      dest="show_fps",
+                      default=False,
+                      help="start game in debugging mode")
+    
     (opts, args) = parser.parse_args()
 
     options.DEBUG = opts.debug
+    options.SHOW_FRAMERATE = opts.show_fps
 
     # Setup a custom data directory
     pyglet.resource.path = ["data"]
@@ -71,7 +78,7 @@ def main():
     if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
     
     # Add one scene
-    game_manager.push(scene.TestinNotes("data/pokemon-melody.mid"))
+    game_manager.push(scene.TestScene())
 
     # Hand control over to the Game manager
     game_manager.run()

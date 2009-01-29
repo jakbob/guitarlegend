@@ -28,6 +28,7 @@ __appname__ = "bosseonfire"
 # Is debuging turned on? #
 ########################## 
 DEBUG = False
+SHOW_FRAMERATE = False
 
 ##########################
 #   Microphone settings  #
@@ -79,3 +80,6 @@ kb.test = AttrDict() #
 ######################
 kb.test.exit = key.ESCAPE
 kb.test.soundtest = key.S
+kb.test.tabtest = key.T
+kb.test.maintest = key.M
+kb.test.up = key.U

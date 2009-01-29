@@ -10,6 +10,9 @@
 import pyglet
 from pyglet.gl import *
 
+import options
+#from scene import ErrorScene
+
 class BasicWindow(pyglet.window.Window):
     
     """Basic window type to be used with scenes and 
@@ -99,8 +102,9 @@ class GameManager(object):
         """
 
         self.current_scene.do_logic(dt)
-        #pyglet.clock.tick()
-        print pyglet.clock.get_fps()
+
+        if options.SHOW_FRAMERATE:
+            print pyglet.clock.get_fps()
 
     def add_window(self, window, method):
 
@@ -151,7 +155,7 @@ class GameManager(object):
         try:
             self.change_scene(self.scenes[-1])
         except IndexError, err:                         # Print an error if the scene is empty
-            self.change_scene(game_scenes.ErrorScene())
+            self.change_scene(ErrorScene())
 
         return scene
 
