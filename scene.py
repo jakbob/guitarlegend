@@ -9,10 +9,12 @@
 #
 # (c) Jonne Mickelin 2009
 
+from __future__ import with_statement
+
 import error
 import options
-import tab
-import graphics
+
+import time
 
 ######################
 # Required libraries #
@@ -29,10 +31,14 @@ import matplotlib.backends.backend_agg as agg
 
 import pylab
 
+
 ######################
 #    Game modules    #
 ######################
 from options import kb
+
+import tab
+import graphics
 
 from manager import game_manager
 
@@ -97,6 +103,68 @@ class Scene(object):
         pyglet.window.Window.on_key_press(window, symbol, modifiers)
 
 class TestScene(Scene):
+    def __init__(self):
+        self.name = "Test scene"
+        self.time = "0"
+
+    def debug_draw(self, window):
+        """Draws the debug view of the scene."""
+        glClear(GL_COLOR_BUFFER_BIT)       # We are not bound to a window, all the functions and methods are
+                                           # merely abstractions for lower level GL calls. If I understand
+                                           # correctly, the window just swaps the GL context, or whatever the
+                                           # lingo is. Anyways. No window. No clear(). If, however, a window
+                                           # is passed using a lambda, we may use it.
+    
+        label = pyglet.text.Label("Debug " + self.name, 
+                                  x=window.width//2, y=window.height//2, 
+                                  font_name="Times New Roman", font_size=46, 
+                                  anchor_x="center", anchor_y="center")
+    
+        label.draw()
+
+    def game_draw(self, window):
+        """Draws the game view of the scene."""
+        glClear(GL_COLOR_BUFFER_BIT)
+
+        helptext = "<font face='Times New Roman' size='46'>Controls:<br><br><i>s</i>: SoundTestScene<br><i>t</i>: TestinNotes<br><i>m</i>: MainTestScene<br><i>u</i>: Pop scene</font>"
+        #helptext = "Hej"
+        #document = pyglet.text.decode_html(helptext)
+        #label = pyglet.text.HTMLLabel(helptext)#,
+        label = pyglet.text.HTMLLabel('<b>Hello</b>, <i>world</i>',
+                                      x=10, y=10)
+        #x=window.width//2, y=window.height//2, 
+        #                              #font_name="Times New Roman", #font_size=46, 
+        #                              anchor_x="center", anchor_y="center")
+
+        label.draw()
+
+    def on_key_press(self, window, symbol, modifiers):
+        
+        """Handles keyboard input. The keys are defined in options.py and are
+        sorted according to namespaces. See that file for further information.
+
+        Arguments:
+        window -- the window that recieved the keypress
+        symbol -- the key that was pressed
+        modifiers -- the modifiers (ctrl, alt, etc.) that were down 
+                     when the keypress occurred
+
+        """
+        
+        if symbol == kb.test.exit:
+            window.close()
+        elif symbol == kb.test.soundtest:
+            game_manager.push(SoundTestScene())
+        elif symbol == kb.test.tabtest:
+            game_manager.push(TestinNotes("data/pokemon-melody.mid"))
+        elif symbol == kb.test.maintest:
+            game_manager.push(MainTestScene())
+        elif symbol == kb.test.up:
+            game_manager.pop()
+        else:
+            print "Recieved keypress:", symbol, "\t\tModifiers:", modifiers
+
+class MainTestScene(TestScene):
     """Defines an isolated environment for a specific scene, 
     providing methods for handling of input, logic and rendering
     of the scene."""
@@ -141,27 +209,7 @@ class TestScene(Scene):
         
         self.time = str(dt)
 
-    def on_key_press(self, window, symbol, modifiers):
-        
-        """Handles keyboard input. The keys are defined in options.py and are
-        sorted according to namespaces. See that file for further information.
-
-        Arguments:
-        window -- the window that recieved the keypress
-        symbol -- the key that was pressed
-        modifiers -- the modifiers (ctrl, alt, etc.) that were down 
-                     when the keypress occurred
-
-        """
-        
-        if symbol == kb.test.exit:
-            window.close()
-        elif symbol == kb.test.soundtest:
-            game_manager.push(SoundTestScene())
-        else:
-            print "Recieved keypress:", symbol, "\t\tModifiers:", modifiers
-
-class SoundTestScene(Scene):
+class SoundTestScene(TestScene):
     
     """Get sound input and display the time and frequency graphs
     in real-time.
@@ -173,6 +221,8 @@ class SoundTestScene(Scene):
                  rate=options.INPUT_RATE, 
                  frames_per_buffer=options.INPUT_CHUNK_SIZE):
         
+        self.name = "Sound test"
+
         p = pyaudio.PyAudio()
         self.instream = p.open(format=format,
                                channels=channels,
@@ -216,10 +266,50 @@ class SoundTestScene(Scene):
         self.time_data, = self.time_plane.plot(time_x, [0]*options.INPUT_CHUNK_SIZE)
         self.freq_data, = self.freq_plane.plot(freq_x, [0]*options.INPUT_CHUNK_SIZE)
         
-        self.pyglet_plot = pyglet.image.create(self.graph_dpi * self.graph_width, 
+        self.pyglet_plot_1 = pyglet.image.create(self.graph_dpi * self.graph_width, 
+                                               self.graph_dpi * self.graph_width)
+        self.pyglet_plot_2 = pyglet.image.create(self.graph_dpi * self.graph_width, 
                                                self.graph_dpi * self.graph_width)
 
         self.graph_updated = True
+
+        #pyglet.clock.schedule_interval(self.update_plot, 1) # Still too slow...
+        import threading
+        self.update_plot_thread = threading.Thread(target=self.update_plot)
+        self.plot_lock = threading.RLock()
+        self.quit = False
+        self.update_plot_thread.start()
+
+
+    def __del__(self):
+        #pyglet.clock.unschedule(self.update_plot)
+        self.quit = True
+        self.update_plot_thread.join()
+        
+    def update_plot(self):
+        while not self.quit:
+            print "bojs"
+            canvas = agg.FigureCanvasAgg(self.fig)
+            canvas.draw()
+            renderer = canvas.get_renderer()
+            self.raw_data = renderer.tostring_argb() # Why isn't rgb and pitch=-3*400 below working?
+
+            raw_pyglet_image = self.pyglet_plot_1.get_image_data()
+            #print id(raw_pyglet_image)
+            #print id(self.pyglet_plot_1)
+            #print "hoj"
+            self.plot_lock.acquire()
+            #print "setting"
+            #print "2 = ", id(self.pyglet_plot_2)
+            #print "1 = ", id(self.pyglet_plot_1)
+            #temporary = self.pyglet_plot_2
+            #self.pyglet_plot_2 = self.pyglet_plot_1
+            #self.pyglet_plot_1 = temporary
+            raw_pyglet_image.set_data("ARGB", -4*(self.graph_width*self.graph_dpi),
+                                      self.raw_data)
+            self.plot_lock.release()
+
+            time.sleep(0.1)
 
     def debug_draw(self, window):
         #ax = fig.gca()
@@ -227,19 +317,16 @@ class SoundTestScene(Scene):
         # Update the data
         window.clear()
         # Platt
-        self.pyglet_plot.blit(0,0)
+        #with self.plot_lock:
+        self.plot_lock.acquire()
+        print "plotting"
+        print "2 = ", id(self.pyglet_plot_2)
+        print "1 = ", id(self.pyglet_plot_1)
+        self.pyglet_plot_1.blit(0,0)
+        self.plot_lock.release()
 
     def do_logic(self, dt):
-        if self.graph_updated:
-            canvas = agg.FigureCanvasAgg(self.fig)
-            canvas.draw()
-            renderer = canvas.get_renderer()
-            self.raw_data = renderer.tostring_argb() # Why isn't rgb and pitch=-3*400 below working?
-            
-            raw_pyglet_image = self.pyglet_plot.get_image_data()
-            raw_pyglet_image.set_data("ARGB", -4*(self.graph_width*self.graph_dpi),
-                                      self.raw_data)
-        self.graph_updated = False
+        pass
 
 class ErrorScene(Scene):
     """Defines an isolated environment for a specific scene, 
@@ -270,8 +357,9 @@ class ErrorScene(Scene):
         """Handles the scene's logic."""
         pass
 
-class TestinNotes(Scene): #a NoteTestScene 
+class TestinNotes(TestScene): #a NoteTestScene 
     def __init__(self, midifile):
+        self.name = "Note test"
         self.tab = tab.Tab(midifile)
         self.note_batch = pyglet.graphics.Batch()
 
