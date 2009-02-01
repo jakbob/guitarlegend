@@ -358,28 +358,44 @@ class ErrorScene(Scene):
         pass
 
 class TestinNotes(TestScene): #a NoteTestScene 
-    def __init__(self, midifile):
+    def __init__(self, midifile,window_width=640):
         self.name = "Note test"
         self.tab = tab.Tab(midifile)
+        self.win_width=window_width
         self.note_batch = pyglet.graphics.Batch()
+        self.label_batch = pyglet.graphics.Batch() #för att labels ska ritas sist, enkla sättet
 
         #begin speed and memory unoptimized code
         self.death_notes = []
-        #self.note_count = 0
         for note in self.tab.all_notes:
-            bolle = graphics.DeathNote(note,self.tab.ticksPerQuarter,self.note_batch)
-            bolle.x = bolle.note.start
-            bolle.y = 20+(6-bolle.note.string) * 50
+            x=note.start
+            y=20+(6-note.string)*50
+            bolle = graphics.DeathNote(note,self.tab.ticksPerQuarter,x=x,y=y,batch=None)
             self.death_notes.append(bolle)
-            #self.note_count+=1
+        self.notecounter=20
+        self.active=self.death_notes[:self.notecounter]
+        for thing in self.active: #kan säkert göras snyggare, men jag pallarnte
+            thing.sprite.batch = self.note_batch
         print "All done!"
     def game_draw(self, window):
         window.clear()
         self.note_batch.draw()
+        self.label_batch.draw()
     def do_logic(self,dt):
-        for olle in self.death_notes:
-            olle.x -= 500*dt
-            olle.update()
+        for olle in self.active:
+            olle.update(dx=-500*dt)
+        #om den första noten har kommit utanför skärmen, döda så gott det går
+        if self.active[0].sprite.x+self.active[0].sprite.width<-100:#lite marginal
+            self.active[0].die()
+            self.active.pop(0)
+        #om den sista noten är nästa inne på skärmen, lägg en ny not sist
+        if self.active[-1].sprite.x<self.win_width+200 and len(self.death_notes)>self.notecounter: #eventuellt borde man spara längden på den längsta noten
+            kalle = self.death_notes[self.notecounter]
+            kalle.sprite.x = self.active[-1].sprite.x+(kalle.note.start-self.active[-1].note.start)
+            kalle.sprite.batch=self.note_batch
+            kalle.label.batch=self.label_batch
+            self.active.append(kalle)
+        
             
 
             
