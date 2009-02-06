@@ -70,33 +70,68 @@ complex* DFT(float * data_points, int N)
 complex *
 FFT(double* data, int N)
 {
-  int i, j;
+  unsigned int i, I, j, k;
   double temp;
   
   // Shuffle input
-  for (i = 0; i < N/2; i+=2)
+  /*for (i = 0; i < N/2; i+=2)
     {
       temp = data[i+1];              // Swap the values of the odd indexed 
       data[i+1] = data[i+N/2];       // data points so that i - (i+1) == N/2 
       data[i+N/2] = temp;            // for all even i.
     }                                
-  
+  */
+  /*
   // Do the FFT
-  for (i = 1; i < N; i<<=1)
+  for (i = 1, I = N>>1; i < N; i<<=1, I>>=1)
     {
       printf("%i:\n", i);
       
       // Loop over each data point and do the summations
-      for (j = 0; j < N; j+=2)
+      for (j = 0; j < N; j+=1)
 	{
-	  printf("\t%.0lf + %.0lf => %i, %i\n", data[j], data[(j+i)%N], j, (j+i)%N);
-	  printf("\t%.0lf + %.0lf => %i, %i\n", data[(j+i)%N], data[j], (j+i)%N, j);
+	  //if (j < N/2)
+	  //  {
+	  printf("\t%.0lf + %.0lf => %i, %i\n", data[j], data[(j+I)%N], j, (j+I)%N);
+	  //  }
+	  //else
+	  //{
+	  //printf("\t%.0lf + %.0lf => %i, %i\n", data[j], data[j-i/2], j, j-i/2);
+	  //printf("\t%.0lf + %.0lf => %i, %i\n", data[j+i], data[j], j+i, j);
+	  //  }
+	  
+	  
 	  //printf("%.0lf + %.0lf => %i\n", data[(j+1)%N], data[j], (j+i)%N);
 	}
       printf("\n");
       
     }
-  
+  */
+  for (i = 1; i < N; i<<=1)           // Do the loop log N times
+    {
+      printf("%i:\n", i);      
+      for (j = 0; j < N; j+=2*i)      // Iterate over the first elements of all the subsequences
+	{
+	  for (k = 0; k < i; k++)     // and if you know the first element, it's easy to find
+	                              // all the other elements to be "added down" If there are
+	                              // n first elements, there are log2 n consequtive elements
+	                              // to "add down".
+	    {
+	      printf("\n");
+	      printf("\t%i, %i\n", j+k, j+k+i);
+	      printf("\t%i, %i\n", j+k+i, j+k);
+	    }
+	  
+	}
+      printf("\n");
+    }
+  /*
+    i = 1, 0 2 4 6 j_n = 2*n
+    i = 2, 0 1 4 5 j_n = ?
+    i = 4, 0 1 2 3 j_n = n
+  */
+  //*/
+
   /*for (i = N; i > 1; i>>=1)
     {
       for (j = 0; j < N; j++)
@@ -130,7 +165,7 @@ int main()
   */
   for (t = 0; t < NUM; t++)
     {
-      data[t] = t+1;
+      data[t] = t;
     }
   freqs = FFT(data, NUM);
 
