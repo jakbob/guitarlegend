@@ -73,34 +73,84 @@ complex complex_mul(complex z, complex w)
   return answer;
 }
 
+/* Return the 2-logarithm of a power of 2 */
+
+int log_2(int N)
+{
+  int i;
+  int log_N = 0;
+  
+  for (i = N; i > 1; i>>=1)
+    {
+      log_N++;
+    }
+  
+  return log_N;
+}
+
+/* Return input with the bits in opposite order */
+int bitreverse(int input, int N)
+{
+  unsigned int n = 0, i, bit;
+
+  bit = input & 1;
+  n |= bit;
+  for (i = 0; i < N - 1; i++)
+    {
+      n<<=1;
+      input>>=1;
+      bit = input & 1;
+      n |= bit;
+    }
+  
+  return n;
+}      
+
 /* Arguments: 
-   data -- real valued time domain input (double*)
+   data -- complex time domain input (complex*)
    N    -- length of data (int)
 */
 complex *
 FFT(complex* data, int N)
 {
   unsigned int i, I, j, k, w, t;
+  unsigned int log_N;
+  
   complex temp, temp2;
   complex W_N_w;                     // Holds the complex twiddle factors
-
+  
   // Shuffle input
-  for (i = 0; i < N/2; i+=2)
+  /*  for (i = 0; i < N/2; i+=2)
     {
       temp = data[i+1];              // Swap the values of the odd indexed 
       data[i+1] = data[i+N/2];       // data points so that i - (i+1) == N/2 
       data[i+N/2] = temp;            // for all even i.
-    }                                
+      }*/
+
+  log_N = log_2(N);
+
+  for (i = 0; i < N; i++)
+    {
+      j = bitreverse(i, log_N);
+      if (j > i)                  // Only swap values once, and don't touch values when j==i
+	{
+	  temp = data[i];
+	  data[i] = data[j];
+	  data[j] = temp;
+	}
+    }
   
-  /*for (t = 0; t < N; t++)
+  printf("\n");
+  
+  for (t = 0; t < N; t++)
     {
       printf("%lf\n", data[t].re+data[t].im);
     }
   
-  printf("\n");
-  */
-  for (i = 1, I = N>>1; i < N; i<<=1, I>>=1)           // Do the loop log N times, corresponding to the depth of the
-                                      // recursive algorithm.
+  //printf("\n");
+  
+  for (i = 1, I = N>>1; i < N; i<<=1, I>>=1)   // Do the loop log N times, corresponding to the depth of the
+                                               // recursive algorithm.
     {
       //printf("i=%i, I=%i:\n", i, I);
       // Now, iterate over all of the elements and do the summations.
@@ -172,29 +222,30 @@ FFT(complex* data, int N)
 		  
 		  W_N_w.re = cos(-2*PI/N * w);
 		  W_N_w.im = sin(-2*PI/N * w);
-		  //printf("\tW = %.2lf + %.2lfi\n", W_N_w.re, W_N_w.im);
-
-		  data[j+k].re = data[j+k].re + (data[j+k+i].re * W_N_w.re
+		  //printf("\tW = %.2lf + %.2lfi, w = %i\n", W_N_w.re, W_N_w.im, w);
+		  
+		  /*data[j+k].re = data[j+k].re + (data[j+k+i].re * W_N_w.re
 						 - data[j+k+i].im * W_N_w.im);   //  Complex multiplication
 		  data[j+k].im = data[j+k].im + (data[j+k+i].re * W_N_w.im
 						 + data[j+k+i].im * W_N_w.re);   //  Complex multiplication
+		  */
+		  temp2 = complex_mul(data[j+k+i], W_N_w);
 		  
+		  data[j+k].re = data[j+k].re + temp2.re;
+		  data[j+k].im = data[j+k].im + temp2.im;
+		  
+		  //temp2.re = data[j+k+i].re;
+		  //temp2.im = data[j+k+i].im;
+		  // We need to save the value in a temporary variable
+		  // because we need both the real and imaginary parts
+		  data[j+k+i].re = temp.re - temp2.re;
+		  data[j+k+i].im = temp.im - temp2.im;
 
-		  temp2.re = data[j+k+i].re;
-		  temp2.im = data[j+k+i].im;
-		   // We need to save the value in a temporary variable
-		   // because we need both the real and imaginary parts
-		   data[j+k+i].re = temp.re - (temp2.re * W_N_w.re
-					       - temp2.im * W_N_w.im);      //  Complex multiplication
-
-		   data[j+k+i].im = temp.im - (temp2.re * W_N_w.im
-					       + temp2.im * W_N_w.re);      //  Complex multiplication		  
-
-		   /*for (t = 0; t < N; t++)
+		  /*for (t = 0; t < N; t++)
 		     {
 		       printf("%lf\n", data[t].re+data[t].im);
 		     }
-		   */
+		  */
 	      }
 
 	      //printf("\n");
@@ -221,7 +272,7 @@ FFT(complex* data, int N)
 }
 
 #ifdef DEBUG
-#define NUM 16
+#define NUM 8
 int main()
 {
   complex data[NUM], data2[NUM];
@@ -237,11 +288,11 @@ int main()
       data2[t].im = 0;
     }
   
-  /*for (t = 0; t < NUM; t++)
+  for (t = 0; t < NUM; t++)
     {
       data[t].re = t;
       data[t].im = 0;
-      }*/
+    }
   freqs = FFT(data, NUM);
   
   // Ok, I put in some stuff for easy printing and plotting with python
