@@ -63,6 +63,16 @@ complex* DFT(float * data_points, int N)
   return frequencies;
 }
 
+complex complex_mul(complex z, complex w)
+{
+  complex answer;
+  
+  answer.re = z.re * w.re - z.im * w.im;
+  answer.im = z.re * w.im + z.im * w.re;
+  
+  return answer;
+}
+
 /* Arguments: 
    data -- real valued time domain input (double*)
    N    -- length of data (int)
@@ -71,7 +81,7 @@ complex *
 FFT(complex* data, int N)
 {
   unsigned int i, I, j, k, w, t;
-  complex temp;
+  complex temp, temp2;
   complex W_N_w;                     // Holds the complex twiddle factors
 
   // Shuffle input
@@ -86,7 +96,7 @@ FFT(complex* data, int N)
     {
       printf("%lf\n", data[t].re+data[t].im);
     }
-
+  
   printf("\n");
   
   for (i = 1, I = N>>1; i < N; i<<=1, I>>=1)           // Do the loop log N times, corresponding to the depth of the
@@ -105,7 +115,7 @@ FFT(complex* data, int N)
 	      w = (I*(j+k))%(N/2);    // Exponent of the twiddle factor. The positive and negative signs
 	                              // are handled simultaneously, thus we use only half of N as a modulo thing.
 	      
-	      /*if (0 == w)             // Twiddle factor is 1
+	      if (0 == w)             // Twiddle factor is 1
 		{
 		  printf("0\n");
 		  temp.re = data[j+k].re;
@@ -138,16 +148,25 @@ FFT(complex* data, int N)
 		  data[j+k].re = data[j+k].re + data[j+k+i].im;    //  i
 		  data[j+k].im = data[j+k].im + data[j+k+i].re;
 		  
-		  data[j+k+i].re = temp.re - data[j+k+i].im;       // -i
-		  data[j+k+i].im = temp.im - data[j+k+i].re;
+		  temp2.re = data[j+k+i].re;
+		  temp2.im = data[j+k+i].im;
+		  // We need to save the value in a temporary variable
+		  // because we need both the real and imaginary parts
+		  data[j+k+i].re = temp.re - temp2.im;       // -i
+		  data[j+k+i].im = temp.im - temp2.re;
 		}
 	      //else if (0.75*N == w)
 	      //{
 	      //printf("3*N/4\n");
 	      //}
 	      else                                  // The twiddle factor is complex
-	      {*/
+	      {
 		  printf("else, w=%i\n", w);
+		  for (t = 0; t < N; t++)
+		    {
+		      printf("%lf\n", data[t].re+data[t].im);
+		    }
+		  
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
 		  
@@ -160,17 +179,23 @@ FFT(complex* data, int N)
 		  data[j+k].im = data[j+k].im + (data[j+k+i].re * W_N_w.im
 						 + data[j+k+i].im * W_N_w.re);   //  Complex multiplication
 		  
-		  data[j+k+i].re = temp.re - (data[j+k+i].re * W_N_w.re
-					      - data[j+k+i].im * W_N_w.im);      //  Complex multiplication
- 		  data[j+k+i].im = temp.im - (data[j+k+i].re * W_N_w.im
-					      + data[j+k+i].im * W_N_w.re);      //  Complex multiplication		  
+
+		  temp2.re = data[j+k+i].re;
+		  temp2.im = data[j+k+i].im;
+		  // We need to save the value in a temporary variable
+		  // because we need both the real and imaginary parts
+		  data[j+k+i].re = temp.re - (temp2.re * W_N_w.re
+					      - temp2.im * W_N_w.im);      //  Complex multiplication
+		  
+ 		  data[j+k+i].im = temp.im - (temp2.re * W_N_w.im
+					      + temp2.im * W_N_w.re);      //  Complex multiplication		  
 
 		  for (t = 0; t < N; t++)
 		    {
 		      printf("%lf\n", data[t].re+data[t].im);
 		    }
 
-		  //}
+	      }
 
 	      //printf("\n");
 	      //printf("W^%i, %i, %i, %i\n", (-I*(j+k))%N, I, j+k, -I*(j+k));
