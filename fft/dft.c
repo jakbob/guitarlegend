@@ -92,13 +92,13 @@ FFT(complex* data, int N)
       data[i+N/2] = temp;            // for all even i.
     }                                
   
-  for (t = 0; t < N; t++)
+  /*for (t = 0; t < N; t++)
     {
       printf("%lf\n", data[t].re+data[t].im);
     }
   
   printf("\n");
-  
+  */
   for (i = 1, I = N>>1; i < N; i<<=1, I>>=1)           // Do the loop log N times, corresponding to the depth of the
                                       // recursive algorithm.
     {
@@ -117,7 +117,7 @@ FFT(complex* data, int N)
 	      
 	      if (0 == w)             // Twiddle factor is 1
 		{
-		  printf("0\n");
+		  //printf("0\n");
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
 
@@ -141,7 +141,7 @@ FFT(complex* data, int N)
 	      //  }
 	      else if (N/4 == w)
 		{
-		  printf("N/4\n");
+		  //printf("N/4\n");
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
 
@@ -161,18 +161,18 @@ FFT(complex* data, int N)
 	      //}
 	      else                                  // The twiddle factor is complex
 	      {
-		  printf("else, w=%i\n", w);
+		/*printf("else, w=%i\n", w);
 		  for (t = 0; t < N; t++)
 		    {
 		      printf("%lf\n", data[t].re+data[t].im);
 		    }
-		  
+		*/
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
 		  
 		  W_N_w.re = cos(-2*PI/N * w);
 		  W_N_w.im = sin(-2*PI/N * w);
-		  printf("\tW = %.2lf + %.2lfi\n", W_N_w.re, W_N_w.im);
+		  //printf("\tW = %.2lf + %.2lfi\n", W_N_w.re, W_N_w.im);
 
 		  data[j+k].re = data[j+k].re + (data[j+k+i].re * W_N_w.re
 						 - data[j+k+i].im * W_N_w.im);   //  Complex multiplication
@@ -182,19 +182,19 @@ FFT(complex* data, int N)
 
 		  temp2.re = data[j+k+i].re;
 		  temp2.im = data[j+k+i].im;
-		  // We need to save the value in a temporary variable
-		  // because we need both the real and imaginary parts
-		  data[j+k+i].re = temp.re - (temp2.re * W_N_w.re
-					      - temp2.im * W_N_w.im);      //  Complex multiplication
-		  
- 		  data[j+k+i].im = temp.im - (temp2.re * W_N_w.im
-					      + temp2.im * W_N_w.re);      //  Complex multiplication		  
+		   // We need to save the value in a temporary variable
+		   // because we need both the real and imaginary parts
+		   data[j+k+i].re = temp.re - (temp2.re * W_N_w.re
+					       - temp2.im * W_N_w.im);      //  Complex multiplication
 
-		  for (t = 0; t < N; t++)
-		    {
-		      printf("%lf\n", data[t].re+data[t].im);
-		    }
+		   data[j+k+i].im = temp.im - (temp2.re * W_N_w.im
+					       + temp2.im * W_N_w.re);      //  Complex multiplication		  
 
+		   /*for (t = 0; t < N; t++)
+		     {
+		       printf("%lf\n", data[t].re+data[t].im);
+		     }
+		   */
 	      }
 
 	      //printf("\n");
@@ -221,7 +221,7 @@ FFT(complex* data, int N)
 }
 
 #ifdef DEBUG
-#define NUM 8
+#define NUM 16
 int main()
 {
   complex data[NUM], data2[NUM];
