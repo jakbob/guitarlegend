@@ -44,9 +44,6 @@ complex* DFT(float * data_points, int N)
 
       for (n = 0; n < N; n++) // Iterate over the samples
 	{
-	  // DONE: Define sin and cos by means of a lookup table instead. 
-	  // Is this correct?
-	  // Seems to be
 	  mod = k*n % N;
 	  
 	  freq.re += data_points[n] * cos_table[mod];	  
@@ -63,7 +60,8 @@ complex* DFT(float * data_points, int N)
   return frequencies;
 }
 
-complex complex_mul(complex z, complex w)
+/* Multiply two complex numbers */
+inline complex complex_mul(complex z, complex w)
 {
   complex answer;
   
@@ -74,8 +72,7 @@ complex complex_mul(complex z, complex w)
 }
 
 /* Return the 2-logarithm of a power of 2 */
-
-int log_2(int N)
+inline int log_2(int N)
 {
   int i;
   int log_N = 0;
@@ -89,7 +86,7 @@ int log_2(int N)
 }
 
 /* Return input with the bits in opposite order */
-int bitreverse(int input, int N)
+inline int bitreverse(int input, int N)
 {
   unsigned int n = 0, i, bit;
 
@@ -113,44 +110,32 @@ int bitreverse(int input, int N)
 complex *
 FFT(complex* data, int N)
 {
-  unsigned int i, I, j, k, w, t;
+  unsigned int i;                     // Half the size of the DFT
+  unsigned int j, k;                  // j+k = the index of a sample in the frequency plane
+  unsigned int w;                     // the exponent of the twiddle factor
   unsigned int log_N;
   
   complex temp, temp2;
-  complex W_N_w;                     // Holds the complex twiddle factors
+  complex W_N_w;                      // Holds the complex twiddle factors
   
-  // Shuffle input
-  /*  for (i = 0; i < N/2; i+=2)
-    {
-      temp = data[i+1];              // Swap the values of the odd indexed 
-      data[i+1] = data[i+N/2];       // data points so that i - (i+1) == N/2 
-      data[i+N/2] = temp;            // for all even i.
-      }*/
-
+  /* Shuffle input */
   log_N = log_2(N);
-
   for (i = 0; i < N; i++)
     {
       j = bitreverse(i, log_N);
-      if (j > i)                  // Only swap values once, and don't touch values when j==i
+      if (j > i)                      // Only swap values once, and don't touch values when j==i
 	{
 	  temp = data[i];
 	  data[i] = data[j];
 	  data[j] = temp;
 	}
     }
-
-  //for (i=0;i<N;i++)
-  //  {
-  //    printf("%i: %.0lf + %.0lfi\n", i, data[i].re, data[i].im);
-  //  }
   
-  for (i = 1, I = N>>1; i < N; i<<=1, I>>=1)   // Do the loop log N times, corresponding to the depth of the
-                                               // recursive algorithm.
+  /* Commence the alorithm! */
+  for (i = 1; i < N; i<<=1)           // Do the loop log N times, corresponding to the depth of the
+                                      // recursive algorithm.
     {
-      //printf("i=%i, I=%i:\n", i, I);
       // Now, iterate over all of the elements and do the summations.
-
       for (j = 0; j < N; j+=2*i)      // Iterate over the first elements of all the subsequences
 	{
 	  for (k = 0; k < i; k++)     // and if you know the first element, it's easy to find
@@ -158,15 +143,13 @@ FFT(complex* data, int N)
 	                              // n first elements, there are log2 n consequtive elements
 	                              // to "add down".
 	    {
-	      //printf("%i, %i, %i\t\t", j, k, j+k);
-	     
-	      w = (j+k)%(2*i);//(I*(j+k))%(N/2);    // Exponent of the twiddle factor. The positive and negative signs
-	                              // are handled simultaneously, thus we use only half of N as a modulo thing.
-	      //printf("\t\t\tw = %i\n", w);
+	      w = (j+k)%(2*i);
 	      
-	      /*if (0 == w)             // Twiddle factor is 1
+	      // The positive and negative signs are handled simultaneously
+
+	      if (0 == w)       // Twiddle factor is 1
 		{
-		  //printf("0\n");
+		  // Just add or subtract the data
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
 		  
@@ -176,105 +159,45 @@ FFT(complex* data, int N)
 		  data[j+k+i].re = temp.re - data[j+k+i].re;        // -1
 		  data[j+k+i].im = temp.im - data[j+k+i].im;
 		}
-	      //else if (N/2 == w)
-	      //	{
-	      //  printf("N/2\n");
-	      //  temp.re = data[j+k].re;
-	      //  temp.im = data[j+k].im;
-	      
-	      //  data[j+k].re += data[j+k+i].re;                   
-	      //  data[j+k].im += data[j+k+i].im;
-		  
-	      //  data[j+k+i].re = temp.re - data[j+k+i].re;        
-	      //  data[j+k+i].im = temp.im - data[j+k+i].im;
-	      //  }
-	      else if ((2*i)/4 == w)
+	      else if (i == w)  // The twiddle factor is i. Recall that i is half the length of the DFT
 		{
-		  //printf("N/4\n");
+		  // Just swap the real and imaginary parts of data[j+k+i]
+		  // and add
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
+		  temp2.re = data[j+k+i].re;
+		  temp2.im = data[j+k+i].im;
 		  
 		  data[j+k].re = data[j+k].re + data[j+k+i].im;    //  i
 		  data[j+k].im = data[j+k].im + data[j+k+i].re;
 		  
-		  temp2.re = data[j+k+i].re;
-		  temp2.im = data[j+k+i].im;
-		  // We need to save the value in a temporary variable
-		  // because we need both the real and imaginary parts
-		  data[j+k+i].re = temp.re - temp2.im;       // -i
+		  data[j+k+i].re = temp.re - temp2.im;             // -i
 		  data[j+k+i].im = temp.im - temp2.re;
 		}
-	      //else if (0.75*N == w)
-	      //{
-	      //printf("3*N/4\n");
-	      //}
-	      else                                  // The twiddle factor is complex
-	      {*/
-		  //printf("else, w=%i\n", w);
-		  //for (t = 0; t < N; t++)
-		  //{
-		  //printf("%lf\n", data[t].re+data[t].im);
-		  //}
-		  
-		  temp.re = data[j+k].re;
-		  temp.im = data[j+k].im;
-		  
-		  W_N_w.re = cos(-2*PI/(2*i) * w);
-		  W_N_w.im = sin(-2*PI/(2*i) * w);
-		  //printf("\tW = %.2lf + %.2lfi, w = %i\n", W_N_w.re, W_N_w.im, w);
-		  
-		  //data[j+k].re = data[j+k].re + (data[j+k+i].re * W_N_w.re
-		  //- data[j+k+i].im * W_N_w.im);   //  Complex multiplication
-		  //data[j+k].im = data[j+k].im + (data[j+k+i].re * W_N_w.im
-		  //+ data[j+k+i].im * W_N_w.re);   //  Complex multiplication
-		  
-		  temp2 = complex_mul(data[j+k+i], W_N_w);
-		  
-		  data[j+k].re = data[j+k].re + temp2.re;
-		  data[j+k].im = data[j+k].im + temp2.im;
-		  
-		  //temp2.re = data[j+k+i].re;
-		  //temp2.im = data[j+k+i].im;
-		  // We need to save the value in a temporary variable
-		  // because we need both the real and imaginary parts
-		  data[j+k+i].re = temp.re - temp2.re;
-		  data[j+k+i].im = temp.im - temp2.im;
-		  
-		  //for (t = 0; t < N; t++)
-		  //  {
-		  //    printf("%lf\n", data[t].re+data[t].im);
-		  //  }
-		  //printf("\n");
-		  
-		  //}
-	      
-	      //for (t = 0; t < N; t++)
-	      //{
-	      //printf("%lf\n", data[t].re+data[t].im);
-	      //}
-	      //printf("\n");
-	      printf("%i + %i\t\t%.0lf + %.0lf\t\t%i\n", j+k, j+k+i, data[j+k].re, data[j+k+i].re, w);
-	      
-	      //printf("\n");
-	      //printf("W^%i, %i, %i, %i\n", (-I*(j+k))%N, I, j+k, -I*(j+k));
-	      //printf("\t%.0lf + %.0lf (data[%i], data[%i]) => data[%i]\t-W^%i\n",  
-	      //     data[j+k].re, data[j+k+i].re, j+k, j+k+i, j+k, (I*(j+k))%(N/2));
-
-	      //printf("W^%i, %i, %i, %i\n", (I*(j+k))%N, I, j+k, I*(j+k));
-	      //printf("\t%.0lf + %.0lf (data[%i], data[%i]) => data[%i]\t W^%i\n", 
-	      //     data[j+k+i].re, data[j+k].re, j+k+i, j+k, j+k+i, (I*(j+k))%(N/2));	      
-	    }
-	  
+	      else              // The twiddle factor is complex
+	      {
+		// Calculate the twiddle factor in rectangular form
+		// and multiply it to data[j+k+i] before adding it 
+		// to data[j+k]
+		temp.re = data[j+k].re;
+		temp.im = data[j+k].im;
+		
+		// TODO: This could be optimised with a lookup table
+		W_N_w.re = cos(-2*PI/(2*i) * w);
+		W_N_w.im = sin(-2*PI/(2*i) * w);
+		
+		temp2 = complex_mul(data[j+k+i], W_N_w);
+		
+		data[j+k].re = data[j+k].re + temp2.re;
+		data[j+k].im = data[j+k].im + temp2.im;
+		
+		data[j+k+i].re = temp.re - temp2.re;
+		data[j+k+i].im = temp.im - temp2.im;
+	      }
+	    }	  
 	}
-      //printf("\n");
     }
 
-  // Print the result
-  /*for (i = 0; i < N; i++)
-    {
-      printf("%lf\n", data[i].re);
-    }
-  */
   return data;
 }
 
@@ -295,12 +218,7 @@ int main()
       data2[t].re = sin(2*PI*t/NUM);// + sin(2*PI * 2 * t/NUM) - sin(2*PI * 5 * t/NUM);
       data2[t].im = 0;
     }
-  /*
-  for (t = 0; t < NUM; t++)
-    {
-      data[t].re = t;
-      data[t].im = 0;
-      }*/
+
   freqs = FFT(data, NUM);
   
   // Ok, I put in some stuff for easy printing and plotting with python
