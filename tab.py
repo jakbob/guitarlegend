@@ -6,6 +6,8 @@
 #
 # (c) Jakob Florell 2009
 
+import struct
+
 import midi
 
 class Note:
@@ -46,7 +48,7 @@ class Tab:
         self.ticksPerQuarter = f.ticksPerQuarterNote
         self.string=[[],[],[],[],[],[],] #array to hold all notes, grouped in strings
         self.all_notes = [] #self explanatory?
-        #for t in xrange(1,7):
+        self.tempo = []
         for track in f.tracks:
             startevent=None
             #try: #litesmahackigt. menmen
@@ -54,6 +56,11 @@ class Tab:
             #except IndexError:
                 #break
             for event in track.events:
+                #first check tempo
+                if event.type == "SET_TEMPO":
+                    self.tempo.append((event.time,struct.unpack('>I','\x00'+event.data)[0]))
+                    #datan finns i 24bit binary, \x00 är ett hack som fungerar bra
+                    continue
                 if event.channel<1 or event.channel>6 or event.velocity==0: #most of these events shuoldn't be in the file, but if they are, skip them.
                     continue #else
                 if not startevent:
