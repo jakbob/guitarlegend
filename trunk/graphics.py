@@ -26,6 +26,8 @@ class DeathNote:
         self.sprite = pyglet.sprite.Sprite(image,x=x,y=y,batch=batch)   
         self.sprite.color = (40*self.note.string+12*self.note.fret,30*self.note.string+15*self.note.fret,35*self.note.string+17*self.note.fret) #mer jobb här...
         self.label = pyglet.text.Label(str(self.note.fret),font_size=30,color=(0,0,0,220),x=self.sprite.x+30,y=self.sprite.y+self.sprite.height/2,anchor_x="center",anchor_y="center",batch=batch)
+	self.played = False #this note haven't been played
+	self.failed = False #player haven't missed this note (yet)
     
     def _get_texture(self, width):
         img = pyglet.image.Texture.create(width, start_circle.height)

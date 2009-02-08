@@ -31,7 +31,6 @@ import matplotlib.backends.backend_agg as agg
 
 import pylab
 
-
 ######################
 #    Game modules    #
 ######################
@@ -364,26 +363,48 @@ class TestinNotes(TestScene): #a NoteTestScene
         self.win_width=window_width
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch() #för att labels ska ritas sist, enkla sättet
-
         #begin speed and memory unoptimized code
         self.death_notes = []
         for note in self.tab.all_notes:
             x=note.start
-            y=20+(6-note.string)*50
+            y=100+(6-note.string)*50
             bolle = graphics.DeathNote(note,self.tab.ticksPerQuarter,x=x,y=y,batch=None)
             self.death_notes.append(bolle)
         self.notecounter=20
         self.active=self.death_notes[:self.notecounter]
         for thing in self.active: #kan säkert göras snyggare, men jag pallarnte
             thing.sprite.batch = self.note_batch
+        self.temponr=0
+        self.tempo=self.tab.tempo[self.temponr][1] #välj första tempot
+        self.timepast=0 #hur lång tid som gått sedan starten
         print "All done!"
+        
+        #temptemp
+        music = pyglet.resource.media('pokemon.wav')
+        music.play()
+
     def game_draw(self, window):
         window.clear()
         self.note_batch.draw()
         self.label_batch.draw()
     def do_logic(self,dt):
+        #kontrollera 1 om det finns fler tempoväxlingar, 2 om det är dax för tempoväxling
+        if len(self.tab.tempo)-1<self.temponr and self.tab.tempo[self.temponr+1][0]<=self.timepast:
+            self.temponr +=1
+            self.tempo=self.tab.tempo[self.temponr][1]
         for olle in self.active:
-            olle.update(dx=-500*dt)
+            #vi borde spara konstanter centralt
+            #förflyttning på en sekund:
+            vel=graphics.quarterlen*1000000/float(self.tempo) #tempo är i microsek
+            olle.update(dx=-vel*dt)
+	    if olle.sprite.x < self.win_width/10:
+	      if olle.played:
+		self.points += 1
+		print self.points
+	      elif not olle.failed:
+		olle.failed = True
+		olle.sprite.color=(200,200,200)
+
         #om den första noten har kommit utanför skärmen, döda så gott det går
         if self.active[0].sprite.x+self.active[0].sprite.width<-100:#lite marginal
             self.active[0].die()
