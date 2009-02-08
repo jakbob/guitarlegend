@@ -14,5 +14,6 @@ typedef struct {
 } complex;
 
 complex* DFT(float * data_points, int N);
+complex* FFT(complex * data, int N);
 
 #endif
