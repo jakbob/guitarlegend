@@ -139,15 +139,11 @@ FFT(complex* data, int N)
 	  data[j] = temp;
 	}
     }
-  
-  printf("\n");
-  
-  for (t = 0; t < N; t++)
-    {
-      printf("%lf\n", data[t].re+data[t].im);
-    }
-  
-  //printf("\n");
+
+  //for (i=0;i<N;i++)
+  //  {
+  //    printf("%i: %.0lf + %.0lfi\n", i, data[i].re, data[i].im);
+  //  }
   
   for (i = 1, I = N>>1; i < N; i<<=1, I>>=1)   // Do the loop log N times, corresponding to the depth of the
                                                // recursive algorithm.
@@ -162,15 +158,18 @@ FFT(complex* data, int N)
 	                              // n first elements, there are log2 n consequtive elements
 	                              // to "add down".
 	    {
-	      w = (I*(j+k))%(N/2);    // Exponent of the twiddle factor. The positive and negative signs
+	      //printf("%i, %i, %i\t\t", j, k, j+k);
+	     
+	      w = (j+k)%(2*i);//(I*(j+k))%(N/2);    // Exponent of the twiddle factor. The positive and negative signs
 	                              // are handled simultaneously, thus we use only half of N as a modulo thing.
+	      //printf("\t\t\tw = %i\n", w);
 	      
-	      if (0 == w)             // Twiddle factor is 1
+	      /*if (0 == w)             // Twiddle factor is 1
 		{
 		  //printf("0\n");
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
-
+		  
 		  data[j+k].re = data[j+k].re + data[j+k+i].re;     //  1   
 		  data[j+k].im = data[j+k].im + data[j+k+i].im;
 		  
@@ -182,19 +181,19 @@ FFT(complex* data, int N)
 	      //  printf("N/2\n");
 	      //  temp.re = data[j+k].re;
 	      //  temp.im = data[j+k].im;
-
+	      
 	      //  data[j+k].re += data[j+k+i].re;                   
 	      //  data[j+k].im += data[j+k+i].im;
 		  
 	      //  data[j+k+i].re = temp.re - data[j+k+i].re;        
 	      //  data[j+k+i].im = temp.im - data[j+k+i].im;
 	      //  }
-	      else if (N/4 == w)
+	      else if ((2*i)/4 == w)
 		{
 		  //printf("N/4\n");
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
-
+		  
 		  data[j+k].re = data[j+k].re + data[j+k+i].im;    //  i
 		  data[j+k].im = data[j+k].im + data[j+k+i].re;
 		  
@@ -210,25 +209,25 @@ FFT(complex* data, int N)
 	      //printf("3*N/4\n");
 	      //}
 	      else                                  // The twiddle factor is complex
-	      {
-		/*printf("else, w=%i\n", w);
-		  for (t = 0; t < N; t++)
-		    {
-		      printf("%lf\n", data[t].re+data[t].im);
-		    }
-		*/
+	      {*/
+		  //printf("else, w=%i\n", w);
+		  //for (t = 0; t < N; t++)
+		  //{
+		  //printf("%lf\n", data[t].re+data[t].im);
+		  //}
+		  
 		  temp.re = data[j+k].re;
 		  temp.im = data[j+k].im;
 		  
-		  W_N_w.re = cos(-2*PI/N * w);
-		  W_N_w.im = sin(-2*PI/N * w);
+		  W_N_w.re = cos(-2*PI/(2*i) * w);
+		  W_N_w.im = sin(-2*PI/(2*i) * w);
 		  //printf("\tW = %.2lf + %.2lfi, w = %i\n", W_N_w.re, W_N_w.im, w);
 		  
-		  /*data[j+k].re = data[j+k].re + (data[j+k+i].re * W_N_w.re
-						 - data[j+k+i].im * W_N_w.im);   //  Complex multiplication
-		  data[j+k].im = data[j+k].im + (data[j+k+i].re * W_N_w.im
-						 + data[j+k+i].im * W_N_w.re);   //  Complex multiplication
-		  */
+		  //data[j+k].re = data[j+k].re + (data[j+k+i].re * W_N_w.re
+		  //- data[j+k+i].im * W_N_w.im);   //  Complex multiplication
+		  //data[j+k].im = data[j+k].im + (data[j+k+i].re * W_N_w.im
+		  //+ data[j+k+i].im * W_N_w.re);   //  Complex multiplication
+		  
 		  temp2 = complex_mul(data[j+k+i], W_N_w);
 		  
 		  data[j+k].re = data[j+k].re + temp2.re;
@@ -240,14 +239,22 @@ FFT(complex* data, int N)
 		  // because we need both the real and imaginary parts
 		  data[j+k+i].re = temp.re - temp2.re;
 		  data[j+k+i].im = temp.im - temp2.im;
-
-		  /*for (t = 0; t < N; t++)
-		     {
-		       printf("%lf\n", data[t].re+data[t].im);
-		     }
-		  */
-	      }
-
+		  
+		  //for (t = 0; t < N; t++)
+		  //  {
+		  //    printf("%lf\n", data[t].re+data[t].im);
+		  //  }
+		  //printf("\n");
+		  
+		  //}
+	      
+	      //for (t = 0; t < N; t++)
+	      //{
+	      //printf("%lf\n", data[t].re+data[t].im);
+	      //}
+	      //printf("\n");
+	      printf("%i + %i\t\t%.0lf + %.0lf\t\t%i\n", j+k, j+k+i, data[j+k].re, data[j+k+i].re, w);
+	      
 	      //printf("\n");
 	      //printf("W^%i, %i, %i, %i\n", (-I*(j+k))%N, I, j+k, -I*(j+k));
 	      //printf("\t%.0lf + %.0lf (data[%i], data[%i]) => data[%i]\t-W^%i\n",  
@@ -261,7 +268,7 @@ FFT(complex* data, int N)
 	}
       //printf("\n");
     }
-  
+
   // Print the result
   /*for (i = 0; i < N; i++)
     {
@@ -272,10 +279,11 @@ FFT(complex* data, int N)
 }
 
 #ifdef DEBUG
-#define NUM 8
+#define NUM 16
 int main()
 {
-  complex data[NUM], data2[NUM];
+  complex data[NUM];
+  complex data2[NUM];
   complex* freqs;
   int t;
   
@@ -287,12 +295,12 @@ int main()
       data2[t].re = sin(2*PI*t/NUM);// + sin(2*PI * 2 * t/NUM) - sin(2*PI * 5 * t/NUM);
       data2[t].im = 0;
     }
-  
+  /*
   for (t = 0; t < NUM; t++)
     {
       data[t].re = t;
       data[t].im = 0;
-    }
+      }*/
   freqs = FFT(data, NUM);
   
   // Ok, I put in some stuff for easy printing and plotting with python
