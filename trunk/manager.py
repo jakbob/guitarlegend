@@ -151,13 +151,12 @@ class GameManager(object):
         """
         
         scene = self.scenes.pop()
-        
+        scene.end()
+
         try:
             self.change_scene(self.scenes[-1])
         except IndexError, err:                         # Print an error if the scene is empty
             self.change_scene(ErrorScene())
-
-        return scene
 
     def change_scene(self, scene):
         
