@@ -231,14 +231,14 @@ def main():
     data = instream.read(chunk)
     d = disect(data)
     #d = t_filter(d)
-    f1 = dft.DFT(d)
+    f1 = dft.FFT(d)
 
     # Set up the two subplots and make their scales fixed
     ax1 = pylab.subplot(211)
     ax1.set_autoscale_on(False)
     ax1.set_xlim(xmin=-10, xmax=len(d)+10)  # We pad the graph on the sides so we can
                                             # see better
-    ax1.set_ylim((0, 20000))             # Starts out with just noise, hopefully. 
+    ax1.set_ylim((0, 2000000))             # Starts out with just noise, hopefully. 
                                             # This should be set manually to match the 
                                             # expectedmaximum amplitude, but I'm not 
                                             # sure what level that is.
@@ -247,7 +247,7 @@ def main():
     ax2 = pylab.subplot(212)
     ax2.set_autoscale_on(False)
     ax2.set_xlim(xmin=-100, xmax=RATE-10000)
-    ax2.set_ylim((0, max(f1)/1000))
+    ax2.set_ylim((0, max(f1)/1))
     ax2.set_xlabel("Hz")
 
     # Plot the preliminary data, so that we may use set_ydata for animation later
@@ -260,6 +260,7 @@ def main():
         try:
             data = instream.read(chunk) # Read data from the mic
             d = disect(data)            # Convert this data to values that python can understand
+            d[-1] = (d[0] + d[-2])/2.0
             #d = t_filter(d, 2*64)    # Filter data in the time domain to remove noise
 
             # Okay, I found this, and I think it's a little strange:
@@ -287,7 +288,8 @@ def main():
 
             #f2 = dft.DFT(d)             # Perform the DFT on the filtered data
             
-            f2 = pylab.fft(d)           # See? Same problem.
+            #f2 = pylab.fft(d)           # See? Same problem.
+            f2 = dft.FFT(d)
             #f2 = pylab.absolute(f2)     # See? Different code.
 
             #f2 = multiply(f2, make_bandpass(20.0/RATE, 20000.0/RATE))

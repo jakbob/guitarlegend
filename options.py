@@ -79,7 +79,7 @@ kb.game.pause = key.P
 kb.test = AttrDict() #
 ######################
 kb.test.exit = key.ESCAPE
-kb.test.soundtest = key.S
+kb.test.threadtest = key.S
 kb.test.tabtest = key.T
 kb.test.maintest = key.M
 kb.test.up = key.U
