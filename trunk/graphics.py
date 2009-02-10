@@ -27,7 +27,7 @@ class DeathNote:
         self.sprite = pyglet.sprite.Sprite(image,x=x,y=y,batch=batch)   
         self.set_color() #lite hackigt men jag bryrmejnte
         self.label = pyglet.text.Label(str(self.note.fret), \
-        font_size=30, color=(0,0,0,220), x=self.sprite.x+30, \
+        font_size=30, color=(255,255,255,200), x=self.sprite.x+30, \
         y=self.sprite.y+self.sprite.height/2, anchor_x="center", \
         anchor_y="center", batch=batch)
 	self.played = False #this note haven't been played
