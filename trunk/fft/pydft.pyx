@@ -95,7 +95,7 @@ cdef _FFT(object data):
     # the complex values. You need to fix this stuff right away.
     pyfreqs = []
     for i from 0 <= i < N:
-        pyfreqs.append((freqs[i].re, freqs[i].im))
+        pyfreqs.append(freqs[i].re**2 + freqs[i].im**2)#(freqs[i].re, freqs[i].im))
 
     # Free those little fuckers
     free(freqs)
