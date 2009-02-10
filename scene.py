@@ -194,27 +194,31 @@ class MainTestScene(TestScene):
         
         self.time = str(dt)
 
-class TestinNotes(TestScene): #a NoteTestScene 
+class TestinNotes(TestScene): #a NoteTestScene
+    """In this scene we test things. Mostly notes"""
+
     def __init__(self, midifile,window_width=640):
         self.name = "Note test"
         self.tab = tab.Tab(midifile)
-        self.win_width=window_width
+        self.win_width = window_width
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch() #för att labels ska ritas sist, enkla sättet
-        #begin speed and memory unoptimized code
+
         self.death_notes = []
         for note in self.tab.all_notes:
-            x=note.start
-            y=100+(6-note.string)*50
-            bolle = graphics.DeathNote(note,self.tab.ticksPerQuarter,x=x,y=y,batch=None)
+            x= note.start
+            y= 100+(6-note.string)*50
+            bolle = graphics.DeathNote(note, self.tab.ticksPerQuarter,\
+            x=x, y=y, batch=None)
             self.death_notes.append(bolle)
-        self.notecounter=20
-        self.active=self.death_notes[:self.notecounter]
+
+        self.notecounter = 20
+        self.active = self.death_notes[:self.notecounter]
         for thing in self.active: #kan säkert göras snyggare, men jag pallarnte
             thing.sprite.batch = self.note_batch
-        self.temponr=0
+        self.temponr = 0
         self.tempo=self.tab.tempo[self.temponr][1] #välj första tempot
-        self.timepast=0 #hur lång tid som gått sedan starten
+        self.timepast = 0 #hur lång tid som gått sedan starten
         print "All done!"
         
         #temptemp
@@ -225,36 +229,42 @@ class TestinNotes(TestScene): #a NoteTestScene
         window.clear()
         self.note_batch.draw()
         self.label_batch.draw()
+
     def do_logic(self,dt):
         #kontrollera 1 om det finns fler tempoväxlingar, 2 om det är dax för tempoväxling
-        if len(self.tab.tempo)-1<self.temponr and self.tab.tempo[self.temponr+1][0]<=self.timepast:
-            self.temponr +=1
-            self.tempo=self.tab.tempo[self.temponr][1]
+        if len(self.tab.tempo)-1 < self.temponr and self.tab.tempo[self.temponr+1][0] <= self.timepast:
+            self.temponr += 1
+            self.tempo = self.tab.tempo[self.temponr][1]
         for olle in self.active:
             #vi borde spara konstanter centralt
             #förflyttning på en sekund:
-            vel=graphics.quarterlen*1000000/float(self.tempo) #tempo är i microsek
+            vel = graphics.quarterlen*1000000/float(self.tempo) #funkarej #tempo är i microsek
             olle.update(dx=-vel*dt)
-	    if olle.sprite.x < self.win_width/10:
-	      if olle.played:
-		self.points += 1
-		print self.points
-	      elif not olle.failed:
-		olle.failed = True
-		olle.sprite.color=(200,200,200)
+        if not olle.failed and olle.sprite.x < self.win_width/10:
+            if olle.played:
+                self.points += 1
+                print self.points
+            else:
+                olle.failed = True
+                olle.sprite.color = (200,200,200)
 
         #om den första noten har kommit utanför skärmen, döda så gott det går
-        if self.active[0].sprite.x+self.active[0].sprite.width<-100:#lite marginal
+        if self.active[0].sprite.x + \
+        self.active[0].sprite.width < -100:#lite marginal
             self.active[0].die()
             self.active.pop(0)
+
         #om den sista noten är nästa inne på skärmen, lägg en ny not sist
-        if self.active[-1].sprite.x<self.win_width+200 and len(self.death_notes)>self.notecounter: #eventuellt borde man spara längden på den längsta noten
+        if self.active[-1].sprite.x < self.win_width + 200 and \
+        len(self.death_notes) > self.notecounter: #eventuellt borde man spara längden på den längsta noten
             kalle = self.death_notes[self.notecounter]
-            kalle.sprite.x = self.active[-1].sprite.x+(kalle.note.start-self.active[-1].note.start)
-            kalle.sprite.batch=self.note_batch
-            kalle.label.batch=self.label_batch
+            kalle.sprite.x = self.active[-1].sprite.x + \
+                (kalle.note.start-self.active[-1].note.start)
+            kalle.sprite.batch = self.note_batch
+            kalle.label.batch = self.label_batch
             self.active.append(kalle)
-            
+            self.notecounter += 1 #ticka upp 
+           
 class ErrorScene(Scene):
     """Defines an isolated environment for a specific scene, 
     providing methods for handling of input, logic and rendering
