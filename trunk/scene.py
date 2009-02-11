@@ -288,7 +288,8 @@ class TestinNotes(TestScene): #a NoteTestScene
               #det kan bugga om den sista noten är längre än win_width + 200
             kalle = self.death_notes[self.notecounter]
             kalle.sprite.x = self.active_sprites[-1].sprite.x + \
-                (kalle.note.start - self.active_sprites[-1].note.start)
+                (kalle.note.start - self.active_sprites[-1].note.start) \
+                * graphics.quarterlen / self.tab.ticksPerQuarter
             kalle.sprite.batch = self.note_batch
 
             kalle.label.begin_update()
@@ -296,8 +297,7 @@ class TestinNotes(TestScene): #a NoteTestScene
             kalle.label.end_update()
 
             self.active_sprites.append(kalle)
-            self.notecounter += 1 #ticka upp 
-        
+            self.notecounter += 1 #ticka upp
         #här kolla om låten är slut, temp
         # Men den ska väl inte dö när låten slutar?
         
