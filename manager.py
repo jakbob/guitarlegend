@@ -59,11 +59,15 @@ class BasicWindow(pyglet.window.Window):
         
         self.scene.on_key_press(self, symbol, modifiers)
 
+    def on_close(self):
+        self.scene.end()
+
 class MainWindow(BasicWindow):
     
     """A window that exits the program when it is closed."""
 
     def on_close(self):
+        BasicWindow.on_close(self)
         pyglet.app.exit()
                  
 class GameManager(object):

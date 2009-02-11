@@ -25,9 +25,12 @@ class DeathNote:
         num_quarters = float(note.stop - note.start) / ticksPerQuarter
         note_width = int(num_quarters * quarterlen)
 
-        image = self._get_texture(note_width)   # Prepare an image texture that we can blit to the screen(s)
+        # Prepare an image texture that we can blit to the screen(s)
+        image = self._get_texture(note_width)
 
-        self.sprite = pyglet.sprite.Sprite(image, x=x, y=y, batch=batch) # Then make a sprite of it
+        # Then make a sprite of it
+        self.sprite = pyglet.sprite.Sprite(image, x=x, y=y, batch=batch)
+
         self.set_color() #lite hackigt men jag bryrmejnte
 
         self.label = pyglet.text.Label(str(self.note.fret),
@@ -55,7 +58,7 @@ class DeathNote:
 
             # Fill in the missing space between the last straight piece and the end cap
             rest = width - (2 * start_circle.width + (offset + 1) * straight.width)
-            if rest>0:
+            if rest > 0:
                 region = straight.get_region(0, 0, rest, straight.height)
                 img.blit_into(region, start_circle.width + (offset + 1)*straight.width, 0, 0)
 
