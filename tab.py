@@ -34,7 +34,10 @@ class Note:
         self.fret=self.pitch-base
     
     def __repr__(self):
-        return "<NOTE! String: " + str(self.string) + " Fret: " + str(self.fret) + " Start: " + str(self.start) + " Stop: " + str(self.stop) + ">"
+        return "<NOTE! String: " + str(self.string) \
+            + " Fret: " + str(self.fret)\
+            + " Start: " + str(self.start)\
+            + " Stop: " + str(self.stop) + ">"
 
 class Tab:
     """Opens up a midifile and converts all midi events into Notes"""
@@ -68,7 +71,7 @@ class Tab:
                         startevent=event
                 else:#when the corresponding NOTE_OFF event shows up, make the note
                     if (event.type=="NOTE_OFF" and startevent.pitch==event.pitch)\
-                    or event.type=="NOTE_ON": #or if we get a new note on message before. This isn't supposed to happen so I implemented this as a sequrity messure.
+                            or event.type=="NOTE_ON": #or if we get a new note on message before. This isn't supposed to happen so I implemented this as a sequrity messure.
                         note = Note(startevent.pitch, startevent.channel, startevent.time, event.time)
                         self.string[event.channel-1].append(note)
                         self.all_notes.append(note)
