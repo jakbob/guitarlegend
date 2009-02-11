@@ -87,9 +87,12 @@ class Tab:
                         # or if we get a new note on message before. 
                         # This isn't supposed to happen so I implemented 
                         # this as a sequrity messure.
-                        note = Note(startevent.pitch, startevent.channel, startevent.time, event.time)
-                        #self.string[event.channel-1].append(note)
-                        self.all_notes.append(note)
+                        
+                        if not startevent.time == event.time:
+                          #removes problems when 2 notes play simultaniously
+                            note = Note(startevent.pitch, startevent.channel, startevent.time, event.time)
+                            #self.string[event.channel-1].append(note)
+                            self.all_notes.append(note)
                         startevent = None
 
                     if event.type == "NOTE_ON": 
