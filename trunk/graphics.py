@@ -13,9 +13,9 @@ import options
 
 quarterlen = 200 #The lenght (in pixels) of a quarter note
 
-start_circle = pyglet.image.load("data/circle1.bmp") #ja, det �r ett hack, jag pallarnte
-end_circle = pyglet.image.load("data/circle2.bmp")
-straight = pyglet.image.load("data/straight.bmp")
+start_circle = pyglet.image.load("data/circle1.png") #ja, det �r ett hack, jag pallarnte
+end_circle = pyglet.image.load("data/circle2.png")
+straight = pyglet.image.load("data/straight.png")
 
 
 class DeathNote:
