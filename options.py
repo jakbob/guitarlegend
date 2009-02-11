@@ -56,13 +56,8 @@ from pyglet.window import key
 # namespaces. For example, to set the key for   #
 # bringing up the menu in-game, change the      #
 # value of kb.game.menu.                        #
-### Two keys can be used for the same action.     #  ## Apparently not.
-### This is done by OR:ing the keys together.     #
-### For example, to make both the P and the Pause #
-### key pause the game, type                      #
-### kb.game.pause = key.P | key.PAUSE             #
-###                                               #
-###################################################
+#                                               #
+#################################################
 
 ######################
 kb = AttrDict()      #
@@ -91,9 +86,9 @@ kb.test.tabtest = key.T
 kb.test.maintest = key.M
 kb.test.up = key.U
 
-######################
-#       Colours      #
-######################
+#########################
+# Guitar scene settings #
+#########################
 
 # The colours of the strings (rgb)
 string_base_colors = [ 0x291275,  # e'
@@ -105,6 +100,9 @@ string_base_colors = [ 0x291275,  # e'
                        ]
 
 # Difference in colour between consequitive frets on a string
+# These value are carefully set by yours truly to avoid sudden changes
+# of colour and to give a generally nice result. Change them at your
+# own risk. You won't die, or anything, but it's not funASDFASBEWR DEJA VU!
 string_color_step = [ 0x050c08,   # e'
                       0x020703,   # h
                       0x090a02,   # g
@@ -117,3 +115,8 @@ string_color_step = [ 0x050c08,   # e'
 # Negative value means darker color. Note that too
 # high values can give entirely different colors
 string_brightness = -0x010101*3
+
+dead_note_color = (200, 200, 200)
+
+note_label_size = 20
+note_label_color = (255,255,255,200) 
