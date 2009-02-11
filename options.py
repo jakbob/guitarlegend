@@ -109,4 +109,4 @@ string_color_step = [ 0x0c0d08,   # e'
 # Fine tune the brightness of the string_base_colors. 
 # Negative value means darker color. Note that too
 # high values can give entirely different colors
-string_brightness = -0x010101
+string_brightness = -0x010101*2
