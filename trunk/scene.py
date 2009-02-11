@@ -293,6 +293,7 @@ class TestinNotes(TestScene): #a NoteTestScene
             self.notecounter += 1 #ticka upp 
         
         #här kolla om låten är slut, temp
+        # Men den ska väl inte dö när låten slutar?
         
            
 class ErrorScene(Scene):
