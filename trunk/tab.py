@@ -19,8 +19,8 @@ class Note:
         self.start = start
         self.stop = stop
         
-        if string == 1: #guitar string nr 1=high e
-            base = 64 #midi keycode for high e
+        if string == 1:   #guitar string nr 1=high e
+            base = 64     #midi number for high e
         elif string == 2: #b
             base = 59
         elif string == 3: #g
@@ -32,7 +32,7 @@ class Note:
         elif string == 6: #E
             base = 40
             
-        self.fret=self.pitch-base
+        self.fret = self.pitch - base
     
     def __repr__(self):
         return "<NOTE! String: " + str(self.string) \
@@ -47,46 +47,54 @@ class Note:
 class Tab:
     """Opens up a midifile and converts all midi events into Notes"""
     def __init__(self, midifile):
-        f=midi.MidiFile()
+        f = midi.MidiFile()
         f.open(midifile)
         f.read()
         f.close()
 
         self.ticksPerSec = f.ticksPerSecond
         self.ticksPerQuarter = f.ticksPerQuarterNote
-            #array to hold all notes, grouped in strings
-        self.string=[[],[],[],[],[],[],] 
-        self.all_notes = [] #self explanatory?
-        self.tempo = []
+
+        #self.string=[[],[],[],[],[],[],] #array to hold all notes, grouped in strings
+        self.all_notes = [] # List of all the notes. Should be sorted by time.
+        self.tempo = []     # List of tempo changes
+
+        # Go through all the tracks (== strings for the purposes of the game)
         for track in f.tracks:
             startevent = None
+
+            # Go through all the events in this track and collect all the interesting ones
             for event in track.events:
-                #first check tempo
+
+                # First, check the tempo:
                 if event.type == "SET_TEMPO":
-                    self.tempo.append((event.time,struct.unpack('>I', \
-                       '\x00' + event.data)[0]))
+                    t = (event.time, struct.unpack('>I','\x00'+event.data)[0])
+                    self.tempo.append(t)
                     #datan finns i 24bit binary, \x00 är ett hack som fungerar bra
-                    continue
-                if event.channel < 1 or event.channel > 6 or \
-                   event.velocity == 0: #most of these events shuoldn't be 
-                                        #in the file, but if they are, skip them.
-                    continue #else
-                if not startevent:
+
+                elif event.channel < 1 or event.channel > 6 or event.velocity == 0: 
+                    # Most of these events shuoldn't be in the file, but if they are, skip them.
+                    pass
+
+                elif not startevent:
+
                     if event.type == "NOTE_ON":
                         startevent = event
-                else:   #when the corresponding NOTE_OFF event shows up,
-                        #make the note
-                    if (event.type == "NOTE_OFF" and \
-                       startevent.pitch==event.pitch) \
-                       or event.type=="NOTE_ON": #or if we get a new note on 
-                                      #message before. This isn't 
-                                      #supposed to happen so I implemented this as a sequrity messure.
-                        note = Note(startevent.pitch, startevent.channel,\
-                           startevent.time, event.time)
-                        self.string[event.channel - 1].append(note)
+
+                else:# When the corresponding NOTE_OFF event shows up, make the note
+                    if (event.type == "NOTE_OFF" and startevent.pitch == event.pitch)\
+                            or event.type == "NOTE_ON": 
+                        # or if we get a new note on message before. 
+                        # This isn't supposed to happen so I implemented 
+                        # this as a sequrity messure.
+                        note = Note(startevent.pitch, startevent.channel, startevent.time, event.time)
+                        #self.string[event.channel-1].append(note)
                         self.all_notes.append(note)
                         startevent = None
-                    if event.type == "NOTE_ON": #If we got a new NOTE_ON 
-                            #before the NOTE_OFF stop the old note and start a new
+
+                    if event.type == "NOTE_ON": 
+                        # If we got a new NOTE_ON before the NOTE_OFF 
+                        # stop the old note and start a new
                         startevent = event
+
             self.all_notes.sort()
