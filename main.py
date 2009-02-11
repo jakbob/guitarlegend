@@ -74,7 +74,8 @@ def main():
     import scene # Imported here, because it depends on the options used
     
     # Add two windows
-    game_manager.add_window(MainWindow(caption=options.__appname__), "game_draw")
+    game_manager.add_window(MainWindow(width=options.window_width, \
+       height=options.window_height, caption=options.__appname__), "game_draw")
     if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
     
     # Add one scene

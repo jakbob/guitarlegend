@@ -41,6 +41,13 @@ INPUT_CHANNELS       = 1               # Number of channels to record.
 INPUT_RATE           = 22050           # Sampling rate.
 INPUT_CHUNK_SIZE     = 2048            # Number of samples to be captured and analyzed at a time.
 
+##########################
+#     Window settings    #
+##########################
+window_width = 1024
+window_height = 768
+
+
 from pyglet.window import key
 
 #################################################
