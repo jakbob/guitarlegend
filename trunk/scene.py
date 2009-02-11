@@ -269,7 +269,7 @@ class TestinNotes(TestScene): #a NoteTestScene
                     print self.points
                 else:
                     olle.failed = True
-                    olle.sprite.color = (200,200,200)
+                    olle.sprite.color = options.dead_note_color
         self.lasttime = time
         
         

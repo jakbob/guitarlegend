@@ -34,7 +34,7 @@ class DeathNote:
         self.set_color() #lite hackigt men jag bryrmejnte
 
         self.label = pyglet.text.Label(str(self.note.fret),
-                                       font_size=30, color=(255,255,255,200), 
+                                       font_size=options.note_label_size, color=options.note_label_color,
                                        x=self.sprite.x+30, y=self.sprite.y + self.sprite.height/2,
                                        anchor_x="center", anchor_y="center", 
                                        batch=batch)
