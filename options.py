@@ -98,15 +98,15 @@ string_base_colors = [ 0x291275,  # e'
                        ]
 
 # Difference in colour between consequitive frets on a string
-string_color_step = [ 0x0c0d08,   # e'
-                      0x070b0e,   # h
-                      0x090e0e,   # g
-                      0x0d090e,   # d
-                      0x0a0c08,   # A
-                      0x0d0c08    # E
+string_color_step = [ 0x050508,   # e'
+                      0x070704,   # h
+                      0x090505,   # g
+                      0x0d0904,   # d
+                      0x040408,   # A
+                      0x060508    # E
                       ]
 
 # Fine tune the brightness of the string_base_colors. 
 # Negative value means darker color. Note that too
 # high values can give entirely different colors
-string_brightness = -0x010101*2
+string_brightness = -0x010101*3
