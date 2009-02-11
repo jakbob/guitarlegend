@@ -273,15 +273,13 @@ class TestinNotes(TestScene): #a NoteTestScene
                     olle.sprite.color = (200,200,200)
         self.lasttime = time
         
-        while True:
-            #om den första noten har kommit utanför skärmen, döda så gott det går
-            if (self.active_sprites[0].sprite.x +\
-                    self.active_sprites[0].sprite.width) < -100:#lite marginal
-                self.active_sprites[0].die()
-                self.active_sprites.pop(0)
-            else:
-                break
-
+        
+        #om den första noten har kommit utanför skärmen, döda så gott det går
+        if (self.active_sprites[0].sprite.x +\
+                self.active_sprites[0].sprite.width) < -100:#lite marginal
+            self.active_sprites[0].die()
+            self.active_sprites.pop(0)
+        
         #om den sista noten är nästan inne på skärmen, lägg en ny not sist
         if self.active_sprites \
                 and self.active_sprites[-1].sprite.x < (self.win_width + 200) \

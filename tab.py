@@ -20,7 +20,7 @@ class Note:
         self.stop = stop
         
         if string == 1: #guitar string nr 1=high e
-            base = 64 #midi number for high e
+            base = 64 #midi keycode for high e
         elif string == 2: #b
             base = 59
         elif string == 3: #g
@@ -39,6 +39,10 @@ class Note:
             + " Fret: " + str(self.fret)\
             + " Start: " + str(self.start)\
             + " Stop: " + str(self.stop) + ">"
+    
+    def __cmp__(self, other):
+        return cmp(self.start, other.start)
+
 
 class Tab:
     """Opens up a midifile and converts all midi events into Notes"""
@@ -85,3 +89,4 @@ class Tab:
                     if event.type == "NOTE_ON": #If we got a new NOTE_ON 
                             #before the NOTE_OFF stop the old note and start a new
                         startevent = event
+            self.all_notes.sort()
