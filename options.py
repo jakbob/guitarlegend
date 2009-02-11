@@ -98,12 +98,12 @@ string_base_colors = [ 0x291275,  # e'
                        ]
 
 # Difference in colour between consequitive frets on a string
-string_color_step = [ 0x050508,   # e'
-                      0x070704,   # h
-                      0x090505,   # g
+string_color_step = [ 0x050c08,   # e'
+                      0x020703,   # h
+                      0x090a02,   # g
                       0x0d0904,   # d
-                      0x040408,   # A
-                      0x060508    # E
+                      0x040a08,   # A
+                      0x040a08    # E
                       ]
 
 # Fine tune the brightness of the string_base_colors. 
