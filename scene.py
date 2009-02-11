@@ -210,9 +210,9 @@ class TestinNotes(TestScene): #a NoteTestScene
 
         self.death_notes = []
         for note in self.tab.all_notes:
-            x = note.start
-
+            x = note.start*graphics.quarterlen/self.tab.ticksPerQuarter
             y = 100 + (6 - note.string)*50
+
             bolle = graphics.DeathNote(note, self.tab.ticksPerQuarter,
                                        x=x, y=y, batch=None)
             self.death_notes.append(bolle)
@@ -232,10 +232,12 @@ class TestinNotes(TestScene): #a NoteTestScene
 
         music = pyglet.resource.media('pokemon.wav')
         self.music = music.play()  # It should be called "player", because it is one, but what the hell. I'll change my code instead
+        self.music.on_eos = self.nuedetslut #det borde funka, men det verkar inte så
         self.lasttime = self.music.time    
         print "All done!"
 
-
+    def nuedetslut(self):
+        print "Hur dödar man den här och kommer tillbaka till menyn?"
     def end(self):
         self.music.stop()
 
@@ -246,7 +248,6 @@ class TestinNotes(TestScene): #a NoteTestScene
 
     def do_logic(self,dt):
         #kontrollera 1 om det finns fler tempoväxlingar, 2 om det är dax för tempoväxling
-
         if len(self.tab.tempo)-1 < self.temponr \
                 and self.tab.tempo[self.temponr+1][0] <= self.timepast:
             self.temponr += 1
