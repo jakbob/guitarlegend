@@ -198,3 +198,5 @@ class GameManager(object):
 # Singleton instance of the game. Use this instead of
 # initializing a new instance.
 game_manager = GameManager()
+
+from scene import ErrorScene

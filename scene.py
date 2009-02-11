@@ -70,11 +70,12 @@ class Scene(object):
         pass
 
     def end(self):
-        topscene = game_manager.pop()
-        if topscene != self:
-            scene_manager.push(topscene)
-        else:
-            del topscene
+        #game_manager.pop()
+        #if topscene != self:
+        #    scene_manager.push(topscene)
+        #else:
+        #    del topscene
+        pass
 
     def on_key_press(self, window, symbol, modifiers):
         
@@ -139,7 +140,7 @@ class TestScene(Scene):
         if symbol == kb.test.exit:
             window.close()
         elif symbol == kb.test.threadtest:
-            game_manager.push(ThreadedScene())
+            game_manager.push(SoundTestScene())
         elif symbol == kb.test.tabtest:
             game_manager.push(TestinNotes("data/pokemon-melody.mid"))
         elif symbol == kb.test.maintest:
@@ -227,7 +228,9 @@ class TestinNotes(TestScene): #a NoteTestScene
         
         #temptemp
         music = pyglet.resource.media('pokemon.wav')
-        music.play()
+        self.player = music.play()
+    def end(self):
+        self.player.stop()
 
     def game_draw(self, window):
         window.clear()
@@ -303,5 +306,5 @@ class ErrorScene(Scene):
         """Handles the scene's logic."""
         pass
 
-#from soundtestscene import SoundTestScene
+from soundtestscene import SoundTestScene
 #from threadedscene import ThreadedScene
