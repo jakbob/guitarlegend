@@ -142,7 +142,7 @@ class TestScene(Scene):
         elif symbol == kb.test.threadtest:
             game_manager.push(SoundTestScene())
         elif symbol == kb.test.tabtest:
-            game_manager.push(TestinNotes("data/pokemon-melody.mid"))
+            game_manager.push(TestinNotes("data/string_color_test.mid"))
         elif symbol == kb.test.maintest:
             game_manager.push(MainTestScene())
         elif symbol == kb.test.up:
@@ -198,7 +198,7 @@ class MainTestScene(TestScene):
 class TestinNotes(TestScene): #a NoteTestScene
     """In this scene we test things. Mostly notes"""
 
-    def __init__(self, midifile,window_width=640):
+    def __init__(self, midifile, window_width=640):
         self.name = "Note test"
 
         self.tab = tab.Tab(midifile)

@@ -80,7 +80,7 @@ class DeathNote:
         """Set the color, based on what string and fret the note symbolizes"""
 
         base_color = options.string_base_colors[self.note.string-1] + options.string_brightness
-        hex_color = base_color + options.string_color_step * self.note.fret
+        hex_color = base_color + options.string_color_step[self.note.string-1] * self.note.fret
 
         self.sprite.color = self.hex_to_rgb_list(hex_color)
 
