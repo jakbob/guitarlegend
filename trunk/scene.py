@@ -142,7 +142,7 @@ class TestScene(Scene):
         elif symbol == kb.test.threadtest:
             game_manager.push(SoundTestScene())
         elif symbol == kb.test.tabtest:
-            game_manager.push(TestinNotes("data/string_color_test.mid"))
+            game_manager.push(TestinNotes("data/pokemon-melody.mid"))
         elif symbol == kb.test.maintest:
             game_manager.push(MainTestScene())
         elif symbol == kb.test.up:
@@ -244,7 +244,9 @@ class TestinNotes(TestScene): #a NoteTestScene
         self.music.stop()
 
     def game_draw(self, window):
-        window.clear()
+        glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
+        glClear(GL_COLOR_BUFFER_BIT)
+        #window.clear()
         self.note_batch.draw()
         self.label_batch.draw()
 
