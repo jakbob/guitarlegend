@@ -89,16 +89,22 @@ kb.test.up = key.U
 ######################
 
 # The colours of the strings (rgb)
-string_base_colors = [ 0x1a6cdc,  # e'
-                       0xdc631a,  # h
-                       0x0dbc2a,  # g
-                       0xbc260d,  # d
-                       0x3a642e,  # A
-                       0x0f458e   # E
+string_base_colors = [ 0x291275,  # e'
+                       0x7c3408,  # h
+                       0x5e0a06,  # g
+                       0x1b5e06,  # d
+                       0x502368,  # A
+                       0x1e2e68   # E
                        ]
 
 # Difference in colour between consequitive frets on a string
-string_color_step = 0x091509
+string_color_step = [ 0x0c0d08,   # e'
+                      0x070b0e,   # h
+                      0x090e0e,   # g
+                      0x0d090e,   # d
+                      0x0a0c08,   # A
+                      0x0d0c08    # E
+                      ]
 
 # Fine tune the brightness of the string_base_colors. 
 # Negative value means darker color. Note that too
