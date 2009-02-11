@@ -198,12 +198,9 @@ class MainTestScene(TestScene):
 class TestinNotes(TestScene): #a NoteTestScene
     """In this scene we test things. Mostly notes"""
 
-    def __init__(self, midifile, window_width=640):
+    def __init__(self, midifile):
         self.name = "Note test"
-
         self.tab = tab.Tab(midifile)
-
-        self.win_width = window_width
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
         #för att labels ska ritas sist, enkla sättet
@@ -211,7 +208,7 @@ class TestinNotes(TestScene): #a NoteTestScene
         self.death_notes = []
         for note in self.tab.all_notes:
             x = note.start*graphics.quarterlen/self.tab.ticksPerQuarter
-            y = 100 + (6 - note.string)*50
+            y = (7 - note.string) * options.window_height / 10
 
             bolle = graphics.DeathNote(note, self.tab.ticksPerQuarter,
                                        x=x, y=y, batch=None)
@@ -284,8 +281,8 @@ class TestinNotes(TestScene): #a NoteTestScene
         
         #om den sista noten är nästan inne på skärmen, lägg en ny not sist
         if self.active_sprites \
-                and self.active_sprites[-1].sprite.x < (self.win_width + 200) \
-                and len(self.death_notes) > self.notecounter: 
+                and self.active_sprites[-1].sprite.x < (options.window_width \
+                + 200) and len(self.death_notes) > self.notecounter: 
               #eventuellt borde man spara längden på den längsta noten
               #det kan bugga om den sista noten är längre än win_width + 200
             kalle = self.death_notes[self.notecounter]
