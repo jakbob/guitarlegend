@@ -211,7 +211,7 @@ class TestinNotes(TestScene): #a NoteTestScene
             x= note.start
             y= 100+(6-note.string)*50
             bolle = graphics.DeathNote(note, self.tab.ticksPerQuarter,\
-            x=x, y=y, batch=None)
+               x=x, y=y, batch=None)
             self.death_notes.append(bolle)
 
         self.notecounter = 20
@@ -224,11 +224,12 @@ class TestinNotes(TestScene): #a NoteTestScene
         self.temponr = 0
         self.tempo=self.tab.tempo[self.temponr][1] #välj första tempot
         self.timepast = 0 #hur lång tid som gått sedan starten
-        print "All done!"
-        
-        #temptemp
+
         music = pyglet.resource.media('pokemon.wav')
-        self.player = music.play()
+        self.music = music.play()
+        self.lasttime = self.music.time    
+        print "All done!"
+
     def end(self):
         self.player.stop()
 
@@ -236,16 +237,19 @@ class TestinNotes(TestScene): #a NoteTestScene
         window.clear()
         self.note_batch.draw()
         self.label_batch.draw()
+
     def do_logic(self,dt):
         #kontrollera 1 om det finns fler tempoväxlingar, 2 om det är dax för tempoväxling
-        if len(self.tab.tempo)-1 < self.temponr and self.tab.tempo[self.temponr+1][0] <= self.timepast:
+        if len(self.tab.tempo)-1 < self.temponr and \
+           self.tab.tempo[self.temponr+1][0] <= self.timepast:
             self.temponr += 1
             self.tempo = self.tab.tempo[self.temponr][1]
+        time = self.music.time
         for olle in self.active:
             #vi borde spara konstanter centralt
             #förflyttning på en sekund:
             vel = graphics.quarterlen*1000000/float(self.tempo) #funkarej #tempo är i microsek
-            olle.update(dx=-vel*dt)
+            olle.update(dx = -vel * (time - self.lasttime))
             #tinta grått när det blir fel
             if not olle.failed and olle.sprite.x < self.win_width/10:
                 if olle.played:
@@ -254,19 +258,21 @@ class TestinNotes(TestScene): #a NoteTestScene
                 else:
                     olle.failed = True
                     olle.sprite.color = (200,200,200)
+        self.lasttime = time
 
         #om den första noten har kommit utanför skärmen, döda så gott det går
         if self.active[0].sprite.x + \
-        self.active[0].sprite.width < -100:#lite marginal
+           self.active[0].sprite.width < -100:#lite marginal
             self.active[0].die()
             self.active.pop(0)
 
         #om den sista noten är nästa inne på skärmen, lägg en ny not sist
         if self.active and self.active[-1].sprite.x < self.win_width + 200 and \
-        len(self.death_notes) > self.notecounter: #eventuellt borde man spara längden på den längsta noten
+           len(self.death_notes) > self.notecounter: 
+           #eventuellt borde man spara längden på den längsta noten
             kalle = self.death_notes[self.notecounter]
             kalle.sprite.x = self.active[-1].sprite.x + \
-                (kalle.note.start-self.active[-1].note.start)
+                (kalle.note.start - self.active[-1].note.start)
             kalle.sprite.batch = self.note_batch
             kalle.label.begin_update()
             kalle.label.batch = self.label_batch

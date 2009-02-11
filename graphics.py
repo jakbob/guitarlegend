@@ -10,7 +10,7 @@ import pyglet
 
 import error
 
-quarterlen = 400 #The lenght (in pixels) of a quarter note
+quarterlen = 200 #The lenght (in pixels) of a quarter note
 
 start_circle = pyglet.image.load("data/circle1.bmp") #ja, det �r ett hack, jag pallarnte
 end_circle = pyglet.image.load("data/circle2.bmp")
