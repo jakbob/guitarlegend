@@ -83,3 +83,15 @@ kb.test.threadtest = key.S
 kb.test.tabtest = key.T
 kb.test.maintest = key.M
 kb.test.up = key.U
+
+######################
+#       Colours      #
+######################
+string_base_colors = [ 0x1a6cdc,  # e'
+                       0xdc631a,  # h
+                       0x0dbc2a,  # g
+                       0xbc260d,  # d
+                       0x3a642e,  # A
+                       0x0f458e   # E
+                       ]
+color_step = 0x091509
