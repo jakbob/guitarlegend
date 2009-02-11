@@ -217,9 +217,11 @@ class TestinNotes(TestScene): #a NoteTestScene
                                        x=x, y=y, batch=None)
             self.death_notes.append(bolle)
 
-        self.notecounter = 20
-        self.active = self.death_notes[:self.notecounter]
-        for thing in self.active: #kan säkert göras snyggare, men jag pallarnte
+        self.notecounter = 20 #number of notes that will be active
+        self.active_sprites = self.death_notes[:self.notecounter] 
+            #holds active notes
+        for thing in self.active_sprites: 
+          #kan säkert göras snyggare, men jag pallarnte
             thing.sprite.batch = self.note_batch
             thing.label.begin_update()
             thing.label.batch = self.label_batch
@@ -230,7 +232,7 @@ class TestinNotes(TestScene): #a NoteTestScene
 
         self.timepast = 0 #hur lång tid som gått sedan starten
 
-        music = pyglet.resource.media('pokemon.wav')
+        music = pyglet.resource.media('pokemon.ogg')
         self.music = music.play()  # It should be called "player", because it is one, but what the hell. I'll change my code instead
         self.music.on_eos = self.nuedetslut #det borde funka, men det verkar inte så
         self.lasttime = self.music.time    
@@ -254,14 +256,15 @@ class TestinNotes(TestScene): #a NoteTestScene
             self.tempo = self.tab.tempo[self.temponr][1]
 
         time = self.music.time
-
-        for olle in self.active:
+        
+        #update only active notes
+        for olle in self.active_sprites:
             #vi borde spara konstanter centralt
             #förflyttning på en sekund:
             vel = graphics.quarterlen * 1000000 / float(self.tempo) #funkarej #tempo är i microsek
             olle.update(dx = -vel * (time - self.lasttime))
             #tinta grått när det blir fel
-            if not olle.failed and olle.sprite.x < self.win_width/10:
+            if not olle.failed and olle.sprite.x < 0:#self.win_width/10
                 if olle.played:
                     self.points += 1
                     print self.points
@@ -269,28 +272,32 @@ class TestinNotes(TestScene): #a NoteTestScene
                     olle.failed = True
                     olle.sprite.color = (200,200,200)
         self.lasttime = time
+        
+        while True:
+            #om den första noten har kommit utanför skärmen, döda så gott det går
+            if (self.active_sprites[0].sprite.x +\
+                    self.active_sprites[0].sprite.width) < -100:#lite marginal
+                self.active_sprites[0].die()
+                self.active_sprites.pop(0)
+            else:
+                break
 
-        #om den första noten har kommit utanför skärmen, döda så gott det går
-        if (self.active[0].sprite.x +\
-                self.active[0].sprite.width) < -100:#lite marginal
-            self.active[0].die()
-            self.active.pop(0)
-
-        #om den sista noten är nästa inne på skärmen, lägg en ny not sist
-
-        if self.active \
-                and self.active[-1].sprite.x < (self.win_width + 200) \
-                and len(self.death_notes) > self.notecounter: #eventuellt borde man spara längden på den längsta noten
+        #om den sista noten är nästan inne på skärmen, lägg en ny not sist
+        if self.active_sprites \
+                and self.active_sprites[-1].sprite.x < (self.win_width + 200) \
+                and len(self.death_notes) > self.notecounter: 
+              #eventuellt borde man spara längden på den längsta noten
+              #det kan bugga om den sista noten är längre än win_width + 200
             kalle = self.death_notes[self.notecounter]
-            kalle.sprite.x = self.active[-1].sprite.x + \
-                (kalle.note.start - self.active[-1].note.start)
+            kalle.sprite.x = self.active_sprites[-1].sprite.x + \
+                (kalle.note.start - self.active_sprites[-1].note.start)
             kalle.sprite.batch = self.note_batch
 
             kalle.label.begin_update()
             kalle.label.batch = self.label_batch
             kalle.label.end_update()
 
-            self.active.append(kalle)
+            self.active_sprites.append(kalle)
             self.notecounter += 1 #ticka upp 
         
         #här kolla om låten är slut, temp
