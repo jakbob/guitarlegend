@@ -44,8 +44,8 @@ INPUT_CHUNK_SIZE     = 2048            # Number of samples to be captured and an
 ##########################
 #     Window settings    #
 ##########################
-window_width = 1024
-window_height = 768
+window_width = 800
+window_height = 600
 
 
 from pyglet.window import key
