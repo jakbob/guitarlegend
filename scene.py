@@ -26,7 +26,7 @@ from options import kb
 
 import tab
 import graphics
-
+import tilt #tempy
 from manager import game_manager
 
 class Scene(object):
@@ -234,7 +234,7 @@ class TestinNotes(TestScene): #a NoteTestScene
         self.music.on_eos = self.nuedetslut #det borde funka, men det verkar inte så
         self.lasttime = self.music.time    
         print "All done!"
-
+        
     def nuedetslut(self):
         print "Hur dödar man den här och kommer tillbaka till menyn?"
     def end(self):
@@ -246,6 +246,7 @@ class TestinNotes(TestScene): #a NoteTestScene
         #window.clear()
         self.note_batch.draw()
         self.label_batch.draw()
+        tilt.tilt()
 
     def do_logic(self,dt):
         #kontrollera 1 om det finns fler tempoväxlingar, 2 om det är dax för tempoväxling
