@@ -226,7 +226,7 @@ class TestinNotes(TestScene):
 
         # Only a fixed number of notes are moved across the screen at once, to 
         # improve performance
-        self.notecounter = 200 # Number of notes that will be active
+        self.notecounter = 20 # Number of notes that will be active
         self.active_sprites = self.death_notes[:self.notecounter]
 
         for note in self.active_sprites: 
@@ -238,8 +238,6 @@ class TestinNotes(TestScene):
 
         self.temponr = 0
         self.tempo = self.tab.tempo[self.temponr][1] #välj första tempot
-
-        self.timepast = 0 # hur lång tid som gått sedan starten,   ########DEPRECATED?#########
 
         music = pyglet.resource.media('pokemon.ogg') # GAAAAAAAAAAH! HISSMUSIK!
         self.music = music.play()
@@ -306,10 +304,10 @@ class TestinNotes(TestScene):
         # Check if there are more changes in tempo and if it is time for such a change.
         # In that case, do the change.
         if len(self.tab.tempo)-1 < self.temponr \
-                and self.tab.tempo[self.temponr + 1][0] <= self.timepast:
+                and self.tab.tempo[self.temponr + 1][0] <= self.music.time*1000000:
+					  #self.music.time är i microsekunder
             self.temponr += 1
             self.tempo = self.tab.tempo[self.temponr][1]
-
         # The progress of the notes is synchronized with the background song.
         time = self.music.time
         
