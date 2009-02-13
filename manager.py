@@ -11,7 +11,6 @@ import pyglet
 from pyglet.gl import *
 
 import options
-#from scene import ErrorScene
 
 class BasicWindow(pyglet.window.Window):
     

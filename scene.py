@@ -7,7 +7,7 @@
 # environment provides methods for handling input, 
 # logic and rendering of the scene.
 #
-# (c) Jonne Mickelin 2009
+# (c) Jonne Mickelin, Jakob Florell 2009
 
 import error
 import options
@@ -26,10 +26,10 @@ from options import kb
 
 import tab
 import graphics
-import tilt #tempy
 from manager import game_manager
 
 class Scene(object):
+
     """Defines an isolated environment for a specific scene, 
     providing methods for handling of input, logic and rendering
     of the scene.
