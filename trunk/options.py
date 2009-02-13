@@ -4,7 +4,7 @@
 #
 # Provides a centralized storage for all options.
 #
-# (c) Jonne Mickelin 2008
+# (c) Jonne Mickelin, Jakob Florell 2008
 
 class AttrDict(dict):
     """A dictionary, whose elements can be accessed 

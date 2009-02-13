@@ -11,9 +11,11 @@ import struct
 import midi
 
 class Note:
+
     """Symbolises a note. Which string to play and what fret.""" 
 
     def __init__(self, pitch, string, start, stop):
+
         self.pitch = pitch
         self.string = string
         self.start = start
@@ -35,18 +37,23 @@ class Note:
         self.fret = self.pitch - base
     
     def __repr__(self):
+
         return "<NOTE! String: " + str(self.string) \
             + " Fret: " + str(self.fret)\
             + " Start: " + str(self.start)\
             + " Stop: " + str(self.stop) + ">"
     
     def __cmp__(self, other):
+
         return cmp(self.start, other.start)
 
 
 class Tab:
+
     """Opens up a midifile and converts all midi events into Notes"""
+
     def __init__(self, midifile):
+
         f = midi.MidiFile()
         f.open(midifile)
         f.read()
@@ -56,6 +63,7 @@ class Tab:
         self.ticksPerQuarter = f.ticksPerQuarterNote
 
         #self.string=[[],[],[],[],[],[],] #array to hold all notes, grouped in strings
+
         self.all_notes = [] # List of all the notes. Should be sorted by time.
         self.tempo = []     # List of tempo changes
 
