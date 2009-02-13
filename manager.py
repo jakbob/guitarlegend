@@ -55,6 +55,8 @@ class BasicWindow(pyglet.window.Window):
 
         self.scene = scene
 
+        self.scene.on_resize(self.width, self.height) # For the scenes that change the viewport
+
     def on_key_press(self, symbol, modifiers):
         
         self.scene.on_key_press(self, symbol, modifiers)
@@ -69,7 +71,9 @@ class MainWindow(BasicWindow):
     def on_close(self):
         BasicWindow.on_close(self)
         pyglet.app.exit()
-                 
+    def on_resize(self, width, height):
+        self.scene.on_resize(width, height)
+
 class GameManager(object):
 
     """Handles the scenes of the game. Runs the logic and controls

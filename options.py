@@ -120,3 +120,8 @@ dead_note_color = (200, 200, 200)
 
 note_label_size = 20
 note_label_color = (255,255,255,200) 
+
+# Rotation for the guitar note plane (in degrees)
+notes_x_rot = -70.0
+notes_y_rot = 0.0
+notes_z_rot = 90.0

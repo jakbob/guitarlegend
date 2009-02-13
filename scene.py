@@ -90,6 +90,13 @@ class Scene(object):
         """
         pyglet.window.Window.on_key_press(window, symbol, modifiers)
 
+    def on_resize(self, width, height):
+        # Pyglet default
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(0, width, 0, height, -1, 1)
+        glMatrixMode(GL_MODELVIEW)
+
 class TestScene(Scene):
     def __init__(self):
         self.name = "Test scene"
@@ -195,111 +202,174 @@ class MainTestScene(TestScene):
         
         self.time = str(dt)
 
-class TestinNotes(TestScene): #a NoteTestScene
+class TestinNotes(TestScene):
     """In this scene we test things. Mostly notes"""
 
     def __init__(self, midifile):
+
         self.name = "Note test"
+
         self.tab = tab.Tab(midifile)
+
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
-        #för att labels ska ritas sist, enkla sättet
 
-        self.death_notes = []
+        # Create the textures for all the notes
+        self.death_notes = []            # Graphics for all notes, active or inactive
         for note in self.tab.all_notes:
-            x = note.start*graphics.quarterlen/self.tab.ticksPerQuarter
+            x = note.start * graphics.quarterlen / self.tab.ticksPerQuarter
             y = (7 - note.string) * options.window_height / 10
 
-            bolle = graphics.DeathNote(note, self.tab.ticksPerQuarter,
+            notegraphic = graphics.DeathNote(note, self.tab.ticksPerQuarter,
                                        x=x, y=y, batch=None)
-            self.death_notes.append(bolle)
+            self.death_notes.append(notegraphic)
 
-        self.notecounter = 20 #number of notes that will be active
-        self.active_sprites = self.death_notes[:self.notecounter] 
-            #holds active notes
-        for thing in self.active_sprites: 
-          #kan säkert göras snyggare, men jag pallarnte
-            thing.sprite.batch = self.note_batch
-            thing.label.begin_update()
-            thing.label.batch = self.label_batch
-            thing.label.end_update()
+        # Only a fixed number of notes are moved across the screen at once, to 
+        # improve performance
+        self.notecounter = 200 # Number of notes that will be active
+        self.active_sprites = self.death_notes[:self.notecounter]
+
+        for note in self.active_sprites: 
+            note.sprite.batch = self.note_batch
+
+            note.label.begin_update()
+            note.label.batch = self.label_batch
+            note.label.end_update()
 
         self.temponr = 0
         self.tempo = self.tab.tempo[self.temponr][1] #välj första tempot
 
-        self.timepast = 0 #hur lång tid som gått sedan starten
+        self.timepast = 0 # hur lång tid som gått sedan starten,   ########DEPRECATED?#########
 
-        music = pyglet.resource.media('pokemon.ogg')
-        self.music = music.play()  # It should be called "player", because it is one, but what the hell. I'll change my code instead
-        self.music.on_eos = self.nuedetslut #det borde funka, men det verkar inte så
-        self.lasttime = self.music.time    
-        print "All done!"
-        
-    def nuedetslut(self):
-        print "Hur dödar man den här och kommer tillbaka till menyn?"
+        music = pyglet.resource.media('pokemon.ogg') # GAAAAAAAAAAH! HISSMUSIK!
+        self.music = music.play()
+        #self.music.on_eos =  #det borde funka, men det verkar inte så
+        self.lasttime = self.music.time    # The position in the song in the last frame
+
+        # Set up the graphics
+        glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
+
+        glClearDepth(1.0)               # Prepare for 3d. Actually, this might as well 
+                                        # be in on_resize, no? Or maybe not. I don't know.
+
+        glDepthFunc(GL_LEQUAL)          # Change the z-priority or whatever one should call it
+
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST) # Too slow, for some cards, maybe. It does not 
+                                                          # give much of a performance gain for me.
+
     def end(self):
-        self.music.stop()
+
+        self.music.stop() # Should check if music is still playing. Stopping twice seems to hang the program.
+
+    def on_resize(self, width, height):
+
+        # Perspective
+        glViewport(0, 0, width, height)
+
+        glMatrixMode(GL_PROJECTION)
+
+        glLoadIdentity()
+        ## glOrtho(-width/2., width/2., -height/2., height/2., 0, 1000) # I should save this snippet somewhere else
+        gluPerspective(30, width / float(height), .1, 10000)
+
+        glMatrixMode(GL_MODELVIEW)
 
     def game_draw(self, window):
-        glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
-        glClear(GL_COLOR_BUFFER_BIT)
-        #window.clear()
+        
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) # We need to set a default scene clearcolor. 
+                                                           # How about on_switch_to and on_witch_from functions?
+        glPushMatrix()
+        
+        glLoadIdentity()
+        
+        glEnable(GL_DEPTH_TEST)
+        glTranslatef(0, 0, -900.0)  # Ugly magic number. More translation might be needed.
+
+        # Draw the notes rotated, as per the user's preferences
+        glRotatef(options.notes_x_rot, 1.0, 0.0, 0.0)
+        glRotatef(options.notes_y_rot, 0.0, 1.0, 0.0)
+        glRotatef(options.notes_z_rot, 0.0, 0.0, 1.0)
+
+        # Graphics of guitar neck in background?
+
         self.note_batch.draw()
+        
+        # The labels are also drawn like that, which makes them less readable. I'll work on improving this, when I have time.
         self.label_batch.draw()
-        tilt.tilt()
+        
+        glDisable(GL_DEPTH_TEST)
+
+        glPopMatrix()
 
     def do_logic(self,dt):
-        #kontrollera 1 om det finns fler tempoväxlingar, 2 om det är dax för tempoväxling
+ 
+        # Check if there are more changes in tempo and if it is time for such a change.
+        # In that case, do the change.
         if len(self.tab.tempo)-1 < self.temponr \
-                and self.tab.tempo[self.temponr+1][0] <= self.timepast:
+                and self.tab.tempo[self.temponr + 1][0] <= self.timepast:
             self.temponr += 1
             self.tempo = self.tab.tempo[self.temponr][1]
 
+        # The progress of the notes is synchronized with the background song.
         time = self.music.time
         
-        #update only active notes
-        for olle in self.active_sprites:
-            #vi borde spara konstanter centralt
-            #förflyttning på en sekund:
-            vel = graphics.quarterlen * 1000000 / float(self.tempo) #funkarej #tempo är i microsek
-            olle.update(dx = -vel * (time - self.lasttime))
-            #tinta grått när det blir fel
-            if not olle.failed and olle.sprite.x < 0:#self.win_width/10
-                if olle.played:
+        # Update only active notes
+        for note in self.active_sprites:
+            # We should store the constants centrally [why? Jonnes anm.]
+
+            # Movement during one second
+            vel = graphics.quarterlen * 1000000 / float(self.tempo) # Tempo is in microseconds
+            note.update(dx = -vel * (time - self.lasttime))
+
+            # Change the colour of missed notes
+            if not note.failed and note.sprite.x < 0:
+                if note.played:
                     self.points += 1
                     print self.points
                 else:
-                    olle.failed = True
-                    olle.sprite.color = options.dead_note_color
+                    note.failed = True
+                    note.sprite.color = options.dead_note_color
+
         self.lasttime = time
         
-        
-        #om den första noten har kommit utanför skärmen, döda så gott det går
-        if (self.active_sprites[0].sprite.x +\
-                self.active_sprites[0].sprite.width) < -100:#lite marginal
+        # Kill the notes that have travelled far enough. This distance 
+        # used to be the screen width, but this does not apply when it's tilted
+        if (self.active_sprites[0].sprite.x \
+                + self.active_sprites[0].sprite.width) < -100: # A little bit of margin
             self.active_sprites[0].die()
             self.active_sprites.pop(0)
         
-        #om den sista noten är nästan inne på skärmen, lägg en ny not sist
+        # At the same time, we add new notes at the end once the last 
+        # currently active note is supposed to appear on screen.
+        # Again, this is not the same anymore.
         if self.active_sprites \
-                and self.active_sprites[-1].sprite.x < (options.window_width \
-                + 200) and len(self.death_notes) > self.notecounter: 
-              #eventuellt borde man spara längden på den längsta noten
-              #det kan bugga om den sista noten är längre än win_width + 200
-            kalle = self.death_notes[self.notecounter]
-            kalle.sprite.x = self.active_sprites[-1].sprite.x + \
-                (kalle.note.start - self.active_sprites[-1].note.start) \
+                and self.active_sprites[-1].sprite.x < (options.window_width + 200) \
+                and len(self.death_notes) > self.notecounter: 
+
+            # Alternatively, one should store the length of the longest notes
+            # This could cause bugs if the last note is longer than window_width + 200
+
+            # Recall that self.notecounter is the index of the next note currently not on screen.
+            note = self.death_notes[self.notecounter]
+
+            # Put it at the correct distance behind the last note
+            note.sprite.x = self.active_sprites[-1].sprite.x \
+                + (note.note.start - self.active_sprites[-1].note.start) \
                 * graphics.quarterlen / self.tab.ticksPerQuarter
-            kalle.sprite.batch = self.note_batch
+            
+            # Add the note and it's label to the batches
+            note.sprite.batch = self.note_batch
+            note.label.begin_update()
+            note.label.batch = self.label_batch
+            note.label.end_update()
+            
+            self.active_sprites.append(note)
+            self.notecounter += 1
 
-            kalle.label.begin_update()
-            kalle.label.batch = self.label_batch
-            kalle.label.end_update()
-
-            self.active_sprites.append(kalle)
-            self.notecounter += 1 #ticka upp
-        #här kolla om låten är slut, temp
-        # Men den ska väl inte dö när låten slutar?
+        # Here we should check if the song has ended
+        # Might I suggest that there is a pause between 
+        # that and the showing of the score or whatever
+        # happens next?
         
            
 class ErrorScene(Scene):
