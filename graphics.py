@@ -16,6 +16,8 @@ start_circle = pyglet.image.load("data/circle1.png") # Well, fuck Windows! At le
 end_circle = pyglet.image.load("data/circle2.png")
 straight = pyglet.image.load("data/straight.png")
 
+normal_guitar = pyglet.image.load("data/guitar.png")
+guitar_fret = pyglet.image.load("data/guitarfret.png")
 
 class DeathNote:
 
@@ -102,3 +104,18 @@ class DeathNote:
         self.label.delete()
         del self # Does not seem to do much
 
+def create_guitar_texture(length):
+    
+    retimg = pyglet.image.Texture.create(length, guitar_fret.height)
+
+    if length < guitar_fret.width:
+        region = guitar_fret.get_region(0, 0, length, guitar_fret.height)
+        retimg.blit_into(region, 0, 0, 0)
+    else:
+        retimg.blit_into(guitar_fret, 0, 0, 0)
+    
+    offset = guitar_fret.width
+    for offset in xrange(guitar_fret.width, length, normal_guitar.width):
+        retimg.blit_into(normal_guitar, offset, 0, 0)
+
+    return retimg
