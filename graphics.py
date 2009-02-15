@@ -10,7 +10,7 @@ import pyglet
 import error
 import options
 
-quarterlen = 200 # The lenght (in pixels) of a quarter note
+quarterlen = 100 # The lenght (in pixels) of a quarter note
 
 start_circle = pyglet.image.load("data/circle1.png") # Well, fuck Windows! At least, fuck them until we fix this. Which will be soon.
 end_circle = pyglet.image.load("data/circle2.png")
