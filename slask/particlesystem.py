@@ -1,8 +1,11 @@
+#coding: utf8
+
 import pyglet
 from pyglet.gl import *
-import random
+from random import random
 
 texture = pyglet.resource.image("Particle.bmp")
+whitespeed = 3.0
 
 
 class ParticleGroup(pyglet.graphics.Group):
@@ -14,66 +17,78 @@ class ParticleGroup(pyglet.graphics.Group):
         glDisable(texture.target)
 
 class Particle:
-    def __init__(self, active, life, fadetime, pos, vel, batch, group=None):
+    def __init__(self, active, life, fadetime, pos, vel, dampening, gravity,
+       batch, group=None):
         self.active = active
         self.life = life
         self.fade = fadetime
         self.x, self.y, self.z = pos
         self.dx, self.dy, self.dz = vel
-        self.gravity = (0,0,0) #to be implemented
-        self.r, self.g, self.b = (255,255,255) #temp
-        
+        self.gx, self.gy, self.gz = gravity
+        self.dampening = dampening
+
         self.vertex_list = batch.add(4, GL_TRIANGLE_STRIP, group,
-        'v3f/stream', 'c3B/stream', ('t2i/static',(1,1,0,1,1,0,0,0)))
+        'v3f/stream', 'c4f/stream', ('t2i/static',(1,1,0,1,1,0,0,0)))
         self.update(0) #set position and color
 
     def update(self,dt=1):
-        self.dx += self.gravity[0]*dt
-        self.dy += self.gravity[1]*dt
-        self.dz += self.gravity[2]*dt
+        self.dx += self.gx * dt
+        self.dy += self.gy * dt
+        self.dz += self.gz * dt
 
-        self.x += self.dx*dt/5
-        self.y += self.dy*dt/5
-        self.z += self.dz*dt/5
-        
-        print self.x, self.y, self.z
+        self.x += self.dx * dt / self.dampening
+        self.y += self.dy * dt / self.dampening
+        self.z += self.dz * dt / self.dampening
+
         #update vertex positions
         self.vertex_list.vertices = \
             (self.x + 0.5, self.y + 0.5, self.z, #Top right
              self.x - 0.5, self.y + 0.5, self.z, #Top left
              self.x + 0.5, self.y - 0.5, self.z, #Bottom right
              self.x - 0.5, self.y - 0.5, self.z) #bottom left
-
-        #update color, currently temp
+        
+        #update color; ett försök att skapa färg baserat på hastighet
+        total = (abs(self.dx) + abs(self.dy) + abs(self.dz)) / whitespeed
+        if total > 3: total = 3
+        self.r = 1.0 if total > 1 else total
+        self.g = 1.0 if total-self.r > 1 else total-self.r
+        self.b = 0.0 if total - self.g - self.r < 0 else total-self.g-self.r
+        self.life -= self.fade
+        
+        if self.life < 0:
+            return #några andra förslag?
         self.vertex_list.colors = \
-            (self.r,self.g, self.b,
-             self.r,self.g, self.b,
-             self.r,self.g, self.b,
-             self.r,self.g, self.b)
+            (self.r,self.g, self.b, self.life,
+             self.r,self.g, self.b, self.life,
+             self.r,self.g, self.b, self.life,
+             self.r,self.g, self.b, self.life)
 
 
 class ParticleSystem:
-    def __init__(self, many, dampening=1):
+    def __init__(self, many, pos=(0.0,0.0,0.0), velfactor=1, dampening=1, 
+       life=1.0, gravity=(0,0,0)):
         self.batch = pyglet.graphics.Batch()
         self.glGroup = ParticleGroup()
         self.particles = []
         for i in xrange(many):
-            self.particles.append(Particle(True, 100.0, random.random(),
-               (0,0,0), 
-               (0, 0, 0),
+            self.particles.append(Particle(True, life, random()/10.0+0.005,
+               (0,0,0), (velfactor*2*(random()-.5), velfactor*2*(random()-.5),               velfactor*2*(random()-.5)), dampening, gravity,
                self.batch, self.glGroup))
         self.draw = self.batch.draw
 
     def update(self, dt=1):
         for particle in self.particles:
-            print dt, "basj"
-            particle.update(dt)
-    
+            if particle.life > 0:
+                particle.update(dt)
+            else:
+                self.particles.remove(particle)
+                if not self.particles:
+                    print "dags för likbilen"
     
 
 if __name__ == "__main__":
     window = pyglet.window.Window()
-    system = ParticleSystem(20)
+    system = ParticleSystem(20, velfactor=3, dampening=5)
     
     #init
     glShadeModel(GL_SMOOTH)
@@ -86,7 +101,8 @@ if __name__ == "__main__":
     #glHint(GL_POINT_SMOOTH_HINT,GL_NICEST)
     pyglet.clock.set_fps_limit(30)
     pyglet.clock.schedule_interval(system.update, 1/30.0)
-
+    
+    @window.event
     def on_resize(width, height):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
@@ -101,7 +117,6 @@ if __name__ == "__main__":
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         system.draw()
-        print "moddafuckin drawin, daug!"
 
     pyglet.app.run()
         
