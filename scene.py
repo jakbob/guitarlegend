@@ -213,13 +213,13 @@ class TestinNotes(TestScene):
 
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
-        self.guitar_texture = graphics.create_guitar_texture(3000)
+        self.guitar_neck = graphics.create_guitar_texture(3000)
 
         # Create the textures for all the notes
         self.death_notes = []            # Graphics for all notes, active or inactive
         for note in self.tab.all_notes:
             x = note.start * graphics.quarterlen / self.tab.ticksPerQuarter
-            y = (6 - note.string) / 6.0 * self.guitar_texture.height - 2 # 2 is calibration
+            y = (6 - note.string) / 6.0 * self.guitar_neck.height - 2 # 2 is calibration
 
             notegraphic = graphics.DeathNote(note, self.tab.ticksPerQuarter,
                                        x=x, y=y, batch=None)
@@ -227,7 +227,7 @@ class TestinNotes(TestScene):
 
         # Only a fixed number of notes are moved across the screen at once, to 
         # improve performance
-        self.notecounter = 20 # Number of notes that will be active
+        self.notecounter = 40 # Number of notes that will be active
         self.active_sprites = self.death_notes[:self.notecounter]
 
         for note in self.active_sprites: 
@@ -282,7 +282,9 @@ class TestinNotes(TestScene):
         glLoadIdentity()
         
         glEnable(GL_DEPTH_TEST)
-        glTranslatef(0, 0, -900.0)  # Ugly magic number. More translation might be needed.
+        glTranslatef(-window.width/2.0 + 100, 
+                      -self.guitar_neck.height/2.0, 
+                      -900.0)  # Ugly magic number.
 
         # Draw the notes rotated, as per the user's preferences
         glRotatef(options.notes_x_rot, 1.0, 0.0, 0.0)
@@ -290,9 +292,10 @@ class TestinNotes(TestScene):
         glRotatef(options.notes_z_rot, 0.0, 0.0, 1.0)
 
         # Graphics of guitar neck in background?
-        self.guitar_texture.blit(0, 0)
+        self.guitar_neck.blit(0, 0)
+        glTranslatef(0, 0, 1.0)
         self.note_batch.draw()
-        
+        glTranslatef(0, 0, 1.0)
         # The labels are also drawn like that, which makes them less readable. I'll work on improving this, when I have time.
         self.label_batch.draw()
         
