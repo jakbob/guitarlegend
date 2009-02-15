@@ -36,6 +36,7 @@ class Particle:
         self.y += self.dy*dt/5
         self.z += self.dz*dt/5
         
+        print self.x, self.y, self.z
         #update vertex positions
         self.vertex_list.vertices = \
             (self.x + 0.5, self.y + 0.5, self.z, #Top right
@@ -57,14 +58,15 @@ class ParticleSystem:
         self.glGroup = ParticleGroup()
         self.particles = []
         for i in xrange(many):
-            self.particles.append(Particle(True, 100.0, random.random(), (0,0,0),
-                                           (2*random.random(), 2*random.random(), 
-                                            2*random.random()), self.batch, self.glGroup))
+            self.particles.append(Particle(True, 100.0, random.random(),
+               (0,0,0), 
+               (0, 0, 0),
+               self.batch, self.glGroup))
         self.draw = self.batch.draw
 
     def update(self, dt=1):
         for particle in self.particles:
-            print dt
+            print dt, "basj"
             particle.update(dt)
     
     
@@ -83,11 +85,8 @@ if __name__ == "__main__":
     #glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST)
     #glHint(GL_POINT_SMOOTH_HINT,GL_NICEST)
     pyglet.clock.set_fps_limit(30)
-    
-    def updatestuff(dt):
-        system.update(dt)
+    pyglet.clock.schedule_interval(system.update, 1/30.0)
 
-    @window.event
     def on_resize(width, height):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
@@ -102,9 +101,7 @@ if __name__ == "__main__":
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         system.draw()
-
-        #print pyglet.clock.get_fps()
-    pyglet.clock.schedule_interval(updatestuff, 1/30.0)
+        print "moddafuckin drawin, daug!"
 
     pyglet.app.run()
         
