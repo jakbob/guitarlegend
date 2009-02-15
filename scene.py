@@ -219,7 +219,7 @@ class TestinNotes(TestScene):
         self.death_notes = []            # Graphics for all notes, active or inactive
         for note in self.tab.all_notes:
             x = note.start * graphics.quarterlen / self.tab.ticksPerQuarter
-            y = (6 - note.string) / 6.0 * self.guitar_neck.height - 2 # 2 is calibration
+            y = (6 - note.string) / 6.0 * self.guitar_neck.height + 3.5 # 2 is calibration
 
             notegraphic = graphics.DeathNote(note, self.tab.ticksPerQuarter,
                                        x=x, y=y, batch=None)
@@ -227,7 +227,7 @@ class TestinNotes(TestScene):
 
         # Only a fixed number of notes are moved across the screen at once, to 
         # improve performance
-        self.notecounter = 40 # Number of notes that will be active
+        self.notecounter = 20 # Number of notes that will be active
         self.active_sprites = self.death_notes[:self.notecounter]
 
         for note in self.active_sprites: 
@@ -255,7 +255,9 @@ class TestinNotes(TestScene):
 
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST) # Too slow, for some cards, maybe. It does not 
                                                           # give much of a performance gain for me.
-
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
+        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
     def end(self):
 
         self.music.stop() # Should check if music is still playing. Stopping twice seems to hang the program.
@@ -295,7 +297,7 @@ class TestinNotes(TestScene):
         self.guitar_neck.blit(0, 0)
         glTranslatef(0, 0, 1.0)
         self.note_batch.draw()
-        glTranslatef(0, 0, 1.0)
+        glTranslatef(0, 5, 1.0)
         # The labels are also drawn like that, which makes them less readable. I'll work on improving this, when I have time.
         self.label_batch.draw()
         
@@ -345,7 +347,7 @@ class TestinNotes(TestScene):
         # currently active note is supposed to appear on screen.
         # Again, this is not the same anymore.
         if self.active_sprites \
-                and self.active_sprites[-1].sprite.x < (options.window_width + 200) \
+                and self.active_sprites[-1].sprite.x < (options.window_width + 500) \
                 and len(self.death_notes) > self.notecounter: 
 
             # Alternatively, one should store the length of the longest notes

@@ -56,10 +56,11 @@ class DeathNote:
         img.blit_into(start_circle, 0, 0, 0)
         
         if width >= 2 * start_circle.width: # If the note is longer than that
-
-            for offset in xrange((width - 2 * start_circle.width) / straight.width): # Attention! xrange does not support floating numbers!
+            for offset in xrange(start_circle.width, 
+                                 width - start_circle.width, 
+                                 straight.width):
                 img.blit_into(straight, 
-                              start_circle.width + offset*straight.width,
+                              offset,
                               0, 0)
 
             # Fill in the missing space between the last straight piece and the end cap
