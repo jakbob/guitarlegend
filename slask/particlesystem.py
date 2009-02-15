@@ -23,7 +23,7 @@ class Particle:
         self.gravity = (0,0,0) #to be implemented
         self.r, self.g, self.b = (255,255,255) #temp
         
-        self.vertex_list = batch.add(4, GL_TRIANGLE_STRIP, group,\
+        self.vertex_list = batch.add(4, GL_TRIANGLE_STRIP, group,
         'v3f/stream', 'c3B/stream', ('t2i/static',(1,1,0,1,1,0,0,0)))
         self.update(0) #set position and color
 
@@ -38,17 +38,17 @@ class Particle:
         
         #update vertex positions
         self.vertex_list.vertices = \
-        (self.x + 0.5, self.y + 0.5, self.z, #Top right
-        self.x - 0.5, self.y + 0.5, self.z, #Top left
-        self.x + 0.5, self.y - 0.5, self.z, #Bottom right
-        self.x - 0.5, self.y - 0.5, self.z) #bottom left
+            (self.x + 0.5, self.y + 0.5, self.z, #Top right
+             self.x - 0.5, self.y + 0.5, self.z, #Top left
+             self.x + 0.5, self.y - 0.5, self.z, #Bottom right
+             self.x - 0.5, self.y - 0.5, self.z) #bottom left
 
         #update color, currently temp
         self.vertex_list.colors = \
-        (self.r,self.g, self.b,
-        self.r,self.g, self.b,
-        self.r,self.g, self.b,
-        self.r,self.g, self.b)
+            (self.r,self.g, self.b,
+             self.r,self.g, self.b,
+             self.r,self.g, self.b,
+             self.r,self.g, self.b)
 
 
 class ParticleSystem:
@@ -57,9 +57,9 @@ class ParticleSystem:
         self.glGroup = ParticleGroup()
         self.particles = []
         for i in xrange(many):
-            self.particles.append(Particle(True, 100.0, random.random(), \
-               (0,0,0),(2*random.random(), 2*random.random(), \
-               2*random.random()), self.batch, self.glGroup))
+            self.particles.append(Particle(True, 100.0, random.random(), (0,0,0),
+                                           (2*random.random(), 2*random.random(), 
+                                            2*random.random()), self.batch, self.glGroup))
         self.draw = self.batch.draw
 
     def update(self, dt=1):
@@ -83,6 +83,9 @@ if __name__ == "__main__":
     #glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST)
     #glHint(GL_POINT_SMOOTH_HINT,GL_NICEST)
     pyglet.clock.set_fps_limit(30)
+    
+    def updatestuff(dt):
+        system.update(dt)
 
     @window.event
     def on_resize(width, height):
@@ -98,10 +101,10 @@ if __name__ == "__main__":
     def on_draw():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        system.update(pyglet.clock.tick())
         system.draw()
-        
+
         #print pyglet.clock.get_fps()
+    pyglet.clock.schedule_interval(updatestuff, 1/30.0)
 
     pyglet.app.run()
         
