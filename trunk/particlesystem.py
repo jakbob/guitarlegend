@@ -5,7 +5,9 @@ from pyglet.gl import *
 from random import random
 import functools
 
-texture = pyglet.resource.texture("particle.png")
+#texture = pyglet.resource.texture("particle.png")
+texture = pyglet.image.load("data/particle.png").get_texture()
+# Av någon anledning är resource helt uppfuckad!!
 whitespeed = 1.0
 
 
