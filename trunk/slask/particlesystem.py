@@ -3,18 +3,23 @@
 import pyglet
 from pyglet.gl import *
 from random import random
+import functools
 
-texture = pyglet.resource.image("Particle.bmp")
-whitespeed = 3.0
+texture = pyglet.resource.texture("particle.png")
+whitespeed = 1.0
 
 
 class ParticleGroup(pyglet.graphics.Group):
     def set_state(self):
         glEnable(texture.target)
         glBindTexture(texture.target, texture.id)
+        glDisable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE)
     
     def unset_state(self):
         glDisable(texture.target)
+        glDisable(GL_BLEND)
 
 class Particle:
     def __init__(self, active, life, fadetime, pos, vel, dampening, gravity,
@@ -32,13 +37,13 @@ class Particle:
         self.update(0) #set position and color
 
     def update(self,dt=1):
-        self.dx += self.gx * dt
-        self.dy += self.gy * dt
-        self.dz += self.gz * dt
+        self.dx += (self.gx - self.dx * self.dampening) * dt
+        self.dy += (self.gy - self.dy * self.dampening) * dt
+        self.dz += (self.gz - self.dz * self.dampening) * dt
 
-        self.x += self.dx * dt / self.dampening
-        self.y += self.dy * dt / self.dampening
-        self.z += self.dz * dt / self.dampening
+        self.x += self.dx * dt
+        self.y += self.dy * dt
+        self.z += self.dz * dt
 
         #update vertex positions
         self.vertex_list.vertices = \
@@ -65,31 +70,42 @@ class Particle:
 
 
 class ParticleSystem:
-    def __init__(self, many, pos=(0.0,0.0,0.0), velfactor=1, dampening=1, 
-       life=1.0, gravity=(0,0,0)):
+    def __init__(self, many=20, pos=(0.0,0.0,0.0), velfactor=1, dampening=0, 
+       fadespeed=1.0, gravity=(0,0,0)):
         self.batch = pyglet.graphics.Batch()
         self.glGroup = ParticleGroup()
         self.particles = []
-        for i in xrange(many):
-            self.particles.append(Particle(True, life, random()/10.0+0.005,
-               (0,0,0), (velfactor*2*(random()-.5), velfactor*2*(random()-.5),               velfactor*2*(random()-.5)), dampening, gravity,
-               self.batch, self.glGroup))
         self.draw = self.batch.draw
-
+    
+        #self.def_many = many #set default values
+        #self.def_pos = pos #alternative solutions
+        #self.def_vel = velfactor #are appreciated
+        #self.def_damp = dampening
+        #self.def_fade = fadespeed
+        #self.def_grav = gravity
+    
+        def explode(many=many, pos=pos, velfactor=velfactor,
+        dampening=dampening, fadespeed=fadespeed, gravity=gravity):
+            for i in xrange(many):
+                self.particles.append(Particle(True, 1.0, 
+                random()*fadespeed+0.005, (0,0,0), (velfactor*2*(random()-.5), velfactor*2*(random()-.5), velfactor*2*(random()-.5)), 
+                dampening, gravity, self.batch, self.glGroup))
+        self.explode = explode # jag tror hacket funka!!
+    
     def update(self, dt=1):
         for particle in self.particles:
             if particle.life > 0:
                 particle.update(dt)
             else:
+                particle.vertex_list.delete()
                 self.particles.remove(particle)
-                if not self.particles:
-                    print "dags för likbilen"
     
 
 if __name__ == "__main__":
     window = pyglet.window.Window()
-    system = ParticleSystem(20, velfactor=3, dampening=5)
-    
+    system = ParticleSystem(velfactor=2, dampening=0.4)
+    system.explode(100)
+
     #init
     glShadeModel(GL_SMOOTH)
     glClearColor(0,0,0,0)
@@ -116,6 +132,7 @@ if __name__ == "__main__":
     def on_draw():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
+        
         system.draw()
 
     pyglet.app.run()
