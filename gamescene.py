@@ -6,17 +6,26 @@
 import pyglet
 from pyglet.gl import *
 from pyglet.graphics import vertex_list
+import math
 
 ####################
 #   Game modules   #
 ####################
 import error
 import options
-
 import tab
 import graphics
 import particlesystem
 from scene import TestScene
+
+def midify(f):                       
+    """                              
+    Returns the midi keycode for given frequency.
+    Could probably be more optimized but this will have to do
+    for now.
+    """
+    n = round(69.0 + 12.0 * math.log(f / 440.0, 2))
+    return int(n)
 
 
 class GameScene(TestScene):
@@ -32,7 +41,7 @@ class GameScene(TestScene):
         self.label_batch = pyglet.graphics.Batch()
         self.guitar_neck = graphics.create_guitar_texture(3000)
 
-        self.particles = particlesystem.ParticleSystem(velfactor=10)
+        self.particles = particlesystem.ParticleSystem(velfactor=50)
 
         # Create the textures for all the notes
         self.death_notes = []            # Graphics for all notes, active or inactive
@@ -159,6 +168,8 @@ class GameScene(TestScene):
                     #probably temp
                     self.particles.explode(pos=(note.sprite.x,
                        note.sprite.y, 0))
+        #update particlesystem
+        self.particles.update(time-self.lasttime)
         self.lasttime = time
         
         # Kill the notes that have travelled far enough. This distance 

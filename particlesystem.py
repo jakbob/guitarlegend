@@ -15,6 +15,7 @@ class ParticleGroup(pyglet.graphics.Group):
     def set_state(self):
         glEnable(texture.target)
         glBindTexture(texture.target, texture.id)
+        self.enableDepth = glIsEnabled(GL_DEPTH_TEST)
         glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE)
@@ -22,6 +23,8 @@ class ParticleGroup(pyglet.graphics.Group):
     def unset_state(self):
         glDisable(texture.target)
         glDisable(GL_BLEND)
+        if self.enableDepth:
+            glEnable(GL_DEPTH_TEST)
 
 class Particle:
     def __init__(self, active, life, fadetime, pos, vel, dampening, gravity,
