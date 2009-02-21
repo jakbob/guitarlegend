@@ -203,7 +203,6 @@ class MainTestScene(TestScene):
         
         self.time = str(dt)
 
-           
 class ErrorScene(Scene):
     """Defines an isolated environment for a specific scene, 
     providing methods for handling of input, logic and rendering

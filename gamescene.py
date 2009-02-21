@@ -1,4 +1,17 @@
-#coding: utf8
+# -*- coding: utf-8 -*-
+#
+# gamescene.py
+# Defines the behaviour of the actual game scene
+# 
+# (c) Jakob Florell and Jonne Mickelin 2009
+
+import error
+
+####################
+# Standard library #
+####################
+
+import math
 
 ####################
 # Required Modules #
@@ -6,17 +19,17 @@
 import pyglet
 from pyglet.gl import *
 from pyglet.graphics import vertex_list
-import math
 
 ####################
 #   Game modules   #
 ####################
-import error
+import scene
+
 import options
 import tab
+
 import graphics
 import particlesystem
-from scene import TestScene
 
 def midify(f):                       
     """                              
@@ -28,7 +41,7 @@ def midify(f):
     return int(n)
 
 
-class GameScene(TestScene):
+class GameScene(scene.TestScene):
     """In this scene we test things. Mostly notes"""
 
     def __init__(self, midifile):
