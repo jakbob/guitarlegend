@@ -1,4 +1,4 @@
-/* The code for the ringbuffer was inspired by
+/* The code for the ringbuffer consume and write was inspired by
  * the Audacity source code (audacity.sourceforge.net), 
  * so creds to one Dominic Mazzoni wbo wrote the original.
  *
@@ -43,7 +43,7 @@ ring_buffer_free_space(struct ring_buffer * rb)
 }
 
 int
-ring_buffer_write_2(struct ring_buffer * rb, int * src, unsigned int lendata)
+ring_buffer_write(struct ring_buffer * rb, int * src, unsigned int lendata)
 {
   int i;
   int block;
@@ -54,8 +54,6 @@ ring_buffer_write_2(struct ring_buffer * rb, int * src, unsigned int lendata)
     {
       lendata = free_space;
     }
-  printf("Will write %i out of a maximum of %i free space\n", lendata, free_space);
-  
   written = lendata;
   
   while (lendata)
@@ -79,10 +77,11 @@ ring_buffer_write_2(struct ring_buffer * rb, int * src, unsigned int lendata)
 	}
       lendata -= block;
     }  
+  return written;
 }
 
 int
-ring_buffer_consume_2(struct ring_buffer * rb, int * dest, unsigned int lendata)
+ring_buffer_consume(struct ring_buffer * rb, int * dest, unsigned int lendata)
 {
   int i;
   int block;
@@ -94,7 +93,6 @@ ring_buffer_consume_2(struct ring_buffer * rb, int * dest, unsigned int lendata)
     {
       lendata = length;
     }
-  printf("Will consume %i out of a maximum of %i written data\n", lendata, length);
   consumed = lendata;
   
   while (lendata)
@@ -121,62 +119,7 @@ ring_buffer_consume_2(struct ring_buffer * rb, int * dest, unsigned int lendata)
   return consumed;
 }
 
-int
-ring_buffer_consume(struct ring_buffer * rb, int * dest, unsigned int lendata)
-{
-  int i;
-  int wrote;
-
-  printf("%i, %i\n", (rb->consume_index + lendata) % rb->size, rb->write_index);
-  
-  if (dest == NULL)
-    {
-      return 0;
-    }
-  else if ((rb->consume_index + lendata) % rb->size < rb->write_index)
-    {
-      for (i = 0; i < lendata; i++)
-	{
-	  dest[i] = rb->data[(rb->consume_index + i)%rb->size];
-	}
-      rb->consume_index = (rb->consume_index + lendata) % rb->size;
-
-      return lendata;
-    }
-  else
-    {
-      wrote = (rb->write_index - rb->consume_index - 1) % rb->size;
-
-      for (i = 0; i < wrote; i++)
-	{
-	  dest[i] = rb->data[(rb->consume_index + i)%rb->size];
-	}
-      rb->consume_index = (rb->consume_index + wrote) % rb->size;
-
-      return wrote;
-    }  
-}
-
-int
-ring_buffer_write(struct ring_buffer * rb, int * data, unsigned int lendata)
-{
-  int i;
-  int wrote;
-  
-  if (data == NULL)
-    {
-      return 0;
-    }
-  else if ((rb->write_index + lendata) % rb->size > rb->consume_index)
-    {
-      wrote = (rb->consume_index - rb->write_index) % rb->size;
-      for (i = 0; i < wrote; i++)
-	{
-	  rb->data[(rb->write_index + i) % rb->size] = data[i];
-	}
-    }
-}
-
+#ifdef DEBUG
 void
 print_ringbuffer(struct ring_buffer * rb)
 {
@@ -233,19 +176,19 @@ main()
   print_ringbuffer(rb);
   print_array(dest, 13);
   
-  ring_buffer_write_2(rb, data, 5);
+  ring_buffer_write(rb, data, 5);
   
   print_ringbuffer(rb);
   print_array(dest, 13);
 
-  ring_buffer_consume_2(rb, dest, 5);
-  ring_buffer_write_2(rb, data+5, 6);
-  ring_buffer_write_2(rb, data+6, 6);
+  ring_buffer_consume(rb, dest, 5);
+  ring_buffer_write(rb, data+5, 6);
+  ring_buffer_write(rb, data+6, 6);
 
   print_ringbuffer(rb);
   print_array(dest, 13);
 
-  i = ring_buffer_consume_2(rb, dest, 1);
+  i = ring_buffer_consume(rb, dest, 1);
   
   assert(i==0);
   
@@ -256,4 +199,4 @@ main()
   free(dest);
   
 }
-
+#endif
