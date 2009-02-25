@@ -163,7 +163,10 @@ class GameManager(object):
         try:
             self.change_scene(self.scenes[-1])
         except IndexError, err:                         # Print an error if the scene is empty
-            self.change_scene(ErrorScene())
+            #self.change_scene(ErrorScene())
+            #jakob thinks the game should end here
+            for window in self.windows:
+                window[0].close() #or something like this
 
     def change_scene(self, scene):
         
