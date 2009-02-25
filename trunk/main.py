@@ -34,19 +34,23 @@ import optparse
 ######################
 # Required libraries #
 ######################
-
+error.debug("Attempting to import pyglet")
 try:
     import pyglet
 except ImportError, err:
     # put an error on the log
     error.critical("This game requires pyglet. If you are using Windows, seeing this message is a BUG. Please file a bug report on http://guitarlegend.googlecode.com. Linux and OS X users should download Pyglet from http://www.pyglet.org.")
     error.bail_out(err)
-
+error.debug("Success!")
 ######################
 #    Game modules    #
 ######################
+error.debug("Importing options")
 import options
+error.debug("Success!")
+error.debug("Importing manager stuffs")
 from manager import game_manager, BasicWindow, MainWindow
+error.debug("Success!")
 
 def main():
     # Parse the command line options
@@ -70,10 +74,14 @@ def main():
     # Setup a custom data directory
     pyglet.resource.path = ["data"]
     pyglet.resource.reindex()
-
+	
+    error.debug("Importing scene")
     import scene # Imported here, because it depends on the options used
+    error.debug("Success!")
+    error.debug("Importing menu")
     import menu
-    
+    error.debug("Success!")
+	
     # Add two windows
     game_manager.add_window(MainWindow(width=options.window_width, height=options.window_height, 
                                        caption=options.__appname__, resizable=True), 
@@ -82,7 +90,7 @@ def main():
     
     # Add one scene
     game_manager.push(menu.MainMenu())
-
+    error.debug("Hiya, I'm gonna hand control over to the game manager")
     # Hand control over to the Game manager
     game_manager.run()
 

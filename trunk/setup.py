@@ -33,6 +33,7 @@ setup(
     #                                 "wonderful/wonderful.c"]),
     ],
   cmdclass = {'build_ext': build_ext,
-              'install_data': smart_install_data,
-              }
+              #'install_data': smart_install_data,
+              },
+  data_files=[("", ["avbin.dll"])]
 )

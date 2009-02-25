@@ -3,6 +3,8 @@
 ####################
 from __future__ import with_statement
 
+import error
+
 #import threading
 try:
     import multiprocessing
