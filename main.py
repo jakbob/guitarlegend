@@ -72,6 +72,7 @@ def main():
     pyglet.resource.reindex()
 
     import scene # Imported here, because it depends on the options used
+    import menu
     
     # Add two windows
     game_manager.add_window(MainWindow(width=options.window_width, height=options.window_height, 
@@ -80,7 +81,7 @@ def main():
     if options.DEBUG: game_manager.add_window(BasicWindow(caption="Debug"), "debug_draw")
     
     # Add one scene
-    game_manager.push(scene.TestScene())
+    game_manager.push(menu.MainMenu())
 
     # Hand control over to the Game manager
     game_manager.run()

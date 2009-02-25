@@ -70,6 +70,7 @@ kb.menu.up = key.UP
 kb.menu.down = key.DOWN
 kb.menu.left = key.LEFT
 kb.menu.right = key.RIGHT
+kb.menu.select = key.ENTER
 
 ######################
 kb.game = AttrDict() #
@@ -80,11 +81,11 @@ kb.game.pause = key.P
 ######################
 kb.test = AttrDict() #
 ######################
-kb.test.exit = key.ESCAPE
+kb.test.exit = key.Q
 kb.test.threadtest = key.S
 kb.test.tabtest = key.T
 kb.test.maintest = key.M
-kb.test.up = key.U
+kb.test.up = key.ESCAPE
 
 #########################
 # Guitar scene settings #
