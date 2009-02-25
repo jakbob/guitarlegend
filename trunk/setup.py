@@ -1,7 +1,7 @@
 from distutils.core import setup
 from distutils.command.install_data import install_data
 from distutils.extension import Extension
-from Pyrex.Distutils import build_ext
+from Cython.Distutils import build_ext
 
 class smart_install_data(install_data):
     def run(self):
@@ -20,8 +20,8 @@ setup(
   packages=["", "fft"],
   ext_modules=[ 
     Extension("wonderful.pydft",    ["wonderful/pydft.pyx", "wonderful/dft.c"]),
-    Extension("wonderful",          ["wonderful/wonderful.pyx", "wonderful/dft.c", 
-                                     "wonderful/wonderful.c"]),
+    #Extension("wonderful",          ["wonderful/wonderful.pyx", "wonderful/dft.c", 
+    #                                 "wonderful/wonderful.c"]),
     ],
   cmdclass = {'build_ext': build_ext,
               'install_data': smart_install_data,
