@@ -1,7 +1,10 @@
 from distutils.core import setup
 from distutils.command.install_data import install_data
 from distutils.extension import Extension
+
 from Cython.Distutils import build_ext
+
+import py2exe
 
 class smart_install_data(install_data):
     def run(self):
@@ -17,7 +20,13 @@ setup(
   author="Jonne Mickelin, Jakob Florell",
   url="http://guitarlegend.googlecode.com",
   license="GPL v3",
-  packages=["", "fft"],
+  packages=["", "wonderful"],
+
+  windows=["main.py"],
+  options={"py2exe": {"compressed": 1,
+                       },
+			},
+  
   ext_modules=[ 
     Extension("wonderful.pydft",    ["wonderful/pydft.pyx", "wonderful/dft.c"]),
     #Extension("wonderful",          ["wonderful/wonderful.pyx", "wonderful/dft.c", 
