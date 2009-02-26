@@ -24,7 +24,7 @@ cdef extern from "wonderful.h":
         unsigned int write_index
 
     ctypedef struct inputData:
-        struct ring_buffer * samples
+        ring_buffer * samples
 
     int wonderful_init(inputData * data, PaStream * stream)
     int wonderful_terminate(inputData * data, PaStream * stream)
