@@ -181,6 +181,7 @@ wonderful_init(inputData * data, PaStream * stream)
   PaError err;
 
   /* Initialize portaudio */
+  printf("Initializing\n"); fflush(stdout);
   err = Pa_Initialize();
   if (err != paNoError)
     {
@@ -196,12 +197,14 @@ wonderful_init(inputData * data, PaStream * stream)
    * value is not necessarily the size of what we send to 
    * the FFT.
    */
+  printf("Setting input params\n"); fflush(stdout);
   input_parameters.device = Pa_GetDefaultInputDevice();
   input_parameters.channelCount = 1;
   input_parameters.sampleFormat = paFloat32;
   input_parameters.suggestedLatency = Pa_GetDeviceInfo(input_parameters.device)->defaultLowInputLatency;
   input_parameters.hostApiSpecificStreamInfo = NULL;
   
+  printf("Opening stream\n"); fflush(stdout);
   err = Pa_OpenStream( &stream,
 		       &input_parameters,
 		       NULL,              // Output parameters
@@ -217,13 +220,14 @@ wonderful_init(inputData * data, PaStream * stream)
     }
   
   /* The callback function now runs in its own thread */
+  printf("Starting stream\n"); fflush(stdout);
   err = Pa_StartStream(stream);
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
-
+  printf("Returning\n"); fflush(stdout);
   return 0;
 }
 
