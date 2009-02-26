@@ -8,7 +8,8 @@ import functools
 #texture = pyglet.resource.texture("particle.png")
 texture = pyglet.image.load("data/particle.png").get_texture()
 # Av någon anledning är resource helt uppfuckad!!
-whitespeed = 1.0
+whitespeed = 50.0
+particlesize = 10
 
 
 class ParticleGroup(pyglet.graphics.Group):
@@ -52,10 +53,10 @@ class Particle:
 
         #update vertex positions
         self.vertex_list.vertices = \
-            (self.x + 0.5, self.y + 0.5, self.z, #Top right
-             self.x - 0.5, self.y + 0.5, self.z, #Top left
-             self.x + 0.5, self.y - 0.5, self.z, #Bottom right
-             self.x - 0.5, self.y - 0.5, self.z) #bottom left
+            (self.x + particlesize/2, self.y + particlesize/2, self.z, #Top right
+             self.x - particlesize/2, self.y + particlesize/2, self.z, #Top left
+             self.x + particlesize/2, self.y - particlesize/2, self.z, #Bottom right
+             self.x - particlesize/2, self.y - particlesize/2, self.z) #bottom left
         
         #update color; ett försök att skapa färg baserat på hastighet
         total = (abs(self.dx) + abs(self.dy) + abs(self.dz)) / whitespeed
@@ -93,7 +94,7 @@ class ParticleSystem:
         dampening=dampening, fadespeed=fadespeed, gravity=gravity):
             for i in xrange(many):
                 self.particles.append(Particle(True, 1.0, 
-                random()*fadespeed+0.005, (0,0,0), (velfactor*2*(random()-.5), velfactor*2*(random()-.5), velfactor*2*(random()-.5)), 
+                random()*fadespeed+0.005, pos, (velfactor*2*(random()-.5), velfactor*2*(random()-.5), velfactor*2*(random()-.5)), 
                 dampening, gravity, self.batch, self.glGroup))
         self.explode = explode # jag tror hacket funka!!
     

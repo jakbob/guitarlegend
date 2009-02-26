@@ -100,6 +100,7 @@ class GameScene(scene.TestScene):
         glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
         glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
         glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
+
     def end(self):
 
         self.music.stop() # Should check if music is still playing. Stopping twice seems to hang the program.
@@ -139,8 +140,8 @@ class GameScene(scene.TestScene):
         self.guitar_neck.blit(0, 0)
         glTranslatef(0, 0, 1.0)
         self.note_batch.draw()
-        self.particles.draw()
         glTranslatef(0, 5, 1.0)
+        self.particles.draw()
         # The labels are also drawn like that, which makes them less readable. I'll work on improving this, when I have time.
         self.label_batch.draw()
         
