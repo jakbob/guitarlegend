@@ -30,7 +30,7 @@ setup(
   ext_modules=[ 
     Extension("wonderful.pydft",    ["wonderful/pydft.pyx", "wonderful/dft.c"]),
     Extension("wonderful",          ["wonderful/wonderful.pyx", "wonderful/dft.c", 
-                                     "wonderful/wonderful.c"]),
+                                     "wonderful/c_wonderful.c"]),
     ],
   cmdclass = {'build_ext': build_ext,
               #'install_data': smart_install_data,
