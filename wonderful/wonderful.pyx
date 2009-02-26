@@ -15,7 +15,7 @@ cdef struct complex:
 cdef extern from "portaudio.h":
     ctypedef struct PaStream
 
-cdef extern from "wonderful.h":
+cdef extern from "c_wonderful.h":
     cdef struct ring_buffer:
         complex * data
     
