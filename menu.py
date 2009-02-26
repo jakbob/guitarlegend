@@ -57,28 +57,20 @@ class MenuItem:
 
 
 class TextMenuItem(MenuItem):
-    def __init__(self, cb, x, y, caption):
+    def __init__(self, cb, x, y, caption, batch, size=25, 
+       hicolor=(255, 255, 0, 255), locolor=(255, 255, 255, 255)):
         MenuItem.__init__(self, cb)
-        self.x = x
-        self.y = y
-        self.caption = caption
-        self.lowlight()
+        self.hicolor = hicolor
+        self.locolor = locolor
+        self.label = pyglet.text.Label(caption, x=x, y=y, batch=batch, 
+           color = self.locolor, font_size=size, 
+           anchor_y="top", anchor_x="center", font_name="Ariel")
 
-    def draw(self):
-        self.label.draw()
     def highlight(self):
-        self.label = pyglet.text.Label(self.caption, 
-                                       x=self.x, 
-                                       y=self.y,
-                                       anchor_x="left",
-                                       anchor_y="top",
-                                       color=(255, 255, 0, 255))
+        self.label.color = self.hicolor
+
     def lowlight(self):
-        self.label = pyglet.text.Label(self.caption, 
-                                       x=self.x, 
-                                       y=self.y,
-                                       anchor_x="left",
-                                       anchor_y="top")
+        self.label.color = self.locolor
 
 class VertexMenuItem(MenuItem):
     def __init__(self, cb, vertices):
@@ -126,8 +118,11 @@ class BaseMenu(scene.Scene):
 
     def game_draw(self, window):
         """Draw the contents of the menu to the screen."""
+        #to be removed:
         for item in self.items:
             item.draw()
+        #the new way
+        self.batch.draw()
 
     def _select(self, number):
         """Select the menu item given by the index number.
@@ -186,13 +181,16 @@ class MainMenu(BaseMenu):
     def __init__(self):
         BaseMenu.__init__(self)
         
+        #add menuitems
         run_game = partial(game_manager.push, 
            scene.GameScene("data/pokemon-melody.mid"))
-        self.items.append(TextMenuItem(run_game, 0, options.window_height, 
-           "Start game"))
-        self.items.append(TextMenuItem(game_manager.pop, 0, 
-           options.window_height - 50, u"Hå"))
+        self.items.append(TextMenuItem(run_game, options.window_width/2,
+           options.window_height, "Start game", self.batch))
+        self.items.append(TextMenuItem(game_manager.pop, 
+           options.window_width/2, options.window_height - 50,
+           u"Exit", self.batch))
 
+        #required
         self._select(self.selected)
 
 #if __name__ == "bajs":
