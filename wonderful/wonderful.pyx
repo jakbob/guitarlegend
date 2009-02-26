@@ -40,12 +40,11 @@ cdef _init():
     global _input_data
     global _stream
     cdef int err
-    print "hej"
+
     _input_data.samples = ring_buffer_init(1024)
     err = wonderful_init(&_input_data, _stream)
     if err != 0:
         print "An error occurred. I hate you"
-    print "bejre"
 
 def init():
     _init()
