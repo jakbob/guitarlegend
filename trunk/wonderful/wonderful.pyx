@@ -30,9 +30,6 @@ cdef extern from "c_wonderful.h":
     int wonderful_init(inputData * data, PaStream * stream) with gil
     int wonderful_terminate(inputData * data, PaStream * stream)
 
-def hej(s):
-    print "Hej,", s
-
 cdef inputData _input_data
 cdef PaStream * _stream
 
@@ -47,6 +44,8 @@ cdef _init():
         print "An error occurred. I hate you"
 
 def init():
+    """Initialize the wonderful library. This routine MUST be called before the others."""
+
     _init()
 
 cdef _terminate():
@@ -56,4 +55,8 @@ cdef _terminate():
     wonderful_terminate(&_input_data, _stream)
 
 def terminate():
+    """Terminate and clean up the wonderful library and kill the portaudio thread. 
+    This routine MUST be called before exiting the program, or the sound might
+    stop working."""
+
     _terminate()
