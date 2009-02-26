@@ -4,7 +4,8 @@ from distutils.extension import Extension
 
 from Cython.Distutils import build_ext
 
-import py2exe
+# Uncomment this line if you are building for windows
+#import py2exe
 
 class smart_install_data(install_data):
     def run(self):
