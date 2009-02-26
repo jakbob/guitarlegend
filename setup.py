@@ -14,6 +14,14 @@ class smart_install_data(install_data):
         self.install_dir = getattr(install_cmd, "install_lib")
         return install_data.run(self)
 
+pydft = Extension("wonderful.pydft", 
+                  sources=["wonderful/pydft.pyx", "wonderful/dft.c"])
+wonderful = Extension("wonderful.wonderful",
+                      sources=["wonderful/wonderful.pyx", 
+                               "wonderful/dft.c", 
+                               "wonderful/c_wonderful.c"],
+                      libraries=["portaudio"])
+
 setup(
   name = 'bosseonfire',
   version='0.1',
@@ -28,11 +36,7 @@ setup(
                        },
 			},
   
-  ext_modules=[ 
-    Extension("wonderful.pydft",    ["wonderful/pydft.pyx", "wonderful/dft.c"]),
-    Extension("wonderful",          ["wonderful/wonderful.pyx", "wonderful/dft.c", 
-                                     "wonderful/c_wonderful.c"]),
-    ],
+  ext_modules=[pydft, wonderful],
   cmdclass = {'build_ext': build_ext,
               #'install_data': smart_install_data,
               },
