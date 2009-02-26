@@ -64,6 +64,9 @@ and just copy the wonderful.pyd file before building the installer on windows ma
 Oh, and also: Either we use separate setup scripts for linux and windows
 or we write tests in it. I don't know. That's low-priority stuff anywho.
 
+Now I remember: Avbin needs to be included in the distribution directory.
+The current setup takes this into account.
+
 ======
 Cython
 
