@@ -244,11 +244,12 @@ wonderful_terminate(inputData * data, PaStream * stream)
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
+  printf("stream\n"); fflush(stdout);
   free(stream);
   /* Yes, ring_buffer_terminate. I don't want to write such a function */
   free(data->samples->data);
   free(data->samples);
-  free(data);
+  // The caller is responsible for data
   
   return 0;
 }
