@@ -1,0 +1,109 @@
+How to build the windows distribution and general thoughts on
+how to and how not to do various things in life:
+
+=====================================================
+Getting a working, non-license-icky portaudio library
+== Also some instructions on getting mingw to work ==
+
+ There is no binary download from the portaudio site. Instead, we have
+to roll our own. This is not as easy as it sounds; portaudio depends
+on the proprietary ASIO library. There are some build instructions 
+on their page that say you have to have the ASIO SDK. This is not true:
+
+(Instructions from these pages:
+http://www.portaudio.com/trac/wiki/TutorialDir/Compile/WindowsMinGW
+http://www.mingw.org/wiki/msys)
+
+Poraudio requires mingw and msys to compile. Install these. Remember that
+when you install the updates from version 1.1.10 to 1.1.11 of msys, you have
+to be careful so that windows' faulty support for symlinks does not break 
+it (by creating it's own /usr/bin directory instead of following the link
+to /bin, for example). Also, the default installer is broken: 
+gcc-g++-3.4.5-20060117-3.tar.gz became corrupted and the program would not
+install with g++ support. When this happens, download the file separately
+from sourceforge, replace the broken file and run the installer again.
+
+After continuing according to the instructions from mingw home page, you
+should have a working linux-like system. Download the latest portaudio 
+snapshot and do ./configure && make && make install. I don't know where
+make install puts the stuff now, but presumably it is in it's own directories.
+That, however, is no biggie: You can copy the static and dynamic libraries
+from portaudio/lib/.libs to wherever you want them to be.
+
+==============
+Installer file
+
+We use NSIS. It is pretty straightforward and did not give me
+any problems. Download, install, write NSIS script, right click
+to ccompile, and presto! You have an installer. Watch it with 
+recursively deleting a directory in the "Uninstall" section. It
+might delete people's files if they are careless.
+
+======¨
+py2exe
+
+py2exe is actually pretty easy to get up and running. Basically
+you do this: write setup script, which links to the main file. 
+The data files are not supposed to be included in the exe, if I
+understood correctly. Adding them to data_files makes them get 
+pulled into the build directory, but you can copy them yourself
+later with no harm. I think there was some problems getting it
+to work, but I don't remember. Nothing that the py2exe and 
+distutils documentation couldn't fix. They have this nice explanation
+of all the files that are created, which clears things up a lot.
+Use python setup.py py2exe to create an executable. It is placed in
+build/. Then add the .nsi file and compile it (it should contain pointers
+to all of py2exe's files, of course). You should now have the game's
+installer.
+
+py2exe should pull in all the python dependencies. However: I am
+not sure about our "wonderful" module, because it is pre-compiled and
+depends on portaudio. We should probably link portaudio into it statically,
+and just copy the wonderful.pyd file before building the installer on windows machines.
+
+Oh, and also: Either we use separate setup scripts for linux and windows
+or we write tests in it. I don't know. That's low-priority stuff anywho.
+
+======
+Cython
+
+It should work out of the box. Just make sure you have mingw installed first.
+Again: Build instructions on the cython home page.
+Oh, right. I decided to go excluively with cython now, because pyrex doesn't
+support newer versions of python (like 3.0). Furthermore. the site was down, 
+so I couldn't find an installer.
+
+This integrates cython with distutils. Google it and you will get better
+instructions:
+from Cython.Distutils import build_ext
+
+=========
+pybuilder
+
+It's a gui for py2exe. I downloaded this for some reason, but I think it
+didn't work, so I wrote a real setup script instead.
+
+=======
+Summary
+
+The programs that are required in the build process:
+NSIS, cython, py2exe, mingw, msys, portaudio sources, python
+Also, I use tortoiseSVN as an svn client.
+
+The required libraries that I haven't mentioned but I think
+they should be written here anyway:
+python2.5
+pyaudio (not anymore, since we're making our own bindings!)
+pyglet
+(matplotlib) (meh.)
+(numpy) (only needed for matplotlib in the first place. Might be fun if we want to speed things up, though)
+
+====
+TODO
+
+* bosseonfire.nsi does that thing with recursive rmdir that I mentioned. 
+  We don't hate our potential users, so fix this.
+* Use a more intelligent name than main.exe for the windows distribution.
+  Fix this in the setup script or wherever. You can't rename it.
+* Finish the bindings and make sure they work with py2exe and NSIS.
+* 
