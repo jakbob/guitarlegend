@@ -27,11 +27,11 @@ cdef extern from "c_wonderful.h":
         ring_buffer * samples
     
     ring_buffer * ring_buffer_init(unsigned int size)
-    int wonderful_init(inputData * data, PaStream * stream) with gil
-    int wonderful_terminate(inputData * data, PaStream * stream)
+    int wonderful_init(inputData * data, PaStream ** stream) with gil
+    int wonderful_terminate(inputData * data, PaStream ** stream)
 
 cdef inputData _input_data
-cdef PaStream * _stream
+cdef PaStream * _stream 
 
 cdef _init():
     global _input_data
@@ -39,7 +39,8 @@ cdef _init():
     cdef int err
 
     _input_data.samples = ring_buffer_init(1024)
-    err = wonderful_init(&_input_data, _stream)
+    print <int>_stream
+    err = wonderful_init(&_input_data, &_stream)
     if err != 0:
         print "An error occurred. I hate you"
     print <int>_stream
@@ -52,7 +53,7 @@ cdef _terminate():
     global _input_data
     global _stream
 
-    wonderful_terminate(&_input_data, _stream)
+    wonderful_terminate(&_input_data, &_stream)
 
 def terminate():
     """Terminate and clean up the wonderful library and kill the portaudio thread. 

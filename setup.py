@@ -20,7 +20,7 @@ wonderful = Extension("wonderful.wonderful",
                       sources=["wonderful/wonderful.pyx", 
                                "wonderful/dft.c", 
                                "wonderful/c_wonderful.c"],
-                      libraries=["portaudio", "winmm"],
+                      libraries=["portaudio",],# "winmm"],
                       library_dirs=["wonderful"])
 
 setup(
