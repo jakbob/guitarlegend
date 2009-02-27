@@ -166,7 +166,7 @@ input_callback( const void * input,
   // Oh, and if frames_per_buffer is more than is available, we
   // will start dropping frames, which is doubleplusungood.
   written = ring_buffer_write(out, in, frames_per_buffer);
-  //printf("Dropped %i frames!\n", frames_per_buffer - written);
+  printf("Dropped %i frames!\n", frames_per_buffer - written);
 
   return paContinue;
 }
@@ -240,6 +240,8 @@ int
 wonderful_terminate(inputData * data, PaStream ** stream)
 {
   PaError err;
+  // The stream needs to be explicitly stopped on windows machines.
+  // On Linux, Pa_Terminate is enough. We stop it anyways.
   err = Pa_StopStream(*stream); // Is AbortStream better for us?
   if (err != paNoError)
     {
