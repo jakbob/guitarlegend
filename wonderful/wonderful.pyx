@@ -42,7 +42,7 @@ cdef _init():
     err = wonderful_init(&_input_data, _stream)
     if err != 0:
         print "An error occurred. I hate you"
-
+    print <int>_stream
 def init():
     """Initialize the wonderful library. This routine MUST be called before the others."""
 

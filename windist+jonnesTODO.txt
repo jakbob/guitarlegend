@@ -101,6 +101,24 @@ pyglet
 (matplotlib) (meh.)
 (numpy) (only needed for matplotlib in the first place. Might be fun if we want to speed things up, though)
 
+==============================
+Compiling the wonderful module
+
+wonderful is the glue that connects the FFT with portaudio and python. To compile it, use
+setup.py from the root directory. On windows machines, it is necessary to link to both 
+winmm (windows multimedia something), or the linker will complain about wave functions 
+and similar. Also, it is necessary to setup the library_dirs path to point to "wonderful/",
+or wherever the portaudio library is. The portaudio library is linked statically to minimize
+dependencies. 
+  I am having some troubles with the module. This works in linux:
+import wonderful
+import time
+
+wonderful.init(); time.sleep(5); wonderful.terminate()
+If you edit the callback function to print a message (not thread-safe, I know), you will see 
+that the thread keeps running on windows machines even though we have terminated portaudio.
+I will look into possible reasons for this.
+
 ====
 TODO
 
