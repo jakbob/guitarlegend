@@ -265,6 +265,13 @@ wonderful_terminate(inputData * data, PaStream ** stream)
   return 0;
 }
 
+int
+wonderful_munch(inputData * data, complex * dest, unsigned int length)
+{
+  printf("Hej");
+  return -1;
+}
+
 #ifdef DEBUG
 int
 main()

@@ -47,5 +47,5 @@ int ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int le
 
 int wonderful_init(inputData * data, PaStream ** stream);
 int wonderful_terminate(inputData * data, PaStream ** stream);
-
+int wonderful_munch(inputData * data, complex * dest, unsigned int length);
 #endif

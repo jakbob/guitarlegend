@@ -29,7 +29,8 @@ cdef extern from "c_wonderful.h":
     ring_buffer * ring_buffer_init(unsigned int size)
     int wonderful_init(inputData * data, PaStream ** stream) with gil
     int wonderful_terminate(inputData * data, PaStream ** stream)
-
+    int wonderful_munch(inputData * data, complex * dest, unsigned int length)
+    
 cdef inputData _input_data
 cdef PaStream * _stream 
 
@@ -52,7 +53,7 @@ def init():
 cdef _terminate():
     global _input_data
     global _stream
-
+    
     wonderful_terminate(&_input_data, &_stream)
 
 def terminate():
@@ -61,3 +62,19 @@ def terminate():
     stop working."""
 
     _terminate()
+
+cdef _munch(int size):
+    global _input_data
+    global _stream
+    cdef complex * dest
+    cdef int err
+    
+    err = wonderful_munch(&_input_data, dest, 1024)
+    if err < 0:
+        raise Exception("You must call wonderful.init before calling wonderful.munch!")
+        
+def munch(size):
+    """Poll for data and return the FFT of it. No data will be returned unless there is 
+    at least size samples available."""
+
+    _munch(size)
