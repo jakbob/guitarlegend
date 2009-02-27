@@ -175,7 +175,7 @@ input_callback( const void * input,
  * Initialize the wonderful module
  */
 int
-wonderful_init(inputData * data, PaStream * stream)
+wonderful_init(inputData * data, PaStream ** stream)
 {
   PaStreamParameters input_parameters;
   PaError err;
@@ -205,7 +205,8 @@ wonderful_init(inputData * data, PaStream * stream)
   input_parameters.hostApiSpecificStreamInfo = NULL;
   
   printf("Opening stream\n"); fflush(stdout);
-  err = Pa_OpenStream( &stream,
+  printf("%i", stream);
+  err = Pa_OpenStream( stream,
 		       &input_parameters,
 		       NULL,              // Output parameters
 		       44100,             // sample rate
@@ -221,7 +222,7 @@ wonderful_init(inputData * data, PaStream * stream)
   
   /* The callback function now runs in its own thread */
   printf("Starting stream\n"); fflush(stdout);
-  err = Pa_StartStream(stream);
+  err = Pa_StartStream(*stream);
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
@@ -236,13 +237,13 @@ wonderful_init(inputData * data, PaStream * stream)
  * Terminate the module and clear up the data
  */
 int
-wonderful_terminate(inputData * data, PaStream * stream)
+wonderful_terminate(inputData * data, PaStream ** stream)
 {
   PaError err;
-  err = Pa_StopStream(stream); // Is AbortStream better for us?
+  err = Pa_StopStream(*stream); // Is AbortStream better for us?
   if (err != paNoError)
     {
-	  printf("%i\n", stream);
+      printf("%i\n", stream);
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
@@ -253,7 +254,7 @@ wonderful_terminate(inputData * data, PaStream * stream)
       return 1;
     }
   printf("stream\n"); fflush(stdout);
-  free(stream);
+  free(*stream);
   /* Yes, ring_buffer_terminate. I don't want to write such a function */
   free(data->samples->data);
   free(data->samples);
