@@ -209,8 +209,8 @@ wonderful_init(inputData * data, PaStream ** stream)
   err = Pa_OpenStream( stream,
 		       &input_parameters,
 		       NULL,              // Output parameters
-		       44100,             // sample rate
-		       256,               // frames per buffer
+		       8000 ,             // sample rate
+		       2048,              // frames per buffer
 		       paClipOff,         //special flags
 		       input_callback,
 		       data);
@@ -242,7 +242,7 @@ wonderful_terminate(inputData * data, PaStream ** stream)
   PaError err;
   // The stream needs to be explicitly stopped on windows machines.
   // On Linux, Pa_Terminate is enough. We stop it anyways.
-  err = Pa_StopStream(*stream); // Is AbortStream better for us?
+  err = Pa_AbortStream(*stream); // Is AbortStream better for us?
   if (err != paNoError)
     {
       printf("%i\n", stream);
