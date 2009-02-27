@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 import pyglet
 from pyglet.window import key
-try:
-    from functools import partial
-except ImportError:
-    print "This game currently requires python >= 2.5"
-    raise
 
 import scene
 import options
@@ -182,8 +177,8 @@ class MainMenu(BaseMenu):
         BaseMenu.__init__(self)
         
         #add menuitems
-        run_game = partial(game_manager.push, 
-           scene.GameScene("data/pokemon-melody.mid"))
+        run_game = lambda: game_manager.push(
+           scene.GameScene("data/fire-and-flames.mid"))#"data/pokemon-melody.mid"
         self.items.append(TextMenuItem(run_game, options.window_width/2,
            options.window_height, "Start game", self.batch))
         self.items.append(TextMenuItem(game_manager.pop, 
