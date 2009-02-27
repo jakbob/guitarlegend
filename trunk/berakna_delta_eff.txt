@@ -1,0 +1,13 @@
+För att beräkna vilket N vi ska använda i dft:n måste vi veta hur långt det är emellan
+2 frekvenser som vi vill skilja på.
+
+Jag tog differansen mellan frekvenerna för c2 och ciss2. de ligger lite under gitarrens lägsta ton
+e2 men jag ville ta lite hänsyn till alternativa stämmningar och oförutsedda händelser.
+
+Beräkningarna var ganska lätta tack vare formeln:
+p = 69 + 12 * log2( f / 440)
+f = 440 * 2 ^ ((p - 69) / 12)
+där p är ett nummer som representerar not och f är frekvensen.
+p för c2 är 36 och 37 för ciss2, vilket gav frekvenserna 65,4 Hz och 69.8
+
+differansen blev lite mer exakt: 3.8892664190683632
