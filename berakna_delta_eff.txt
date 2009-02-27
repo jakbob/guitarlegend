@@ -11,3 +11,35 @@ där p är ett nummer som representerar not och f är frekvensen.
 p för c2 är 36 och 37 för ciss2, vilket gav frekvenserna 65,4 Hz och 69.8
 
 differansen blev lite mer exakt: 3.8892664190683632
+
+Om vi däremot väljer p1 = 37 och p2 = 38 blir \delta f = 4.1205342351338601
+
+Om vi väljer \delta f så att det ligger mellan 3.8 och 4.1 vet vi att vi kan
+urskilja toner exakt ned till ciss2. Detta ger oss lite svängrum.
+Välj \delta f = F_0 = 3.90625. Anledningen till att vi väljer detta värde
+kommer att framgå inom kort.
+
+Den högsta tonen på min (Jonnes) gitarr är tvåstrukna h, vilken har en frekvens på
+987.767 Hz. Enligt samplingsteoremet behöver vi en samplingsfrekvens F_s = 2 * 987.767 Hz =
+1975.534 Hz. Detta skulle i sin tur innebära att storleken på vår DFT skulle vara ca 508 samplar
+(se beräkningar nedan). Dessvärre är den lägsta samplingsfrekvens som våra program kan användra
+8000 Hz.
+
+Därmed har vi:
+F_s = 8000 Hz
+F_0 = 3.90625 Hz
+Detta ger oss:
+tidsintervallet mellan samplar = T = 1/F_s = 0.000125 s
+tidsintervallet mellan "buffrar"* = T_0 = 1/F_0 = 0.256 s
+Antalet samplar per "buffer" = N = F_s/F_0 = 2048
+
+N är 2048 = 2 ^ 11, och det är gott, ty vår implementation av FFT-algoritmen
+funkar enbart i de fall då antalet samplar är en tvåpotens.
+
+* Med buffer menas samplarna s[a + k], 0 <= k < N, på vilka vi applicerar 
+den diskreta fouriertransformen.
+
+Vi ser även följande:
+tidsintervallet mellan de olika buffrarna och därmed mellan anropen till
+FFT-funktionen är stort (1/4 s). Senast jag undersökte klarade spelets loop
+av sina grejer på 0.030 s. Detta ger oss nog med utrymme för att leka.
