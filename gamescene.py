@@ -81,7 +81,7 @@ class GameScene(scene.TestScene):
         self.temponr = 0
         self.tempo = self.tab.tempo[self.temponr][1] #välj första tempot
 
-        music = pyglet.resource.media('pokemon.ogg') # GAAAAAAAAAAH! HISSMUSIK!
+        music = pyglet.resource.media('through-the-fire-and-flames.ogg') # GAAAAAAAAAAH! HISSMUSIK!
         self.music = music.play()
 
         #self.music.on_eos =  #det borde funka, men det verkar inte så
