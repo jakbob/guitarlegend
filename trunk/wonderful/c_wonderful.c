@@ -1,4 +1,4 @@
-/* wonderful.c
+/* c_wonderful.c
  *
  * The magic gears of wonderful things. This 
  * module utilizes portaudio to (nonblockingly)
@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <portaudio.h>
+#include "portaudio.h"
 
 #include "dft.h"
 
@@ -227,6 +227,7 @@ wonderful_init(inputData * data, PaStream * stream)
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
+  printf("%i\n", stream);
   printf("Returning\n"); fflush(stdout);
   return 0;
 }
@@ -238,6 +239,13 @@ int
 wonderful_terminate(inputData * data, PaStream * stream)
 {
   PaError err;
+  err = Pa_StopStream(stream); // Is AbortStream better for us?
+  if (err != paNoError)
+    {
+	  printf("%i\n", stream);
+      printf("Portaudio error: %s\n", Pa_GetErrorText(err));
+      return 1;
+    }
   err = Pa_Terminate();
   if (err != paNoError)
     {

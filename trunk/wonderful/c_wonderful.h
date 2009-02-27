@@ -1,4 +1,4 @@
-/* wonderful.c
+/* c_wonderful.h
  *
  * The magic gears of wonderful things. This 
  * module utilizes portaudio to (nonblockingly)
@@ -16,7 +16,7 @@
  * The other code is (c) Jonne Mickelin 2009
  */
 
-#include <portaudio.h>
+#include "portaudio.h"
 #include "dft.h"
 
 #ifndef WONDERFUL_H
