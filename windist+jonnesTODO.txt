@@ -117,7 +117,8 @@ import time
 wonderful.init(); time.sleep(5); wonderful.terminate()
 If you edit the callback function to print a message (not thread-safe, I know), you will see 
 that the thread keeps running on windows machines even though we have terminated portaudio.
-I will look into possible reasons for this.
+I will look into possible reasons for this. Update: It looks like the stream needs to be
+explicitly stopped in Windows, but not in Linux. 'tis stopped now.
 
 ====
 TODO
