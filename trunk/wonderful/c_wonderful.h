@@ -45,7 +45,7 @@ unsigned int ring_buffer_free_space(struct ring_buffer * rb);
 int ring_buffer_write(struct ring_buffer * rb, const float * src, unsigned int lendata);
 int ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendata);
 
-int wonderful_init(inputData * data, PaStream ** stream);
+int wonderful_init(inputData * data, PaStream ** stream, unsigned int size);
 int wonderful_terminate(inputData * data, PaStream ** stream);
-int wonderful_munch(inputData * data, complex * dest, unsigned int length);
+complex * wonderful_munch(inputData * data, complex * dest, unsigned int length);
 #endif
