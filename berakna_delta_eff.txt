@@ -43,3 +43,15 @@ Vi ser även följande:
 tidsintervallet mellan de olika buffrarna och därmed mellan anropen till
 FFT-funktionen är stort (1/4 s). Senast jag undersökte klarade spelets loop
 av sina grejer på 0.030 s. Detta ger oss nog med utrymme för att leka.
+
+Uppdatering: På grund av ytterligare begränsningar insåg vi att vi måste
+höja samplefrekvensen till 44100 Hz. Detta ger oss:
+F_s = 44100 Hz
+F_0 = 3.90625 Hz
+T = 2.2675736961451248e-05 s
+T_0 = 0.256 s
+
+N >= 11289.6 (närmaste tvåpotens = 16384)
+
+För att sätta in det i ett tidsperspektiv: 
+9001 FFT:s ran in 264.744879007 seconds. Mean execution time: 0.0294128295753

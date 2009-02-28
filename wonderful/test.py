@@ -1,7 +1,7 @@
 import math
 import pydft
 
-N = 1024
+N = 16384
 
 data = []
 for i in range(N):
