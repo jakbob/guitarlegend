@@ -80,7 +80,7 @@ ring_buffer_write(struct ring_buffer * rb, const float * src, unsigned int lenda
       lendata = free_space;
     }
   written = lendata;
-  
+  printf("%i free space when writing!\n", free_space);
   while (lendata)
     {
       block = lendata;
@@ -156,17 +156,18 @@ input_callback( const void * input,
 		PaStreamCallbackFlags statusFlags,
 		void * userData )
 {
-  inputData * data = (inputData*) userData;
+  /*inputData * data = (inputData*) userData;
   const float * in = (const float*) input;
   struct ring_buffer * out = data->samples;
   unsigned int len = frames_per_buffer;
-  int written;
+  int written;*/
 
   // Just copy the stuffs! I hope this is enough to make it work. 
   // Oh, and if frames_per_buffer is more than is available, we
   // will start dropping frames, which is doubleplusungood.
-  written = ring_buffer_write(out, in, frames_per_buffer);
-  printf("Dropped %i frames!\n", frames_per_buffer - written);
+  printf("will I segfault?\n"); fflush(stdout);
+  //written = ring_buffer_write(out, in, frames_per_buffer);
+  //printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
 
   return paContinue;
 }
@@ -175,7 +176,7 @@ input_callback( const void * input,
  * Initialize the wonderful module
  */
 int
-wonderful_init(inputData * data, PaStream ** stream)
+wonderful_init(inputData * data, PaStream ** stream, unsigned int size)
 {
   PaStreamParameters input_parameters;
   PaError err;
@@ -197,20 +198,20 @@ wonderful_init(inputData * data, PaStream ** stream)
    * value is not necessarily the size of what we send to 
    * the FFT.
    */
-  printf("Setting input params\n"); fflush(stdout);
+  //printf("Setting input params\n"); fflush(stdout);
   input_parameters.device = Pa_GetDefaultInputDevice();
   input_parameters.channelCount = 1;
   input_parameters.sampleFormat = paFloat32;
   input_parameters.suggestedLatency = Pa_GetDeviceInfo(input_parameters.device)->defaultLowInputLatency;
   input_parameters.hostApiSpecificStreamInfo = NULL;
   
-  printf("Opening stream\n"); fflush(stdout);
-  printf("%i", stream);
+  //printf("Opening stream\n"); fflush(stdout);
+  //printf("%i", stream);
   err = Pa_OpenStream( stream,
 		       &input_parameters,
 		       NULL,              // Output parameters
-		       8000 ,             // sample rate
-		       2048,              // frames per buffer
+		       41000,             // sample rate
+		       256,               // frames per buffer
 		       paClipOff,         //special flags
 		       input_callback,
 		       data);
@@ -221,15 +222,15 @@ wonderful_init(inputData * data, PaStream ** stream)
     }
   
   /* The callback function now runs in its own thread */
-  printf("Starting stream\n"); fflush(stdout);
+  //printf("Starting stream\n"); fflush(stdout);
   err = Pa_StartStream(*stream);
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
-  printf("%i\n", stream);
-  printf("Returning\n"); fflush(stdout);
+  //printf("%i\n", stream);
+  //printf("Returning\n"); fflush(stdout);
   return 0;
 }
 
@@ -242,7 +243,7 @@ wonderful_terminate(inputData * data, PaStream ** stream)
   PaError err;
   // The stream needs to be explicitly stopped on windows machines.
   // On Linux, Pa_Terminate is enough. We stop it anyways.
-  err = Pa_AbortStream(*stream); // Is AbortStream better for us?
+  err = Pa_AbortStream(*stream); // The stream never exits, so StopStream wouldn't work
   if (err != paNoError)
     {
       printf("%i\n", stream);
@@ -265,11 +266,27 @@ wonderful_terminate(inputData * data, PaStream ** stream)
   return 0;
 }
 
-int
+/**
+ * Consumes deta from the input buffer (data->samples)
+ * and stores it in dest. Then a DFT is performed on 
+ * the data, and stored in dest. The length defines how 
+ * much data to consume before performing the DFT.
+ * If the function could not consume enough data
+ * to perform a DFT, NULL will be returned. Otherwise,
+ * return a pointer to the data.
+ */
+complex *
 wonderful_munch(inputData * data, complex * dest, unsigned int length)
 {
-  printf("Hej");
-  return -1;
+  static int consumed = 0;
+  consumed += ring_buffer_consume(data->samples, dest+consumed, length-consumed);
+  printf("Consumed %i samples total\n", consumed);
+  if (consumed >= length)
+    {
+      consumed = 0;
+      return FFT(dest, length);
+    }
+  return NULL;
 }
 
 #ifdef DEBUG
