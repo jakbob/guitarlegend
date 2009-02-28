@@ -80,7 +80,7 @@ ring_buffer_write(struct ring_buffer * rb, const float * src, unsigned int lenda
       lendata = free_space;
     }
   written = lendata;
-  printf("%i free space when writing!\n", free_space);
+  
   while (lendata)
     {
       block = lendata;
@@ -156,17 +156,16 @@ input_callback( const void * input,
 		PaStreamCallbackFlags statusFlags,
 		void * userData )
 {
-  /*inputData * data = (inputData*) userData;
+  inputData * data = (inputData*) userData;
   const float * in = (const float*) input;
   struct ring_buffer * out = data->samples;
   unsigned int len = frames_per_buffer;
-  int written;*/
+  int written;
 
   // Just copy the stuffs! I hope this is enough to make it work. 
   // Oh, and if frames_per_buffer is more than is available, we
   // will start dropping frames, which is doubleplusungood.
-  printf("will I segfault?\n"); fflush(stdout);
-  //written = ring_buffer_write(out, in, frames_per_buffer);
+  written = ring_buffer_write(out, in, frames_per_buffer);
   //printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
 
   return paContinue;
@@ -176,7 +175,8 @@ input_callback( const void * input,
  * Initialize the wonderful module
  */
 int
-wonderful_init(inputData * data, PaStream ** stream, unsigned int size)
+wonderful_init(inputData * data, PaStream ** stream, 
+	       unsigned int sample_rate, unsigned int size)
 {
   PaStreamParameters input_parameters;
   PaError err;
@@ -207,11 +207,19 @@ wonderful_init(inputData * data, PaStream ** stream, unsigned int size)
   
   //printf("Opening stream\n"); fflush(stdout);
   //printf("%i", stream);
+  err = Pa_IsFormatSupported(&input_parameters, NULL, sample_rate);
+  printf("error = %i\n", err);
+  if (paFormatIsSupported != paNoError)
+    {
+      printf("Portaudio error: %s\n", Pa_GetErrorText(err));
+      return 1;
+    }
+
   err = Pa_OpenStream( stream,
 		       &input_parameters,
 		       NULL,              // Output parameters
-		       41000,             // sample rate
-		       256,               // frames per buffer
+		       sample_rate,       // sample rate
+		       size,               // frames per buffer
 		       paClipOff,         //special flags
 		       input_callback,
 		       data);
@@ -246,7 +254,6 @@ wonderful_terminate(inputData * data, PaStream ** stream)
   err = Pa_AbortStream(*stream); // The stream never exits, so StopStream wouldn't work
   if (err != paNoError)
     {
-      printf("%i\n", stream);
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
@@ -280,8 +287,8 @@ wonderful_munch(inputData * data, complex * dest, unsigned int length)
 {
   static int consumed = 0;
   consumed += ring_buffer_consume(data->samples, dest+consumed, length-consumed);
-  printf("Consumed %i samples total\n", consumed);
-  if (consumed >= length)
+  //printf("Consumed %i samples total\n", consumed);
+  if (consumed >= length - 1)
     {
       consumed = 0;
       return FFT(dest, length);

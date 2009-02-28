@@ -30,7 +30,7 @@ cdef extern from "c_wonderful.h":
     
     ring_buffer * ring_buffer_init(unsigned int size)
 
-    int wonderful_init(inputData * data, PaStream ** stream, unsigned int size) with gil
+    int wonderful_init(inputData * data, PaStream ** stream, unsigned int sample_rate, unsigned int size) with gil
     int wonderful_terminate(inputData * data, PaStream ** stream)
     complex* wonderful_munch(inputData * data, complex * dest, unsigned int length)
     
@@ -39,7 +39,7 @@ cdef PaStream * _stream
 cdef complex * _retdata
 cdef int _size
 
-cdef _init(int size): # Should only be able to initialize once. Fix this!
+cdef _init(int sample_rate, int size): # Should only be able to initialize once. Fix this!
     global _input_data
     global _retdata
     global _stream
@@ -60,7 +60,7 @@ cdef _init(int size): # Should only be able to initialize once. Fix this!
     _input_data.samples = ring_buffer_init(size) 
 
     # Starts the thread
-    err = wonderful_init(&_input_data, &_stream, size)
+    err = wonderful_init(&_input_data, &_stream, sample_rate, size)
     if err != 0:
         print "Terminating!!!"
         _terminate()
@@ -73,10 +73,10 @@ def isactive():
     else:
         return False
 
-def init(size):
+def init(sample_rate, size):
     """Initialize the wonderful library. This routine MUST be called before the others."""
 
-    _init(size)
+    _init(sample_rate, size)
 
 cdef _terminate():
     global _input_data
