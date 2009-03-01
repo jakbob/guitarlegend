@@ -44,7 +44,7 @@ def midify(f):
 class GameScene(scene.TestScene):
     """In this scene we test things. Mostly notes"""
 
-    def __init__(self, midifile):
+    def __init__(self, soundfile, midifile):
 
         self.name = "Note test"
 
@@ -81,7 +81,7 @@ class GameScene(scene.TestScene):
         self.temponr = 0
         self.tempo = self.tab.tempo[self.temponr][1] #välj första tempot
 
-        music = pyglet.resource.media('through-the-fire-and-flames.ogg') # GAAAAAAAAAAH! HISSMUSIK!
+        music = pyglet.media.load(soundfile)
         self.music = music.play()
 
         #self.music.on_eos =  #det borde funka, men det verkar inte så
