@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import pyglet
 from pyglet.window import key
+from pyglet.gl import *
+import os
+import re
 
 import scene
 import options
@@ -26,9 +29,9 @@ class MenuItem:
         """
         self.cb = cb
 
-    def draw(self):
-        """Draw the menu object to the screen."""
-        pass
+    #def draw(self):
+        #"""Draw the menu object to the screen."""
+        #pass
 
     def highlight(self):
         """Switch to the active state of the menu object. What this means
@@ -51,21 +54,69 @@ class MenuItem:
         self.cb()
 
 
-class TextMenuItem(MenuItem):
+class TextMenuItem(MenuItem, pyglet.text.Label):
     def __init__(self, cb, x, y, caption, batch, size=25, 
        hicolor=(255, 255, 0, 255), locolor=(255, 255, 255, 255)):
         MenuItem.__init__(self, cb)
         self.hicolor = hicolor
         self.locolor = locolor
-        self.label = pyglet.text.Label(caption, x=x, y=y, batch=batch, 
+        pyglet.text.Label.__init__(self, caption, x=x, y=y, batch=batch, 
            color = self.locolor, font_size=size, 
            anchor_y="top", anchor_x="center", font_name="Ariel")
 
     def highlight(self):
-        self.label.color = self.hicolor
+        self.color = self.hicolor
 
     def lowlight(self):
-        self.label.color = self.locolor
+        self.color = self.locolor
+
+class SpriteMenuItem(MenuItem, pyglet.sprite.Sprite):
+    def __init__(self, cb, x, y, image, batch):
+        MenuItem.__init__(self, cb)
+        pyglet.sprite.Sprite.__init__(self, image, x, y, batch=batch)
+    
+    def highlight(self):
+        pass #fixa vid tillfälle
+    
+    def lowlight(self):
+        pass #fixa när jag har tid    
+
+class MenuItemGroup(MenuItem, pyglet.graphics.Group):
+    #arvet är inte helt snyggt, men vafan. Det borde va det bästa sättet
+    def __init__(self, cb, x, y, members):
+        MenuItem.__init__(self, cb)
+        pyglet.graphics.Group.__init__(self)
+        self.members = members
+        for member in self.members:
+            member.group = self
+        self.lastx = 0
+        self.lasty = 0
+        self.__dict__['x'] = x #tar omväg för att undvika krasch. Enkel workaround
+        self.y = y
+        self.angle = 0
+
+    def _update_pos(self):
+        pass
+        #for member in self.members:
+            #member.x += self.x - self.lastx
+            #member.y += self.y - self.lasty
+        #self.lastx = self.x
+        #self.lasty = self.y
+        
+    #def __setattr__(self, name, value):
+        #self.__dict__[name] = value #som det brukar va
+        #if name == "x" or name == "y":
+            #self._update_pos()
+
+    def set_state(self):
+        glPushMatrix()
+        glTranslatef(self.x, self.y, 0)
+        glRotatef(self.angle, 0, 0, 1)
+        #glTranslatef(-x, -y, 0)
+
+    def unset_state(self):
+        glPopMatrix()
+    
 
 class VertexMenuItem(MenuItem):
     def __init__(self, cb, vertices):
@@ -94,28 +145,30 @@ class VertexMenuItem(MenuItem):
         self.vertex_list.draw(pyglet.graphics.GL_LINE_LOOP)
         #pyglet.graphics.draw(2, pyglet.graphics.GL_LINES, ("v2f", self.vertices[0] + self.vertices[1]))
 
-class Borg:
-    _shared_state = {"items": [], "selected" : -1}
-    def __init__(self):
-        self.__dict__ = self._shared_state
+#class Borg:
+    #_shared_state = {"items": [], "selected" : -1}
+    #def __init__(self):
+        #self.__dict__ = self._shared_state
         
 class BaseMenu(scene.Scene):
-    def __init__(self):
+    def __init__(self, bgimage=None):
         self.name = "Menu"
         #Borg.__init__(self)
 
         #self._shared_state.setdefault("items", [])
         #self._shared_state.setdefault("selected", -1)
         
+        self.bgimage = bgimage
         self.items = []
         self.selected = 0
         self.batch = pyglet.graphics.Batch() #to be implemented
 
     def game_draw(self, window):
         """Draw the contents of the menu to the screen."""
-        #to be removed:
-        for item in self.items:
-            item.draw()
+        glClear(GL_COLOR_BUFFER_BIT)
+        
+        if self.bgimage:
+            self.bgimage.blit(0,0)
         #the new way
         self.batch.draw()
 
@@ -160,9 +213,9 @@ class BaseMenu(scene.Scene):
     def on_key_press(self, window, symbol, modifiers):
         """Catches keyboard events.
         Returns True if the symbol was handled or False otherwise."""
-        if symbol == options.kb.menu.up:
+        if symbol == options.kb.menu.up or symbol == options.kb.menu.left:
             self.prev()
-        elif symbol == options.kb.menu.down:
+        elif symbol == options.kb.menu.down or symbol == options.kb.menu.right:
             self.next()
         elif symbol == options.kb.test.up:
             game_manager.pop()
@@ -174,13 +227,14 @@ class BaseMenu(scene.Scene):
 
 class MainMenu(BaseMenu):
     def __init__(self):
-        BaseMenu.__init__(self)
+        bg = pyglet.resource.image("menubg.png")
+        
+        BaseMenu.__init__(self, bg)
         
         #add menuitems
-        run_game = lambda: game_manager.push(
-           scene.GameScene("data/fire-and-flames.mid"))#"data/pokemon-melody.mid"
+        run_game = lambda: game_manager.push(SongSelect())
         self.items.append(TextMenuItem(run_game, options.window_width/2,
-           options.window_height, "Start game", self.batch))
+           options.window_height, "Song Select", self.batch))
         self.items.append(TextMenuItem(game_manager.pop, 
            options.window_width/2, options.window_height - 50,
            u"Exit", self.batch))
@@ -188,6 +242,49 @@ class MainMenu(BaseMenu):
         #required
         self._select(self.selected)
 
+class SongSelect(BaseMenu):
+    def __init__(self):
+        BaseMenu.__init__(self)
+        for name in os.listdir("songs"): #hackigt ("songs"), förbättra nån gång
+            path = os.path.join("songs", name)
+            if os.path.isdir(path): #now we're talking!!
+                data = {}
+                for fil in os.listdir(path):
+                    attr = None
+                    if re.search("\.(mp3|ogg)$", fil): #ska sättas i options
+                        attr = "sound"
+                    elif re.search("\.(mid|midi)$", fil):
+                        attr = "midi"
+                    elif re.search("\.(jpg|png|bmp)$", fil):
+                        attr = "image"
+                    elif fil == "info.txt":
+                        attr = "info"
+                    print os.path.join(path, fil)
+                    data[attr] = os.path.join(path, fil)
+                if data.has_key("sound") and data.has_key("midi") \
+                   and data.has_key("info"):
+                    if not data.has_key("image"):
+                        img = defaultimage
+                    else:
+                        img = pyglet.image.load(data["image"])
+                    picture = SpriteMenuItem(None, 0, -img.height/2, 
+                       img, self.batch)
+                    select_song = lambda: game_manager.push(
+                       scene.GameScene(data["sound"], data["midi"]))
+                    item = MenuItemGroup(select_song, 0, 
+                       options.window_height/2, (picture,))
+                    self.items.append(item)
+                else:
+                    pass #hoppa över blir nog lättast
+        self._select(self.selected)
+
+    def _select(self, number):
+        BaseMenu._select(self, number)
+        for n in xrange(5):
+            if n > len(self.items) or (n < 0 and len(self.items) < 5):
+                continue
+            self.items[self.selected-n].x = n / 5.0 * options.window_width
+            
 #if __name__ == "bajs":
     #@window.event
     #def on_draw():
