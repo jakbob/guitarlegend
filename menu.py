@@ -249,8 +249,10 @@ class SongSelect(BaseMenu):
             path = os.path.join("songs", name)
             if os.path.isdir(path): #now we're talking!!
                 data = {}
+
                 for fil in os.listdir(path):
                     attr = None
+
                     if re.search("\.(mp3|ogg)$", fil): #ska sättas i options
                         attr = "sound"
                     elif re.search("\.(mid|midi)$", fil):
@@ -259,20 +261,26 @@ class SongSelect(BaseMenu):
                         attr = "image"
                     elif fil == "info.txt":
                         attr = "info"
+
                     print os.path.join(path, fil)
+
                     data[attr] = os.path.join(path, fil)
+
                 if data.has_key("sound") and data.has_key("midi") \
-                   and data.has_key("info"):
+                        and data.has_key("info"):
+
                     if not data.has_key("image"):
                         img = defaultimage
                     else:
                         img = pyglet.image.load(data["image"])
+
                     picture = SpriteMenuItem(None, 0, -img.height/2, 
-                       img, self.batch)
-                    select_song = lambda: game_manager.push(
-                       scene.GameScene(data["sound"], data["midi"]))
-                    item = MenuItemGroup(select_song, 0, 
-                       options.window_height/2, (picture,))
+                                             img, self.batch)
+
+                    select_song = lambda d: lambda: game_manager.push(scene.GameScene(d["sound"], 
+                                                                                      d["midi"]))
+                    item = MenuItemGroup(select_song(data), 0, 
+                                         options.window_height/2, (picture,))
                     self.items.append(item)
                 else:
                     pass #hoppa över blir nog lättast
