@@ -131,7 +131,7 @@ ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendat
 
       for (i = 1; i <= block; i++)
 	{
-	  dest[i] = rb->data[rb->consume_index + i];
+	  dest[i-1] = rb->data[rb->consume_index + i];
 	}
 
       rb->consume_index = rb->consume_index + block;
@@ -141,7 +141,9 @@ ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendat
 	  rb->consume_index = 0;
 	}
       lendata -= block;
-    }  
+    }
+  //if (consumed == 0){ printf("Could not consume!\n"); }
+
   return consumed;
 }
 
@@ -286,13 +288,19 @@ complex *
 wonderful_munch(inputData * data, complex * dest, unsigned int length)
 {
   static int consumed = 0;
-  consumed += ring_buffer_consume(data->samples, dest+consumed, length-consumed);
+  int lenconsumed;
+
+  lenconsumed = ring_buffer_consume(data->samples, dest+consumed, length - consumed);
+  consumed += lenconsumed;
+  //printf("%i ", lenconsumed);
   //printf("Consumed %i samples total\n", consumed);
-  if (consumed >= length - 1)
+  if (consumed >= length)
     {
       consumed = 0;
+      //printf("%i\n", consumed);
       return FFT(dest, length);
     }
+  //printf("%i\n", consumed);
   return NULL;
 }
 

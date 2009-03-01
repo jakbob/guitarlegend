@@ -284,6 +284,7 @@ class SongSelect(BaseMenu):
                     self.items.append(item)
                 else:
                     pass #hoppa över blir nog lättast
+
         self._select(self.selected)
 
     def _select(self, number):

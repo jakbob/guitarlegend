@@ -54,13 +54,19 @@ cdef _init(int sample_rate, int size): # Should only be able to initialize once.
     # Recall that the ringbuffer keeps one sample of 
     # inaccessible data between the write and consume
     # pointers
-    _retdata = <complex *>malloc((2*size+1)*sizeof(complex)) # FREEME
-    
-    # Freed by wonderful_terminate. This is a bad design decision, yes.
-    _input_data.samples = ring_buffer_init(size) 
 
+    #print <int>_retdata
+    _retdata = <complex *>malloc(size*sizeof(complex)) # FREEME
+    #print <int>_retdata
+    if _retdata == NULL:
+        raise Exception("Could not allocate memory")
+
+    # Freed by wonderful_terminate. This is a bad design decision, yes.
+    _input_data.samples = ring_buffer_init(2*size) 
+    #print <int>_retdata
     # Starts the thread
     err = wonderful_init(&_input_data, &_stream, sample_rate, size)
+    #print <int>_retdata
     if err != 0:
         print "Terminating!!!"
         _terminate()
@@ -83,8 +89,9 @@ cdef _terminate():
     global _retdata
     global _stream
 
+    #print <int>_retdata
     free(_retdata)
-
+    #print "Freed retdata"
     # Stops the thread
     wonderful_terminate(&_input_data, &_stream)
 
@@ -106,6 +113,7 @@ cdef complex_to_mag_list(complex* data, int length):
         re = data[i].re
         im = data[i].im
         ret_list.append(sqrt(re*re + im*im))
+    
     return ret_list
 
 cdef _munch():
@@ -126,7 +134,6 @@ cdef _munch():
             return None # Better luck next time
         else:
             ret_list = complex_to_mag_list(_retdata, _size)
-
             return ret_list
 
 def munch():
