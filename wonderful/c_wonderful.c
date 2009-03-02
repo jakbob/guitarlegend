@@ -184,8 +184,7 @@ wonderful_init(inputData * data, PaStream ** stream,
   PaError err;
 
   /* Initialize portaudio */
-  printf("Initializing\n"); fflush(stdout);
-  err = Pa_Initialize();
+    err = Pa_Initialize();
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
@@ -210,7 +209,7 @@ wonderful_init(inputData * data, PaStream ** stream,
   //printf("Opening stream\n"); fflush(stdout);
   //printf("%i", stream);
   err = Pa_IsFormatSupported(&input_parameters, NULL, sample_rate);
-  printf("error = %i\n", err);
+  
   if (paFormatIsSupported != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
@@ -265,7 +264,7 @@ wonderful_terminate(inputData * data, PaStream ** stream)
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
-  printf("stream\n"); fflush(stdout);
+  
   free(*stream);
   /* Yes, ring_buffer_terminate. I don't want to write such a function */
   free(data->samples->data);
