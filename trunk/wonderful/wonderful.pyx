@@ -39,13 +39,17 @@ cdef PaStream * _stream
 cdef complex * _retdata
 cdef int _size
 
-cdef _init(int sample_rate, int size): # Should only be able to initialize once. Fix this!
+cdef _init(int sample_rate, int size):
     global _input_data
     global _retdata
     global _stream
     global _size
 
     cdef int err
+
+    err = Pa_IsStreamActive(_stream)
+    if err == 1:
+        raise Exception("wonderful is already initialized!")
     
     _size = size
 
@@ -55,23 +59,19 @@ cdef _init(int sample_rate, int size): # Should only be able to initialize once.
     # inaccessible data between the write and consume
     # pointers
 
-    #print <int>_retdata
     _retdata = <complex *>malloc(size*sizeof(complex)) # FREEME
-    #print <int>_retdata
+
     if _retdata == NULL:
         raise Exception("Could not allocate memory")
 
     # Freed by wonderful_terminate. This is a bad design decision, yes.
     _input_data.samples = ring_buffer_init(2*size) 
-    #print <int>_retdata
     # Starts the thread
     err = wonderful_init(&_input_data, &_stream, sample_rate, size)
-    #print <int>_retdata
+
     if err != 0:
-        print "Terminating!!!"
         _terminate()
         raise Exception("Could not initialize portaudio.")
-    print "Does not terminate"
 
 def isactive():
     if Pa_IsStreamActive(_stream):
@@ -80,7 +80,12 @@ def isactive():
         return False
 
 def init(sample_rate, size):
-    """Initialize the wonderful library. This routine MUST be called before the others."""
+    """Initialize the wonderful library and start the sound recording. 
+    This routine MUST be called before the others.
+
+    Arguments:
+    sample_rate -- sampling frequency
+    size -- size of the sound buffer and resulting DFT"""
 
     _init(sample_rate, size)
 
@@ -89,9 +94,14 @@ cdef _terminate():
     global _retdata
     global _stream
 
-    #print <int>_retdata
+    cdef int err
+
+    err = Pa_IsStreamActive(_stream)
+    if err != 1:
+        raise Exception("wonderful is not initialized!")
+
     free(_retdata)
-    #print "Freed retdata"
+
     # Stops the thread
     wonderful_terminate(&_input_data, &_stream)
 
@@ -139,6 +149,8 @@ cdef _munch():
 def munch():
     """Poll the Portaudio thread for data. If enough
     data has accumulated, return the DFT on it.
-    If less """
+    If not, None will be returned.
+    The size of the returned list is the one provided to
+    wonderful.init"""
 
     return _munch()
