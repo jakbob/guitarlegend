@@ -102,7 +102,7 @@ class MenuItemGroup(MenuItem, pyglet.graphics.Group):
         glPushMatrix()
         glLoadIdentity()
         glTranslatef(self.x, self.y, self.z)
-        glRotatef(self.angle, 0, 1, 0) # ? Varför roterar du kring z-axeln? Varför roterar du överhuvudtaget?
+        glRotatef(self.zrot, 0, 1, 0) # ? Varför roterar du kring z-axeln? Varför roterar du överhuvudtaget?
         glEnable(GL_DEPTH_TEST)
 
     def unset_state(self):
@@ -307,7 +307,7 @@ class SongSelect(BaseMenu):
             self.items[n].x = -r * math.cos(v) + x_offset
             self.items[n].y = 0
             self.items[n].z = -r * math.sin(v) + z_offset
-            self.items[n].zrot = math.pi/2 - v
+            self.items[n].zrot = 90 - v * 180 / math.pi
 
     def on_key_press(self, window, symbol, modifiers):
         """Catches keyboard events.
