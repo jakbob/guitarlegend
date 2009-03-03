@@ -57,13 +57,14 @@ class MenuItem:
 
 class TextMenuItem(MenuItem, pyglet.text.Label):
     def __init__(self, cb, x, y, caption, batch, size=25, 
-       hicolor=(255, 255, 0, 255), locolor=(255, 255, 255, 255)):
+                 hicolor=(255, 255, 0, 255), locolor=(255, 255, 255, 255)):
         MenuItem.__init__(self, cb)
         self.hicolor = hicolor
         self.locolor = locolor
         pyglet.text.Label.__init__(self, caption, x=x, y=y, batch=batch, 
-           color = self.locolor, font_size=size, 
-           anchor_y="top", anchor_x="center", font_name="Ariel")
+                                   color=self.locolor, font_size=size, 
+                                   anchor_y="top", anchor_x="center", 
+                                   font_name="Arial")
 
     def highlight(self):
         self.color = self.hicolor
@@ -98,21 +99,20 @@ class MenuItemGroup(MenuItem, pyglet.graphics.Group):
         self.angle = 0
 
     def set_state(self):
-        #glPushMatrix()
-        #glLoadIdentity()
+        glPushMatrix()
+        glLoadIdentity()
         glTranslatef(self.x, self.y, self.z)
-        glRotatef(self.angle, 0, 0, 1)
+        glRotatef(self.angle, 0, 1, 0) # ? Varför roterar du kring z-axeln? Varför roterar du överhuvudtaget?
         glEnable(GL_DEPTH_TEST)
 
     def unset_state(self):
-        #glPopMatrix()
+        glPopMatrix()
         glDisable(GL_DEPTH_TEST)
     
-
 class VertexMenuItem(MenuItem):
     def __init__(self, cb, vertices):
         self.vertex_list = pyglet.graphics.vertex_list(len(vertices), "v2f", "c4B")
-        self.vertex_list.colors = (255, 255, 0, 0) *len(vertices)
+        self.vertex_list.colors = (255, 255, 0, 0) * len(vertices)
         print len(vertices)
         for i in range(len(vertices)):
             print i
@@ -141,6 +141,7 @@ class BaseMenu(scene.Scene):
         glLoadIdentity()
         
         if self.bgimage:
+            glTranslatef(0,0,1.0)
             self.bgimage.blit(0,0)
         self.batch.draw()
 
@@ -154,8 +155,10 @@ class BaseMenu(scene.Scene):
 
         Returns the item that was selected or None if the index is out of range."""
 
-        if self.selected is not None and not (0 <= number < len(self.items)):
-            return
+        #if self.selected is not None and not (0 <= number < len(self.items)):
+        #    return
+        if self.items:
+            number %= len(self.items)
 
         if self.selected is not None:
             self.items[self.selected].lowlight()
@@ -187,9 +190,9 @@ class BaseMenu(scene.Scene):
     def on_key_press(self, window, symbol, modifiers):
         """Catches keyboard events.
         Returns True if the symbol was handled or False otherwise."""
-        if symbol == options.kb.menu.up or symbol == options.kb.menu.left:
+        if symbol == options.kb.menu.up:
             self.prev()
-        elif symbol == options.kb.menu.down or symbol == options.kb.menu.right:
+        elif symbol == options.kb.menu.down:
             self.next()
         elif symbol == options.kb.test.up:
             game_manager.pop()
@@ -205,10 +208,10 @@ class MainMenu(BaseMenu):
         #add menuitems
         run_game = lambda: game_manager.push(SongSelect())
         self.items.append(TextMenuItem(run_game, options.window_width/2,
-           options.window_height, "Song Select", self.batch))
+                                       options.window_height, "Song Select", self.batch))
         self.items.append(TextMenuItem(game_manager.pop, 
-           options.window_width/2, options.window_height - 50,
-           u"Exit", self.batch))
+                                       options.window_width/2, options.window_height - 50,
+                                       u"Exit", self.batch))
 
         #required
         self._select(self.selected)
@@ -220,10 +223,10 @@ class SongSelect(BaseMenu):
             path = os.path.join("songs", name)
             if os.path.isdir(path): #now we're talking!!
                 data = {}
-
+                
                 for fil in os.listdir(path):
                     attr = None
-
+                    
                     if re.search("\.(mp3|ogg)$", fil): #ska sättas i options
                         attr = "sound"
                     elif re.search("\.(mid|midi)$", fil):
@@ -232,11 +235,11 @@ class SongSelect(BaseMenu):
                         attr = "image"
                     elif fil == "info.txt":
                         attr = "info"
-
+                        
                     print os.path.join(path, fil)
-
+                    
                     data[attr] = os.path.join(path, fil)
-
+                    
                 if data.has_key("sound") and data.has_key("midi") \
                         and data.has_key("info"):
 
@@ -249,44 +252,71 @@ class SongSelect(BaseMenu):
                                              img, self.batch)
 
                     select_song = lambda d: lambda: game_manager.push(scene.GameScene(d["sound"], 
-                                                         d["midi"]))
+                                                                                      d["midi"]))
                     item = MenuItemGroup(select_song(data), 0, 
-                              options.window_height/2, 0, (picture,))
+                                         options.window_height/2, 0, (picture,))
                     self.items.append(item)
                 else:
                     pass #hoppa över blir nog lättast
 
         self._select(self.selected)
-    
+
+        #glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
+            
+        glClearDepth(1.0)               # Prepare for 3d. Actually, this might as well 
+                                        # be in on_resize, no? Or maybe not. I don't know.
+
+        glDepthFunc(GL_LEQUAL)          # Change the z-priority or whatever one should call it
+
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
+        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
+
     #def game_draw(self, *args, **kwargs):
-        #glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        #glPushMatrix()
-        #glLoadIdentity()
-        #glEnable(GL_DEPTH_TEST)
-        
-        #BaseMenu.game_draw(self, *args, **kwargs)
-    
-        #glDisable(GL_DEPTH_TEST)
+    #    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    #    glPushMatrix()
+    #    glLoadIdentity()
+    #    glEnable(GL_DEPTH_TEST)
+    #    
+    #    BaseMenu.game_draw(self, *args, **kwargs)
+    # 
+    #    glDisable(GL_DEPTH_TEST)
 
     def on_resize(self, width, height):
         # Perspective
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(30, width / float(height), .1, 10000)
+        gluPerspective(45, width / float(height), .1, 10000)
         glMatrixMode(GL_MODELVIEW)
 
     def _select(self, number):
-        print number
+        #print number
         BaseMenu._select(self, number)
         #for n in xrange(5):
             #if n > len(self.items) or (n < 0 and len(self.items) < 5):
                 #continue
             #self.items[self.selected-n].x = n / 5.0 * options.window_width
-        r = 100
+        r = 500
+        x_offset = options.window_width/2 - r# inte options!
+        z_offset = -(2000 - r)
         for n in xrange(len(self.items)):
             i = n - (len(self.items) - self.selected)
             v = 3 * math.pi / 2 + i * 2 * math.pi / len(self.items)
-            self.items[n].x = 0 #options.window_width / 2 + r * math.cos(v)
+            self.items[n].x = -r * math.cos(v) + x_offset
             self.items[n].y = 0
-            #self.items[n].z = 10 #r * math.cos(v) + r/2
+            self.items[n].z = -r * math.sin(v) + z_offset
+            self.items[n].zrot = math.pi/2 - v
+
+    def on_key_press(self, window, symbol, modifiers):
+        """Catches keyboard events.
+        Returns True if the symbol was handled or False otherwise."""
+        if symbol == options.kb.menu.left:
+            self.next()
+        elif symbol == options.kb.menu.right:
+            self.prev()
+        elif symbol == options.kb.test.up:
+            game_manager.pop()
+        elif symbol == options.kb.menu.select:
+            self.items[self.selected].select()
