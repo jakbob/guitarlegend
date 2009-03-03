@@ -40,90 +40,35 @@ def midify(f):
     n = round(69.0 + 12.0 * math.log(f / 440.0, 2))
     return int(n)
 
-
 class GameScene(scene.TestScene):
     """In this scene we test things. Mostly notes"""
 
     def __init__(self, soundfile, midifile):
 
-        self.name = "Note test"
+        self.name = "Ingame"
+        self._setup_graphics()
 
-        self.tab = tab.Tab(midifile)
-
-        self.note_batch = pyglet.graphics.Batch()
-        self.label_batch = pyglet.graphics.Batch()
-        self.guitar_neck = graphics.create_guitar_texture(3000)
-
+        self._load_file(soundfile, midifile)
         self.particles = particlesystem.ParticleSystem(velfactor=50)
-
-        # Create the textures for all the notes
-        self.death_notes = []            # Graphics for all notes, active or inactive
-        for note in self.tab.all_notes:
-            x = note.start * graphics.quarterlen / self.tab.ticksPerQuarter
-            y = (6 - note.string) / 6.0 * self.guitar_neck.height + 3.5 # 2 is calibration
-
-            notegraphic = graphics.DeathNote(note, self.tab.ticksPerQuarter,
-                                       x=x, y=y, batch=None)
-            self.death_notes.append(notegraphic)
-
-        # Only a fixed number of notes are moved across the screen at once, to 
-        # improve performance
-        self.notecounter = 20 # Number of notes that will be active
-        self.active_sprites = self.death_notes[:self.notecounter]
-
-        for note in self.active_sprites: 
-            note.sprite.batch = self.note_batch
-
-            note.label.begin_update()
-            note.label.batch = self.label_batch
-            note.label.end_update()
-
-        self.temponr = 0
-        self.tempo = self.tab.tempo[self.temponr][1] #välj första tempot
-
-        music = pyglet.media.load(soundfile)
-        self.music = music.play()
-
-        #self.music.on_eos =  #det borde funka, men det verkar inte så
-        self.lasttime = self.music.time    # The position in the song in the last frame
-
-        # Set up the graphics
-        glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
-
-        glClearDepth(1.0)               # Prepare for 3d. Actually, this might as well 
-                                        # be in on_resize, no? Or maybe not. I don't know.
-
-        glDepthFunc(GL_LEQUAL)          # Change the z-priority or whatever one should call it
-
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST) # Too slow, for some cards, maybe. It does not 
-                                                          # give much of a performance gain for me.
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
-        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
-        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
 
     def end(self):
 
         self.music.stop() # Should check if music is still playing. Stopping twice seems to hang the program.
-
     def on_resize(self, width, height):
 
         # Perspective
         glViewport(0, 0, width, height)
-
         glMatrixMode(GL_PROJECTION)
-
         glLoadIdentity()
         ## glOrtho(-width/2., width/2., -height/2., height/2., 0, 1000) # I should save this snippet somewhere else
         gluPerspective(30, width / float(height), .1, 10000)
-
         glMatrixMode(GL_MODELVIEW)
 
     def game_draw(self, window):
-        
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) # We need to set a default scene clearcolor. 
                                                            # How about on_switch_to and on_witch_from functions?
         glPushMatrix()
-        
         glLoadIdentity()
         
         glEnable(GL_DEPTH_TEST)
@@ -146,53 +91,117 @@ class GameScene(scene.TestScene):
         self.label_batch.draw()
         
         glDisable(GL_DEPTH_TEST)
-
         glPopMatrix()
 
-    def do_logic(self,dt):
- 
-        # Check if there are more changes in tempo and if it is time for such a change.
-        # In that case, do the change.
-        if len(self.tab.tempo)-1 < self.temponr \
-                and self.tab.tempo[self.temponr + 1][0] <= self.music.time*1000000:
-                      #self.music.time är i microsekunder
+    def do_logic(self, dt):
+
+        # The progress of the notes is synchronized with the background song.
+        t = self.music.time
+        self._check_tempochange(t)
+        self._update_notes(dt)#t - self.lasttime)
+        self.particles.update(t-self.lasttime)
+        self.lasttime = t
+
+        # Here we should check if the song has ended
+        # Might I suggest that there is a pause between 
+        # that and the showing of the score or whatever
+        # happens next?
+
+    def _setup_graphics(self):
+
+        glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
+
+        glClearDepth(1.0)               # Prepare for 3d. Actually, this might as well 
+                                        # be in on_resize, no? Or maybe not. I don't know.
+
+        glDepthFunc(GL_LEQUAL)          # Change the z-priority or whatever one should call it
+
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
+        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
+    
+    def _load_file(self, soundfile, midifile):
+
+        self.tab = tab.Tab(midifile)
+        self.note_batch = pyglet.graphics.Batch()
+        self.label_batch = pyglet.graphics.Batch()
+        self.guitar_neck = graphics.create_guitar_texture(3000)
+
+        # Create the textures for all the notes
+        self.death_notes = []            # Graphics for all notes, active or inactive
+        for note in self.tab.all_notes:
+            x = (note.start) * graphics.quarterlen / self.tab.ticksPerQuarter
+            y = (6 - note.string) / 6.0 * self.guitar_neck.height + 3.5 # 2 is calibration
+
+            notegraphic = graphics.DeathNote(note, self.tab.ticksPerQuarter,
+                                             x=x, y=y, batch=None)
+            self.death_notes.append(notegraphic)
+
+        # Only a fixed number of notes are moved across the screen at once, to 
+        # improve performance
+        self.notecounter = 20 # Number of notes that will be active
+        self.active_sprites = self.death_notes[:self.notecounter]
+
+        for note in self.active_sprites: 
+            note.sprite.batch = self.note_batch
+
+            note.label.begin_update()
+            note.label.batch = self.label_batch
+            note.label.end_update()
+
+        self.temponr = 0
+        self.tempo = self.tab.tempo[self.temponr][1] #välj första tempot
+
+        music = pyglet.media.load(soundfile)
+        self.music = pyglet.media.StaticSource(music).play()
+        self.lasttime = self.music.time    # The position in the song in the last frame
+
+    def _check_tempochange(self, t):
+
+        """Check if there are more changes in tempo and if 
+        it is time for such a change. In that case, do the change."""
+
+        # Tempo change position is in microseconds
+        if len(self.tab.tempo) - 1 < self.temponr \
+                and self.tab.tempo[self.temponr + 1][0] <= t*1000000:
             self.temponr += 1
             self.tempo = self.tab.tempo[self.temponr][1]
-        # The progress of the notes is synchronized with the background song.
-        time = self.music.time
-        
+
+    def _update_notes(self, dt):
+        self._update_active_notes(dt)
+        self._set_active_notes(dt)
+
+    def _update_active_notes(self, dt):
+
         # Update only active notes
         for note in self.active_sprites:
-            # We should store the constants centrally [why? Jonnes anm.]
-
             # Movement during one second
-            vel = graphics.quarterlen * 1000000 / float(self.tempo) # Tempo is in microseconds
-            note.update(dx = -vel * (time - self.lasttime))
+            #vel = graphics.quarterlen * 1000000 / float(self.tempo) # Tempo is in microseconds
+            note.update(dt, self.tempo)#(time - self.lasttime))
 
             # Change the colour of missed notes
             if not note.failed and note.sprite.x < 0:
                 if note.played:
-                    self.points += 1
+                    self.points += 1 # This sounds bad
                     print self.points
                     self.particles.explode(pos=(note.sprite.x,
-                       note.sprite.y, 0))
+                                                note.sprite.y, 0))
                 else:
                     note.failed = True
                     note.sprite.color = options.dead_note_color
                     #probably temp
                     self.particles.explode(pos=(note.sprite.x,
-                       note.sprite.y, 0))
-        #update particlesystem
-        self.particles.update(time-self.lasttime)
-        self.lasttime = time
-        
+                                                note.sprite.y, 0))
+
+    def _set_active_notes(self, dt):
         # Kill the notes that have travelled far enough. This distance 
         # used to be the screen width, but this does not apply when it's tilted
         if (self.active_sprites[0].sprite.x \
                 + self.active_sprites[0].sprite.width) < -100: # A little bit of margin
             self.active_sprites[0].die()
             self.active_sprites.pop(0)
-        
+                    
         # At the same time, we add new notes at the end once the last 
         # currently active note is supposed to appear on screen.
         # Again, this is not the same anymore.
@@ -219,9 +228,5 @@ class GameScene(scene.TestScene):
             
             self.active_sprites.append(note)
             self.notecounter += 1
-
-        # Here we should check if the song has ended
-        # Might I suggest that there is a pause between 
-        # that and the showing of the score or whatever
-        # happens next?
+        
  
