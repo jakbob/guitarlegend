@@ -91,11 +91,13 @@ class DeathNote:
 
         self.sprite.color = hex_to_rgb_list(hex_color)
 
-    def update(self, dx=0):
+    def update(self, dt, tempo):
 
         """Update the on-screen position of the note."""
 
-        self.sprite.x += dx
+        dx = -quarterlen * (1000000.0/float(tempo)) # Tempo is in microseconds
+
+        self.sprite.x += dx*dt
         self.label.x = self.sprite.x + 30
                 
     def die(self):

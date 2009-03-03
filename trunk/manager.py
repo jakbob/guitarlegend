@@ -99,7 +99,7 @@ class GameManager(object):
         self.current_scene = None
 
         # Handle the scene's logic at a fixed interval
-        pyglet.clock.schedule_interval(self.handle_scene_logic, 1/30.0) 
+        pyglet.clock.schedule_interval(self.handle_scene_logic, 1/60.0) 
 
     def handle_scene_logic(self, dt):
         
