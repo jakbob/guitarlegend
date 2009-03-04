@@ -12,6 +12,7 @@ import error
 ####################
 
 import math
+import heapq
 
 ####################
 # Required Modules #
@@ -26,7 +27,9 @@ from pyglet.graphics import vertex_list
 import scene
 
 import options
+
 import tab
+import wonderful
 
 import graphics
 import particlesystem
@@ -52,9 +55,13 @@ class GameScene(scene.TestScene):
         self._load_file(soundfile, midifile)
         self.particles = particlesystem.ParticleSystem(velfactor=50)
 
+        wonderful.init(options.SAMPLE_RATE, options.DFT_SIZE)
+
     def end(self):
         if self.music.playing:
             self.music.stop()
+        print "in end, yo"
+        wonderful.terminate()
 
     def on_resize(self, width, height):
 
@@ -87,12 +94,24 @@ class GameScene(scene.TestScene):
         self.guitar_neck.blit(0, 0)
         glTranslatef(0, 0, 1.0)
         self.note_batch.draw()
-        glTranslatef(0, 5, 1.0)
-        self.particles.draw()
-        # The labels are also drawn like that, which makes them less readable. I'll work on improving this, when I have time.
+        glTranslatef(0, 0, 1.0)
+        # The labels are also drawn rotated, which makes them less readable. 
+        # I'll work on improving this, when I have time.
         self.label_batch.draw()
-        
         glDisable(GL_DEPTH_TEST)
+
+        # Try to uncomment this and see why it is commented out.
+        # There is something wrong with the particles, and I don't have
+        # the orc to find out what. particlesystem.py is like an italian
+        # restaurant.
+        #glLoadIdentity()
+        #glEnable(GL_DEPTH_TEST)
+        #glTranslatef(-window.width/2.0 + 100, 
+        #              -self.guitar_neck.height/2.0, 
+        #              -880.0)  # Ugly magic number.
+        #self.particles.draw()
+
+        #glDisable(GL_DEPTH_TEST)
         glPopMatrix()
 
     def do_logic(self, dt):
@@ -100,9 +119,16 @@ class GameScene(scene.TestScene):
         # The progress of the notes is synchronized with the background song.
         t = self.music.time
         self._check_tempochange(t)
-        self._update_notes(dt)#t - self.lasttime)
-        self.particles.update(t-self.lasttime)
+        try:
+            self._update_notes(dt)#t - self.lasttime)
+        except IndexError:
+            pass
+        self.particles.update(t - self.lasttime)
         self.lasttime = t
+        
+        sound = self._get_sound_input()
+        if sound:
+            print sound
 
         # Here we should check if the song has ended
         # Might I suggest that there is a pause between 
@@ -159,7 +185,8 @@ class GameScene(scene.TestScene):
         self.music = pyglet.media.StaticSource(music).play()
         self.lasttime = self.music.time    # The position in the song in the last frame
         #@self.music.event
-        def on_music_eos(): #when song is finished, exit
+        #self.music.event
+        def on_music_eos():
             game_manager.pop()
         self.music._on_eos = on_music_eos #misstänker bugg i pyglet
     
@@ -235,5 +262,14 @@ class GameScene(scene.TestScene):
             
             self.active_sprites.append(note)
             self.notecounter += 1
-        
- 
+
+    def _get_sound_input(self):
+        freqs = wonderful.munch()
+        if freqs is not None:
+            lowest_hearable = int(20*options.DFT_SIZE/float(options.SAMPLE_RATE))
+            relevant_freqs = freqs[lowest_hearable:options.DFT_SIZE/2]
+            largest = heapq.nlargest(6, enumerate(relevant_freqs), key=(lambda (num, amp): amp))
+            hertz_freqs = [(p + lowest_hearable) * float(options.SAMPLE_RATE) / options.DFT_SIZE
+                             for (p, mag) in largest 
+                            if mag > options.FREQ_THRESHOLD]
+            return [midify(f) for f in  hertz_freqs]

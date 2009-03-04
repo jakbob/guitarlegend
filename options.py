@@ -33,13 +33,10 @@ SHOW_FRAMERATE = False
 ##########################
 #   Microphone settings  #
 ##########################
-import pyaudio
 
-INPUT_FORMAT         = pyaudio.paInt16 # 16 bit sample format.
-STRUCT_INPUT_FORMAT  = "1h"            # The setting for struct.unpack. 16 bits per sample.
-INPUT_CHANNELS       = 1               # Number of channels to record.
-INPUT_RATE           = 22050           # Sampling rate.
-INPUT_CHUNK_SIZE     = 2048            # Number of samples to be captured and analyzed at a time.
+SAMPLE_RATE = 44100
+DFT_SIZE = 8192
+FREQ_THRESHOLD = 100
 
 ##########################
 #     Window settings    #

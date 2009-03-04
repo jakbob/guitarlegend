@@ -82,6 +82,7 @@ class SpriteMenuItem(MenuItem, pyglet.sprite.Sprite):
     def __init__(self, cb, x, y, image, batch, **kwargs):
         pyglet.sprite.Sprite.__init__(self, image, x, y, batch=batch, **kwargs)
         MenuItem.__init__(self, cb)
+
         self.lowlight()
         
     def highlight(self):
@@ -109,14 +110,17 @@ class MenuItemGroup(MenuItem, pyglet.graphics.Group):
 
     def set_state(self):
         glPushMatrix()
+        glEnable(GL_DEPTH_TEST)
         glLoadIdentity()
         glTranslatef(self.x, self.y, self.z)
+        glTranslatef(self.members[0].image.width/2, 0, 0) # Do not rotate around x=0
         glRotatef(self.yrot, 0, 1, 0)
-        glEnable(GL_DEPTH_TEST)
+        glTranslatef(-self.members[0].image.width/2, 0, 0)
+
 
     def unset_state(self):
-        glPopMatrix()
         glDisable(GL_DEPTH_TEST)
+        glPopMatrix()
 
     def highlight(self):
         for member in self.members:
@@ -148,7 +152,7 @@ class BaseMenu(scene.Scene):
 
         self.bgimage = bgimage
         self.items = []
-        self.selected = 0
+        self.selected = None
         self.batch = pyglet.graphics.Batch() #to be implemented
 
     def game_draw(self, window):
@@ -158,7 +162,7 @@ class BaseMenu(scene.Scene):
         glLoadIdentity()
         
         if self.bgimage:
-            glTranslatef(0,0,1.0)
+            glTranslatef(0, 0, 1.0)
             self.bgimage.blit(0,0)
         self.batch.draw()
 
@@ -231,7 +235,7 @@ class MainMenu(BaseMenu):
                                        u"Exit", self.batch))
 
         #required
-        self._select(self.selected)
+        self._select(0)
 
 class SongSelect(BaseMenu):
     def __init__(self):
@@ -274,12 +278,12 @@ class SongSelect(BaseMenu):
                     select_song = lambda d: lambda: game_manager.push(scene.GameScene(d["sound"], 
                                                                                       d["midi"]))
                     item = MenuItemGroup(select_song(data), 0, 0, 0, 
-                            (picture,songtext, artisttext)) 
+                                         (picture, songtext, artisttext)) 
                     self.items.append(item)
                 else:
                     pass #hoppa över blir nog lättast
 
-        self._select(self.selected)
+        self._select(0)
 
         #glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
             
@@ -302,17 +306,29 @@ class SongSelect(BaseMenu):
         glMatrixMode(GL_MODELVIEW)
 
     def _select(self, number):
-        BaseMenu._select(self, number)
-        r = 500
+        #BaseMenu._select(self, number)
+
+        
+        if self.items:
+            number %= len(self.items)
+        if self.selected is not None:
+            self.items[self.selected].lowlight()
+        print number
+        self.items[number].highlight()
+        self.selected = number
+
+        r = 500 #sum([item.members[0].width for item in self.items])/(2*math.pi)
         x_offset = options.window_width/2 - r# inte options!
         z_offset = -(2000 - r)
         for n in xrange(len(self.items)):
-            i = n - (len(self.items) - self.selected)
+            i = (n - (len(self.items) - self.selected))
             v = 3 * math.pi / 2 + i * 2 * math.pi / len(self.items)
-            self.items[n].x = -r * math.cos(v) + x_offset
+            self.items[n].x = r * math.cos(v) + x_offset
             #self.items[n].y = 0
             self.items[n].z = -r * math.sin(v) + z_offset
-            self.items[n].yrot = 90 - v * 180 / math.pi
+            self.items[n].yrot = (270 - v * 180 / math.pi)
+
+        return self.items[number]
 
     def on_key_press(self, window, symbol, modifiers):
         """Catches keyboard events.
