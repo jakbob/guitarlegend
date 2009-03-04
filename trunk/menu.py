@@ -10,13 +10,18 @@ import scene
 import options
 from manager import game_manager
 
-#window = pyglet.window.Window()
-
-#env = { "kb" : { "menu" : { "up" : key.UP,
-                            #"down" : key.DOWN,
-                            #},          
-                 #},
-        #}
+def parse_info(info_path):
+    """Parse an information file and return name of song and artist"""
+    f = open(info_path, "r")
+    song = artist = ""
+    for line in f:
+        keyword = line.split()[0].strip(":").lower()
+        information = "".join(line.split()[1:])
+        if keyword == "song" or keyword == "name":
+            song = information
+        elif keyword == "artist":
+            artist = information
+    return song, artist
 
 class MenuItem:
     """Base class for menu objects."""
@@ -57,15 +62,16 @@ class MenuItem:
 
 class TextMenuItem(MenuItem, pyglet.text.Label):
     def __init__(self, cb, x, y, caption, batch, size=25, 
-                 hicolor=(255, 255, 0, 255), locolor=(255, 255, 255, 255)):
-        MenuItem.__init__(self, cb)
+                 hicolor=(255, 255, 0, 255), locolor=(255, 255, 255, 255),
+                 **kwargs):
         self.hicolor = hicolor
         self.locolor = locolor
         pyglet.text.Label.__init__(self, caption, x=x, y=y, batch=batch, 
                                    color=self.locolor, font_size=size, 
                                    anchor_y="top", anchor_x="center", 
-                                   font_name="Arial")
-
+                                   font_name="Arial", **kwargs)
+        MenuItem.__init__(self, cb)
+    
     def highlight(self):
         self.color = self.hicolor
 
@@ -73,10 +79,11 @@ class TextMenuItem(MenuItem, pyglet.text.Label):
         self.color = self.locolor
 
 class SpriteMenuItem(MenuItem, pyglet.sprite.Sprite):
-    def __init__(self, cb, x, y, image, batch):
+    def __init__(self, cb, x, y, image, batch, **kwargs):
+        pyglet.sprite.Sprite.__init__(self, image, x, y, batch=batch, **kwargs)
         MenuItem.__init__(self, cb)
-        pyglet.sprite.Sprite.__init__(self, image, x, y, batch=batch)
-    
+        self.lowlight()
+        
     def highlight(self):
         self.opacity = 255
 
@@ -86,28 +93,38 @@ class SpriteMenuItem(MenuItem, pyglet.sprite.Sprite):
 class MenuItemGroup(MenuItem, pyglet.graphics.Group):
     #arvet är inte helt snyggt, men vafan. Det borde va det bästa sättet
     def __init__(self, cb, x, y, z, members):
-        MenuItem.__init__(self, cb)
         pyglet.graphics.Group.__init__(self)
+        MenuItem.__init__(self, cb)
         self.members = members
         for member in self.members:
-            member.group = self
-        self.lastx = 0
-        self.lasty = 0
+            try:
+                #workaround för labels, hitta gärna nåt snyggare sätt
+                member._init_groups(self) #riktigt hackigt
+            except AttributeError:
+                member.group = self
         self.x = x
         self.y = y
         self.z = z
-        self.angle = 0
+        self.yrot = 0
 
     def set_state(self):
         glPushMatrix()
         glLoadIdentity()
         glTranslatef(self.x, self.y, self.z)
-        glRotatef(self.zrot, 0, 1, 0) # ? Varför roterar du kring z-axeln? Varför roterar du överhuvudtaget?
+        glRotatef(self.yrot, 0, 1, 0)
         glEnable(GL_DEPTH_TEST)
 
     def unset_state(self):
         glPopMatrix()
         glDisable(GL_DEPTH_TEST)
+
+    def highlight(self):
+        for member in self.members:
+            member.highlight()
+
+    def lowlight(self):
+        for member in self.members:
+            member.lowlight()
     
 class VertexMenuItem(MenuItem):
     def __init__(self, cb, vertices):
@@ -236,8 +253,6 @@ class SongSelect(BaseMenu):
                     elif fil == "info.txt":
                         attr = "info"
                         
-                    print os.path.join(path, fil)
-                    
                     data[attr] = os.path.join(path, fil)
                     
                 if data.has_key("sound") and data.has_key("midi") \
@@ -250,11 +265,16 @@ class SongSelect(BaseMenu):
 
                     picture = SpriteMenuItem(None, 0, -img.height/2, 
                                              img, self.batch)
+                    
+                    songname, artist = parse_info(data["info"]) #kan förbättras
+                    songtext = TextMenuItem(None, img.width/2, 0, songname, self.batch)
+                    artisttext = TextMenuItem(None, img.width/2, 
+                       -songtext.content_height - 5, artist, self.batch)
 
                     select_song = lambda d: lambda: game_manager.push(scene.GameScene(d["sound"], 
                                                                                       d["midi"]))
-                    item = MenuItemGroup(select_song(data), 0, 
-                                         options.window_height/2, 0, (picture,))
+                    item = MenuItemGroup(select_song(data), 0, 0, 0, 
+                            (picture,songtext, artisttext)) 
                     self.items.append(item)
                 else:
                     pass #hoppa över blir nog lättast
@@ -273,16 +293,6 @@ class SongSelect(BaseMenu):
         glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
         glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
 
-    #def game_draw(self, *args, **kwargs):
-    #    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    #    glPushMatrix()
-    #    glLoadIdentity()
-    #    glEnable(GL_DEPTH_TEST)
-    #    
-    #    BaseMenu.game_draw(self, *args, **kwargs)
-    # 
-    #    glDisable(GL_DEPTH_TEST)
-
     def on_resize(self, width, height):
         # Perspective
         glViewport(0, 0, width, height)
@@ -292,12 +302,7 @@ class SongSelect(BaseMenu):
         glMatrixMode(GL_MODELVIEW)
 
     def _select(self, number):
-        #print number
         BaseMenu._select(self, number)
-        #for n in xrange(5):
-            #if n > len(self.items) or (n < 0 and len(self.items) < 5):
-                #continue
-            #self.items[self.selected-n].x = n / 5.0 * options.window_width
         r = 500
         x_offset = options.window_width/2 - r# inte options!
         z_offset = -(2000 - r)
@@ -305,9 +310,9 @@ class SongSelect(BaseMenu):
             i = n - (len(self.items) - self.selected)
             v = 3 * math.pi / 2 + i * 2 * math.pi / len(self.items)
             self.items[n].x = -r * math.cos(v) + x_offset
-            self.items[n].y = 0
+            #self.items[n].y = 0
             self.items[n].z = -r * math.sin(v) + z_offset
-            self.items[n].zrot = 90 - v * 180 / math.pi
+            self.items[n].yrot = 90 - v * 180 / math.pi
 
     def on_key_press(self, window, symbol, modifiers):
         """Catches keyboard events.
