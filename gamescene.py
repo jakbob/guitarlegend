@@ -30,6 +30,7 @@ import tab
 
 import graphics
 import particlesystem
+from manager import game_manager
 
 def midify(f):                       
     """                              
@@ -52,8 +53,9 @@ class GameScene(scene.TestScene):
         self.particles = particlesystem.ParticleSystem(velfactor=50)
 
     def end(self):
+        if self.music.playing:
+            self.music.stop()
 
-        self.music.stop() # Should check if music is still playing. Stopping twice seems to hang the program.
     def on_resize(self, width, height):
 
         # Perspective
@@ -122,7 +124,7 @@ class GameScene(scene.TestScene):
         glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
     
     def _load_file(self, soundfile, midifile):
-
+        
         self.tab = tab.Tab(midifile)
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
@@ -156,7 +158,11 @@ class GameScene(scene.TestScene):
         music = pyglet.media.load(soundfile)
         self.music = pyglet.media.StaticSource(music).play()
         self.lasttime = self.music.time    # The position in the song in the last frame
-
+        #@self.music.event
+        def on_music_eos(): #when song is finished, exit
+            game_manager.pop()
+        self.music._on_eos = on_music_eos #misstänker bugg i pyglet
+    
     def _check_tempochange(self, t):
 
         """Check if there are more changes in tempo and if 
@@ -169,8 +175,11 @@ class GameScene(scene.TestScene):
             self.tempo = self.tab.tempo[self.temponr][1]
 
     def _update_notes(self, dt):
-        self._update_active_notes(dt)
-        self._set_active_notes(dt)
+        """Make sure there are notes to update, and update them"""
+        if self.active_sprites:
+            self._update_active_notes(dt)
+            if self.notecounter < len(self.death_notes):
+                self._set_active_notes(dt)
 
     def _update_active_notes(self, dt):
 
@@ -205,9 +214,7 @@ class GameScene(scene.TestScene):
         # At the same time, we add new notes at the end once the last 
         # currently active note is supposed to appear on screen.
         # Again, this is not the same anymore.
-        if self.active_sprites \
-                and self.active_sprites[-1].sprite.x < (options.window_width + 500) \
-                and len(self.death_notes) > self.notecounter: 
+        if self.active_sprites[-1].sprite.x < (options.window_width + 500): 
 
             # Alternatively, one should store the length of the longest notes
             # This could cause bugs if the last note is longer than window_width + 200

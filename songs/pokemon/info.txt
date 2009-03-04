@@ -1,1 +1,2 @@
-skriva håhå 
+song: Pokemon Theme Song
+artist: dunno (Ash Ketchum?)
