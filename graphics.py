@@ -6,6 +6,7 @@
 # (c) Jonne Mickelin & Jakob Florell 2008-09
 
 import pyglet
+import os
 
 import error
 import options
@@ -107,6 +108,14 @@ class DeathNote:
         self.sprite.delete()
         self.label.delete()
         del self # Does not seem to do much
+        
+    def is_played(self):
+        self.played = True
+        #ändra färg här
+    
+    def missed(self):
+        self.played = False
+        self.sprite.color = options.dead_note_color
 
 def create_guitar_texture(length):
     

@@ -95,7 +95,8 @@ class Scene(object):
         # Pyglet default
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(0, width, 0, height, -1, 1)
+        glViewport(0, 0, width, height)
+        glOrtho(0, options.window_width, 0, options.window_height, -1, 1)
         glMatrixMode(GL_MODELVIEW)
 
 class TestScene(Scene):
