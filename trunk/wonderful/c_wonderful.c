@@ -184,13 +184,14 @@ wonderful_init(inputData * data, PaStream ** stream,
   PaError err;
 
   /* Initialize portaudio */
-    err = Pa_Initialize();
+  printf("\tSo, let's get Portaudio started.\n"); fflush(stdout);
+  err = Pa_Initialize();
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
-
+  printf("\tWohoo!\n"); fflush(stdout);
   /* Define the format of the returned sound.
    * Default is from the default microphone, mono, and 
    * as a floating number between -1.0 and 1.0.
@@ -200,14 +201,23 @@ wonderful_init(inputData * data, PaStream ** stream,
    * the FFT.
    */
   //printf("Setting input params\n"); fflush(stdout);
+  printf("\tHmm. What is the default input device?\n"); fflush(stdout);
   input_parameters.device = Pa_GetDefaultInputDevice();
+  printf("\tGot it.n"); fflush(stdout);
+  printf("\tNow, let's set up some parameters.\n"); fflush(stdout);
   input_parameters.channelCount = 1;
   input_parameters.sampleFormat = paFloat32;
+  printf("\tLooking good.\n"); fflush(stdout);
+  printf("\tthelatencysayswhat?.\n"); fflush(stdout);
+  printf("%i", input_parameters.device);
   input_parameters.suggestedLatency = Pa_GetDeviceInfo(input_parameters.device)->defaultLowInputLatency;
+  printf("\t\"What?\"\n"); fflush(stdout);
+  printf("\tSMACK!\n"); fflush(stdout);
   input_parameters.hostApiSpecificStreamInfo = NULL;
-  
+  printf("\tOuch!\n"); fflush(stdout);
   //printf("Opening stream\n"); fflush(stdout);
   //printf("%i", stream);
+  printf("\tIs the format we are using supported?\n"); fflush(stdout);
   err = Pa_IsFormatSupported(&input_parameters, NULL, sample_rate);
   
   if (paFormatIsSupported != paNoError)
@@ -215,7 +225,8 @@ wonderful_init(inputData * data, PaStream ** stream,
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
-
+  printf("\tIt is!\n"); fflush(stdout);
+  printf("\tStreamemon! I choose you!\n"); fflush(stdout);
   err = Pa_OpenStream( stream,
 		       &input_parameters,
 		       NULL,              // Output parameters
@@ -229,17 +240,20 @@ wonderful_init(inputData * data, PaStream ** stream,
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
-  
+  printf("\tGo!\n"); fflush(stdout);
   /* The callback function now runs in its own thread */
   //printf("Starting stream\n"); fflush(stdout);
+  printf("\tUse your start attack!\n"); fflush(stdout);
   err = Pa_StartStream(*stream);
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
+  printf("\tIt's super effective!\n"); fflush(stdout);
   //printf("%i\n", stream);
   //printf("Returning\n"); fflush(stdout);
+  printf("\tThat's enough! Let's return!\n"); fflush(stdout);
   return 0;
 }
 
