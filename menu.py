@@ -10,6 +10,8 @@ import scene
 import options
 from manager import game_manager
 
+defaultimage = pyglet.image.load(os.path.join("data", "defaultimage.png"))
+
 def parse_info(info_path):
     """Parse an information file and return name of song and artist"""
     f = open(info_path, "r")
