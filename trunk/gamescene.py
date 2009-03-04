@@ -35,6 +35,8 @@ import graphics
 import particlesystem
 from manager import game_manager
 
+the_danger_point = 100 #the point where the notes should be played
+
 def midify(f):                       
     """                              
     Returns the midi keycode for given frequency.
@@ -177,6 +179,8 @@ class GameScene(scene.TestScene):
             note.label.begin_update()
             note.label.batch = self.label_batch
             note.label.end_update()
+        
+        self.the_edge = [] #notes that are to be played
 
         self.temponr = 0
         self.tempo = self.tab.tempo[self.temponr][1] #välj första tempot
@@ -184,9 +188,10 @@ class GameScene(scene.TestScene):
         music = pyglet.media.load(soundfile)
         self.music = pyglet.media.StaticSource(music).play()
         self.lasttime = self.music.time    # The position in the song in the last frame
-        #@self.music.event
         #self.music.event
+        self.music._old_eos = self.music._on_eos
         def on_music_eos():
+            self.music._old_eos()
             game_manager.pop()
         self.music._on_eos = on_music_eos #misstänker bugg i pyglet
     
@@ -207,29 +212,19 @@ class GameScene(scene.TestScene):
             self._update_active_notes(dt)
             if self.notecounter < len(self.death_notes):
                 self._set_active_notes(dt)
+            self.check_whos_playing([]) #såhär nånting?
 
     def _update_active_notes(self, dt):
-
+        self.the_edge = [] #
         # Update only active notes
         for note in self.active_sprites:
             # Movement during one second
             #vel = graphics.quarterlen * 1000000 / float(self.tempo) # Tempo is in microseconds
             note.update(dt, self.tempo)#(time - self.lasttime))
-
-            # Change the colour of missed notes
-            if not note.failed and note.sprite.x < 0:
-                if note.played:
-                    self.points += 1 # This sounds bad
-                    print self.points
-                    self.particles.explode(pos=(note.sprite.x,
-                                                note.sprite.y, 0))
-                else:
-                    note.failed = True
-                    note.sprite.color = options.dead_note_color
-                    #probably temp
-                    self.particles.explode(pos=(note.sprite.x,
-                                                note.sprite.y, 0))
-
+            if note.sprite.x < the_danger_point and \
+               note.sprite.x + note.sprite.width > the_danger_point:
+                self.the_edge.append(note)
+            
     def _set_active_notes(self, dt):
         # Kill the notes that have travelled far enough. This distance 
         # used to be the screen width, but this does not apply when it's tilted
@@ -273,3 +268,17 @@ class GameScene(scene.TestScene):
                              for (p, mag) in largest 
                             if mag > options.FREQ_THRESHOLD]
             return [midify(f) for f in  hertz_freqs]
+    
+    def check_whos_playing(self, notes_played):
+        for note in self.the_edge:
+            if note.note.pitch in notes_played:
+                note.is_played()
+                #give points
+                self.points += 1 # This sounds bad
+                print self.points
+                self.particles.explode(pos=(note.sprite.x,
+                                            note.sprite.y, 0))
+            else:
+                note.missed()
+                    
+            
