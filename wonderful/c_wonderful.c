@@ -40,7 +40,7 @@ struct ring_buffer
 typedef struct
 {
   struct ring_buffer * samples;
-
+  unsigned int consumed;
 } inputData;
 
 /********************************************
@@ -168,7 +168,7 @@ input_callback( const void * input,
   // Oh, and if frames_per_buffer is more than is available, we
   // will start dropping frames, which is doubleplusungood.
   written = ring_buffer_write(out, in, frames_per_buffer);
-  //printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
+  printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
 
   return paContinue;
 }
@@ -203,13 +203,19 @@ wonderful_init(inputData * data, PaStream ** stream,
   //printf("Setting input params\n"); fflush(stdout);
   printf("\tHmm. What is the default input device?\n"); fflush(stdout);
   input_parameters.device = Pa_GetDefaultInputDevice();
-  printf("\tGot it.n"); fflush(stdout);
+  if (input_parameters.device == paNoDevice)
+    {
+      fprintf(stderr, "Could not get input device: %s\n", Pa_GetErrorText(input_parameters.device));
+      return -1;
+    }
+
+  printf("\t%i\n", input_parameters.device);
+  printf("\tGot it.\n"); fflush(stdout);
   printf("\tNow, let's set up some parameters.\n"); fflush(stdout);
   input_parameters.channelCount = 1;
   input_parameters.sampleFormat = paFloat32;
   printf("\tLooking good.\n"); fflush(stdout);
-  printf("\tthelatencysayswhat?.\n"); fflush(stdout);
-  printf("%i", input_parameters.device);
+  printf("\tthelatencysayswhat?\n"); fflush(stdout);
   input_parameters.suggestedLatency = Pa_GetDeviceInfo(input_parameters.device)->defaultLowInputLatency;
   printf("\t\"What?\"\n"); fflush(stdout);
   printf("\tSMACK!\n"); fflush(stdout);
@@ -266,12 +272,26 @@ wonderful_terminate(inputData * data, PaStream ** stream)
   PaError err;
   // The stream needs to be explicitly stopped on windows machines.
   // On Linux, Pa_Terminate is enough. We stop it anyways.
+  if (Pa_IsStreamActive(*stream))
+    {
+      fprintf(stderr, "\tYarr! There be active streams!\n");
+    }
+  else
+    {
+      fprintf(stderr, "\tNo activity here!\n");
+    }
+  
   err = Pa_AbortStream(*stream); // The stream never exits, so StopStream wouldn't work
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
       return 1;
     }
+  if (!Pa_IsStreamStopped(*stream))
+    {
+      fprintf(stderr, "\nDurr. I'm not stopped. Bleaeaeeaeh!\n");
+    }
+  
   err = Pa_Terminate();
   if (err != paNoError)
     {
@@ -300,16 +320,15 @@ wonderful_terminate(inputData * data, PaStream ** stream)
 complex *
 wonderful_munch(inputData * data, complex * dest, unsigned int length)
 {
-  static int consumed = 0;
   int lenconsumed;
 
   lenconsumed = ring_buffer_consume(data->samples, dest+consumed, length - consumed);
-  consumed += lenconsumed;
+  data->consumed += lenconsumed;
   //printf("%i ", lenconsumed);
   //printf("Consumed %i samples total\n", consumed);
   if (consumed >= length)
     {
-      consumed = 0;
+      data->consumed = 0;
       //printf("%i\n", consumed);
       return FFT(dest, length);
     }
@@ -331,20 +350,25 @@ main()
   int numspaces = 0;
   
   /* Set up the struct that we send to the callback function */
+
+  printf("Okay...!\n"); fflush(stdout);
+
   data.samples = ring_buffer_init(2*SAMPLES);     // FREE ME
   if (data.samples == NULL)
     {
       printf("Could not allocate memory for complex input samples!\n");
       return 1;
     }
-  err = wonderful_init(&data, stream);
+  data.consumed = 0;
+  
+  err = wonderful_init(&data, &stream, 44100, 8192);
   if (err != 0)
     {
       printf("An error occurred. Could not initialize portaudio\n");
     }
-  
+  printf("Once!\n"); fflush(stdout);  
   //FFT(data.samples, SAMPLES);
-  while (1)
+  /*while (1)
     {
       lenconsumed = ring_buffer_consume(data.samples, consumed, 2*SAMPLES);
       //printf("Consumed %i frames\n", lenconsumed);
@@ -357,10 +381,44 @@ main()
 	    }
 	  printf("|\n");
 	}
-    }
+	}*/
   
-  err = wonderful_terminate(&data, stream);
+  err = wonderful_terminate(&data, &stream);
+  printf("Dead.\n"); fflush(stdout);  
 
+  data.samples = ring_buffer_init(2*SAMPLES);     // FREE ME
+  if (data.samples == NULL)
+    {
+      printf("Could not allocate memory for complex input samples!\n");
+      return 1;
+    }
+
+  err = wonderful_init(&data, &stream, 44100, 8192);
+  if (err != 0)
+    {
+      printf("An error occurred. Could not initialize portaudio\n");
+    }
+  printf("Twice!\n"); fflush(stdout);  
+  err = wonderful_terminate(&data, &stream);
+  printf("Dead.\n"); fflush(stdout);  
+
+  data.samples = ring_buffer_init(2*SAMPLES);     // FREE ME
+  if (data.samples == NULL)
+    {
+      printf("Could not allocate memory for complex input samples!\n");
+      return 1;
+    }
+
+  err = wonderful_init(&data, stream, 44100, 8192);
+  if (err != 0)
+    {
+      printf("An error occurred. Could not initialize portaudio\n");
+    }
+  printf("Thrice!\n"); fflush(stdout);  
+  err = wonderful_terminate(&data, &stream);
+  printf("Dead.\n"); fflush(stdout);  
+  
+  printf("Okay!\n"); fflush(stdout);
   return 0;
 }
 #endif

@@ -37,7 +37,7 @@ struct ring_buffer
 typedef struct
 {
   struct ring_buffer * samples;
-
+  unsigned int consumed;
 } inputData;
 
 struct ring_buffer * ring_buffer_init(unsigned int size);
