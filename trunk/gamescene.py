@@ -57,13 +57,11 @@ class GameScene(scene.TestScene):
         self._load_file(soundfile, midifile)
         self.particles = particlesystem.ParticleSystem(velfactor=50)
 
-        wonderful.init(options.SAMPLE_RATE, options.DFT_SIZE)
-
     def end(self):
         if self.music.playing:
             self.music.stop()
         print "in end, yo"
-        wonderful.terminate()
+        #wonderful.terminate()
 
     def on_resize(self, width, height):
 
@@ -128,10 +126,20 @@ class GameScene(scene.TestScene):
         self.particles.update(t - self.lasttime)
         self.lasttime = t
         
-        sound = self._get_sound_input()
-        if sound:
-            print sound
-
+        #sound = self._get_sound_input()
+        #if sound:
+        #    print sound
+        freqs = wonderful.munch()
+        if freqs is not None:
+            lowest_hearable = int(20*options.DFT_SIZE/float(options.SAMPLE_RATE))
+            relevant_freqs = freqs[lowest_hearable:options.DFT_SIZE/2]
+            largest = heapq.nlargest(6, enumerate(relevant_freqs), key=(lambda (num, amp): amp))
+            hertz_freqs = [(p + lowest_hearable) * float(options.SAMPLE_RATE) / options.DFT_SIZE
+                             for (p, mag) in largest 
+                            if mag > options.FREQ_THRESHOLD]
+            print [midify(f) for f in  hertz_freqs]
+        else:
+            print "Hej"
         # Here we should check if the song has ended
         # Might I suggest that there is a pause between 
         # that and the showing of the score or whatever
@@ -189,6 +197,7 @@ class GameScene(scene.TestScene):
         self.music = pyglet.media.StaticSource(music).play()
         self.lasttime = self.music.time    # The position in the song in the last frame
         #self.music.event
+
         self.music._old_eos = self.music._on_eos
         def on_music_eos():
             self.music._old_eos()
@@ -259,6 +268,7 @@ class GameScene(scene.TestScene):
             self.notecounter += 1
 
     def _get_sound_input(self):
+
         freqs = wonderful.munch()
         if freqs is not None:
             lowest_hearable = int(20*options.DFT_SIZE/float(options.SAMPLE_RATE))
@@ -280,5 +290,3 @@ class GameScene(scene.TestScene):
                                             note.sprite.y, 0))
             else:
                 note.missed()
-                    
-            

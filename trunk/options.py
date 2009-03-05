@@ -41,8 +41,8 @@ FREQ_THRESHOLD = 100
 ##########################
 #     Window settings    #
 ##########################
-window_width = 800
-window_height = 600
+window_width = 1024
+window_height = 786
 
 
 from pyglet.window import key

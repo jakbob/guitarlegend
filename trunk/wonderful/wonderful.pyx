@@ -27,7 +27,8 @@ cdef extern from "c_wonderful.h":
 
     ctypedef struct inputData:
         ring_buffer * samples
-    
+        unsigned int consumed
+
     ring_buffer * ring_buffer_init(unsigned int size)
 
     int wonderful_init(inputData * data, PaStream ** stream, unsigned int sample_rate, unsigned int size) with gil
@@ -61,7 +62,7 @@ cdef _init(int sample_rate, int size):
     # pointers
     print "Then let's initialize the _retdata"
     _retdata = <complex *>malloc(size*sizeof(complex)) # FREEME
-
+    print "Retdata is", <int>_retdata
     if _retdata == NULL:
         print "But we couldn't!"
         raise Exception("Could not allocate memory")
@@ -71,6 +72,10 @@ cdef _init(int sample_rate, int size):
     # Freed by wonderful_terminate. This is a bad design decision, yes.
     print "Let's see if we can get that ringbuffer working."
     _input_data.samples = ring_buffer_init(2*size) 
+    if _input_data.samples == NULL:
+        raise Exception("Could not allocate memory")
+    _input_data.consumed = 0
+    print "_input_data.samples is", <int>_input_data.samples
     print "Woo!"
     # Starts the thread
     print "Can we...start C-part of wonderful?"
@@ -108,11 +113,14 @@ cdef _terminate():
     err = Pa_IsStreamActive(_stream)
     if err != 1:
         raise Exception("wonderful is not initialized!")
-
+    
+    print "Freeing retdata"
     free(_retdata)
 
     # Stops the thread
+    print "Hiya, I'ma gonna terminata"
     wonderful_terminate(&_input_data, &_stream)
+    _input_data.consumed = 0
 
 def terminate():
     """Terminate and clean up the wonderful library and kill the portaudio thread. 

@@ -90,9 +90,16 @@ def main():
     
     # Add one scene
     game_manager.push(menu.MainMenu())
-    error.debug("Hiya, I'm gonna hand control over to the game manager")
+
+    # Start sound recordning here. Something is wrong with wonderful,
+    # leading to strange segfaults. I'm gonna see if this fixes it.
+    import wonderful
+    wonderful.init(options.SAMPLE_RATE, options.DFT_SIZE)
+    
     # Hand control over to the Game manager
+    error.debug("Hiya, I'm gonna hand control over to the game manager")
     game_manager.run()
+    wonderful.terminate()
 
 if __name__ == "__main__":
     main()
