@@ -323,7 +323,8 @@ class SongSelect(BaseMenu):
         x_offset = options.window_width/2 - r# inte options!
         z_offset = -(2000 - r)
         for n in xrange(len(self.items)):
-            i = (n - (len(self.items) - self.selected))
+            #i = (n - (len(self.items) - self.selected))
+            i = n - self.selected
             v = 3 * math.pi / 2 + i * 2 * math.pi / len(self.items)
             self.items[n].x = r * math.cos(v) + x_offset
             #self.items[n].y = 0
