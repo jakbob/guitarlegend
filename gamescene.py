@@ -119,8 +119,14 @@ class GameScene(scene.TestScene):
         # The progress of the notes is synchronized with the background song.
         t = self.music.time
         self._check_tempochange(t)
+        #let's see if it works
+        if t == self.lasttime:
+            delta_time = self.offsync = dt/2 #move a little
+        else:
+            delta_time = t - self.lasttime - self.offsync
+            self.offsync = 0
         try:
-            self._update_notes(dt)#t - self.lasttime)
+            self._update_notes(delta_time)
         except IndexError:
             pass
         self.particles.update(t - self.lasttime)
@@ -169,7 +175,7 @@ class GameScene(scene.TestScene):
         # Create the textures for all the notes
         self.death_notes = []            # Graphics for all notes, active or inactive
         for note in self.tab.all_notes:
-            x = (note.start) * graphics.quarterlen / self.tab.ticksPerQuarter
+            x = the_danger_point + (note.start) * graphics.quarterlen / self.tab.ticksPerQuarter
             y = (6 - note.string) / 6.0 * self.guitar_neck.height + 3.5 # 2 is calibration
 
             notegraphic = graphics.DeathNote(note, self.tab.ticksPerQuarter,
@@ -196,8 +202,7 @@ class GameScene(scene.TestScene):
         music = pyglet.media.load(soundfile)
         self.music = pyglet.media.StaticSource(music).play()
         self.lasttime = self.music.time    # The position in the song in the last frame
-        #self.music.event
-
+        self.offsync = 0
         self.music._old_eos = self.music._on_eos
         def on_music_eos():
             self.music._old_eos()
