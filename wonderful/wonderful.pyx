@@ -47,12 +47,10 @@ cdef _init(int sample_rate, int size):
     global _size
 
     cdef int err
-    print "Is stream active?"
+
     err = Pa_IsStreamActive(_stream)
     if err == 1:
-        print "Yes!"
         raise Exception("wonderful is already initialized!")
-    print "No!"
     _size = size
 
     # Initialize the temporary container for munch. 
@@ -60,32 +58,22 @@ cdef _init(int sample_rate, int size):
     # Recall that the ringbuffer keeps one sample of 
     # inaccessible data between the write and consume
     # pointers
-    print "Then let's initialize the _retdata"
     _retdata = <complex *>malloc(size*sizeof(complex)) # FREEME
-    print "Retdata is", <int>_retdata
     if _retdata == NULL:
-        print "But we couldn't!"
         raise Exception("Could not allocate memory")
 
-    print "I did, and I'm loving it!"
-
     # Freed by wonderful_terminate. This is a bad design decision, yes.
-    print "Let's see if we can get that ringbuffer working."
     _input_data.samples = ring_buffer_init(2*size) 
     if _input_data.samples == NULL:
         raise Exception("Could not allocate memory")
     _input_data.consumed = 0
-    print "_input_data.samples is", <int>_input_data.samples
-    print "Woo!"
+
     # Starts the thread
-    print "Can we...start C-part of wonderful?"
     err = wonderful_init(&_input_data, &_stream, sample_rate, size)
 
     if err != 0:
-        print "Noo!"
         _terminate()
         raise Exception("Could not initialize portaudio.")
-    print "Yay!"
 
 def isactive():
     if Pa_IsStreamActive(_stream):
@@ -114,11 +102,9 @@ cdef _terminate():
     if err != 1:
         raise Exception("wonderful is not initialized!")
     
-    print "Freeing retdata"
     free(_retdata)
 
     # Stops the thread
-    print "Hiya, I'ma gonna terminata"
     wonderful_terminate(&_input_data, &_stream)
     _input_data.consumed = 0
 
@@ -139,7 +125,7 @@ cdef complex_to_mag_list(complex* data, int length):
     for i from 0 <= i < length:
         re = data[i].re
         im = data[i].im
-        ret_list.append(sqrt(re*re + im*im))
+        ret_list.append(sqrt(re*re + im*im)) ## Ger overflow varannan buffer.
     
     return ret_list
 
@@ -160,7 +146,9 @@ cdef _munch():
         if ret == NULL: # Unsuccessful to perform the DFT
             return None # Better luck next time
         else:
+            print ret[4].im
             ret_list = complex_to_mag_list(_retdata, _size)
+            print ret_list[4]
             return ret_list
 
 def munch():

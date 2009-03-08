@@ -36,7 +36,7 @@ SHOW_FRAMERATE = False
 
 SAMPLE_RATE = 44100
 DFT_SIZE = 8192
-FREQ_THRESHOLD = 100
+FREQ_THRESHOLD = 200
 
 ##########################
 #     Window settings    #

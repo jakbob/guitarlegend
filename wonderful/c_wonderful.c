@@ -120,7 +120,8 @@ ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendat
       lendata = length;
     }
   consumed = lendata;
-  
+  //printf("Can consume %i data", consumed); fflush(stdout);
+    
   while (lendata)
     {
       block = lendata;
@@ -168,7 +169,7 @@ input_callback( const void * input,
   // Oh, and if frames_per_buffer is more than is available, we
   // will start dropping frames, which is doubleplusungood.
   written = ring_buffer_write(out, in, frames_per_buffer);
-  printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
+  //printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
 
   return paContinue;
 }
@@ -321,13 +322,16 @@ complex *
 wonderful_munch(inputData * data, complex * dest, unsigned int length)
 {
   int lenconsumed;
-
-  lenconsumed = ring_buffer_consume(data->samples, dest+consumed, length - consumed);
+  //printf("Dest is now: %i\n", dest+data->consumed); fflush(stdout);
+  
+  lenconsumed = ring_buffer_consume(data->samples, dest+data->consumed, length - data->consumed);
   data->consumed += lenconsumed;
   //printf("%i ", lenconsumed);
   //printf("Consumed %i samples total\n", consumed);
-  if (consumed >= length)
+  if (data->consumed >= length)
     {
+      printf("%i\n", data->consumed);
+      printf("lenconsumed: %i\n", lenconsumed);
       data->consumed = 0;
       //printf("%i\n", consumed);
       return FFT(dest, length);
