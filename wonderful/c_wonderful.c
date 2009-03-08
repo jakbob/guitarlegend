@@ -43,6 +43,18 @@ typedef struct
   unsigned int consumed;
 } inputData;
 
+
+void print_array(complex * array, unsigned int length)
+{
+  int i;
+  printf("The array is like follows: \n");
+  for (i = 0; i < length; i++)
+    {
+      printf("%lf, ", array[i].re);
+    }
+  printf("\n");
+}
+
 /********************************************
  * Functions for controlling the ringbuffer *
  ********************************************/
@@ -88,13 +100,15 @@ ring_buffer_write(struct ring_buffer * rb, const float * src, unsigned int lenda
 	{
 	  block = rb->size - rb->write_index;
 	}
-
+      //printf("\n");
       for (i = 0; i < block; i++)
 	{
+	  //printf("%i, ", rb->write_index + i);
 	  rb->data[rb->write_index + i].re = src[i];
 	  rb->data[rb->write_index + i].im = 0.0;
 	}
 
+      src += block;
       rb->write_index = rb->write_index + block;
 
       if (rb->write_index == rb->size)
@@ -129,18 +143,23 @@ ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendat
 	{
 	  block = rb->size - rb->consume_index;
 	}
-
-      for (i = 1; i <= block; i++)
+      //printf("BLOCK = %i\n", block);
+      for (i = 0; i < block; i++)
 	{
-	  dest[i-1] = rb->data[rb->consume_index + i];
+	  //printf("%lf, ", rb->data[rb->consume_index + i]);
+	  //printf("%lf, ", rb->data[rb->size - 1]);
+	  //printf("Index %i\n", rb->consume_index + i);
+	  dest[i] = rb->data[rb->consume_index + i];
 	}
-
+      
+      dest += block;
       rb->consume_index = rb->consume_index + block;
-
       if (rb->consume_index == rb->size)
 	{
 	  rb->consume_index = 0;
 	}
+      //printf("Consume_index = %i\n", rb->consume_index);
+
       lendata -= block;
     }
   //if (consumed == 0){ printf("Could not consume!\n"); }
@@ -168,7 +187,10 @@ input_callback( const void * input,
   // Just copy the stuffs! I hope this is enough to make it work. 
   // Oh, and if frames_per_buffer is more than is available, we
   // will start dropping frames, which is doubleplusungood.
+  //printf("frames_per_buffer: %i\n", frames_per_buffer);
   written = ring_buffer_write(out, in, frames_per_buffer);
+  //printf("%lf, ", in[frames_per_buffer]);
+  //print_array(out->data, out->size);
   //printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
 
   return paContinue;
@@ -322,6 +344,7 @@ complex *
 wonderful_munch(inputData * data, complex * dest, unsigned int length)
 {
   int lenconsumed;
+  complex * ret;
   //printf("Dest is now: %i\n", dest+data->consumed); fflush(stdout);
   
   lenconsumed = ring_buffer_consume(data->samples, dest+data->consumed, length - data->consumed);
@@ -330,10 +353,13 @@ wonderful_munch(inputData * data, complex * dest, unsigned int length)
   //printf("Consumed %i samples total\n", consumed);
   if (data->consumed >= length)
     {
-      printf("%i\n", data->consumed);
-      printf("lenconsumed: %i\n", lenconsumed);
+      //print_array(dest, length);
+      //printf("%i\n", data->consumed);
+      //printf("lenconsumed: %i\n", lenconsumed);
       data->consumed = 0;
       //printf("%i\n", consumed);
+      //ret = FFT(dest, length);
+      //print_array(dest, length);
       return FFT(dest, length);
     }
   //printf("%i\n", consumed);

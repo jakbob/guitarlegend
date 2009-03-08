@@ -144,8 +144,6 @@ class GameScene(scene.TestScene):
                              for (p, mag) in largest 
                             if mag > options.FREQ_THRESHOLD]
             print [midify(f) for f in  hertz_freqs]
-        else:
-            print "Hej"
         # Here we should check if the song has ended
         # Might I suggest that there is a pause between 
         # that and the showing of the score or whatever

@@ -5,8 +5,8 @@ import time
 SAMPLE_RATE = 44100
 N = 16384
 wonderful.init(SAMPLE_RATE, N)
-wonderful.terminate()
-wonderful.init(SAMPLE_RATE, N)
+#wonderful.terminate()
+#wonderful.init(SAMPLE_RATE, N)
 
 lasttime = time.clock()
 

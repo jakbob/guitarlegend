@@ -224,7 +224,7 @@ class BaseMenu(scene.Scene):
 
 class MainMenu(BaseMenu):
     def __init__(self):
-        bg = pyglet.image.load(os.path.join("data", "menubg.png"))
+        bg = pyglet.resource.image("menubg.png")
         
         BaseMenu.__init__(self, bg)
         

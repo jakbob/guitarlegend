@@ -58,18 +58,18 @@ cdef _init(int sample_rate, int size):
     # Recall that the ringbuffer keeps one sample of 
     # inaccessible data between the write and consume
     # pointers
-    _retdata = <complex *>malloc(size*sizeof(complex)) # FREEME
+    _retdata = <complex *>malloc(_size*sizeof(complex)) # FREEME
     if _retdata == NULL:
         raise Exception("Could not allocate memory")
 
     # Freed by wonderful_terminate. This is a bad design decision, yes.
-    _input_data.samples = ring_buffer_init(2*size) 
+    _input_data.samples = ring_buffer_init(2*_size) 
     if _input_data.samples == NULL:
         raise Exception("Could not allocate memory")
     _input_data.consumed = 0
 
     # Starts the thread
-    err = wonderful_init(&_input_data, &_stream, sample_rate, size)
+    err = wonderful_init(&_input_data, &_stream, sample_rate, _size)
 
     if err != 0:
         _terminate()
@@ -146,9 +146,10 @@ cdef _munch():
         if ret == NULL: # Unsuccessful to perform the DFT
             return None # Better luck next time
         else:
-            print ret[4].im
+            print "Ret im is:", ret[_size-1].im
+            print "Ret re is:", ret[_size-1].re
             ret_list = complex_to_mag_list(_retdata, _size)
-            print ret_list[4]
+            #print ret_list[4]
             return ret_list
 
 def munch():
