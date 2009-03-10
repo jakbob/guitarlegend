@@ -23,7 +23,10 @@
 
 #include "dft.h"
 
-#define SAMPLES (1024)
+#define WONDERFUL_NOINIT (-2)
+#define WONDERFUL_ERROR (1)
+#define WONDERFUL_NODEV (-1)
+#define WONDERFUL_SUCCESS (0)
 
 struct ring_buffer
 {
@@ -44,7 +47,7 @@ typedef struct
 } inputData;
 
 
-void print_array(complex * array, unsigned int length)
+/*void print_array(complex * array, unsigned int length)
 {
   int i;
   printf("The array is like follows: \n");
@@ -53,7 +56,7 @@ void print_array(complex * array, unsigned int length)
       printf("%lf, ", array[i].re);
     }
   printf("\n");
-}
+  }*/
 
 /********************************************
  * Functions for controlling the ringbuffer *
@@ -100,10 +103,9 @@ ring_buffer_write(struct ring_buffer * rb, const float * src, unsigned int lenda
 	{
 	  block = rb->size - rb->write_index;
 	}
-      //printf("\n");
+
       for (i = 0; i < block; i++)
 	{
-	  //printf("%i, ", rb->write_index + i);
 	  rb->data[rb->write_index + i].re = src[i];
 	  rb->data[rb->write_index + i].im = 0.0;
 	}
@@ -134,7 +136,6 @@ ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendat
       lendata = length;
     }
   consumed = lendata;
-  //printf("Can consume %i data", consumed); fflush(stdout);
     
   while (lendata)
     {
@@ -143,12 +144,8 @@ ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendat
 	{
 	  block = rb->size - rb->consume_index;
 	}
-      //printf("BLOCK = %i\n", block);
       for (i = 0; i < block; i++)
 	{
-	  //printf("%lf, ", rb->data[rb->consume_index + i]);
-	  //printf("%lf, ", rb->data[rb->size - 1]);
-	  //printf("Index %i\n", rb->consume_index + i);
 	  dest[i] = rb->data[rb->consume_index + i];
 	}
       
@@ -158,11 +155,9 @@ ring_buffer_consume(struct ring_buffer * rb, complex * dest, unsigned int lendat
 	{
 	  rb->consume_index = 0;
 	}
-      //printf("Consume_index = %i\n", rb->consume_index);
 
       lendata -= block;
     }
-  //if (consumed == 0){ printf("Could not consume!\n"); }
 
   return consumed;
 }
@@ -187,11 +182,7 @@ input_callback( const void * input,
   // Just copy the stuffs! I hope this is enough to make it work. 
   // Oh, and if frames_per_buffer is more than is available, we
   // will start dropping frames, which is doubleplusungood.
-  //printf("frames_per_buffer: %i\n", frames_per_buffer);
   written = ring_buffer_write(out, in, frames_per_buffer);
-  //printf("%lf, ", in[frames_per_buffer]);
-  //print_array(out->data, out->size);
-  //printf("Dropped %i frames!\n", frames_per_buffer - written); fflush(stdout);
 
   return paContinue;
 }
@@ -205,16 +196,16 @@ wonderful_init(inputData * data, PaStream ** stream,
 {
   PaStreamParameters input_parameters;
   PaError err;
+  const PaDeviceInfo *device_info;
+  int num_devices, i;
 
   /* Initialize portaudio */
-  printf("\tSo, let's get Portaudio started.\n"); fflush(stdout);
   err = Pa_Initialize();
   if (err != paNoError)
     {
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
-      return 1;
+      return WONDERFUL_NOINIT;
     }
-  printf("\tWohoo!\n"); fflush(stdout);
   /* Define the format of the returned sound.
    * Default is from the default microphone, mono, and 
    * as a floating number between -1.0 and 1.0.
@@ -223,39 +214,53 @@ wonderful_init(inputData * data, PaStream ** stream,
    * value is not necessarily the size of what we send to 
    * the FFT.
    */
-  //printf("Setting input params\n"); fflush(stdout);
-  printf("\tHmm. What is the default input device?\n"); fflush(stdout);
+
+  /* Choose the input device. If the default one is not working, just go on 
+     until we find one. 
+  */
+  num_devices = Pa_GetDeviceCount();
+  if (num_devices < 0)
+    {
+      Pa_Terminate();
+      printf("Portaudio error: %s\n", Pa_GetErrorText(num_devices));
+      return WONDERFUL_ERROR;
+    }
   input_parameters.device = Pa_GetDefaultInputDevice();
+  for (i = 0; i < num_devices; i++)
+    {
+      if (input_parameters.device != paNoDevice)
+	{
+	  break;
+	}
+      
+      device_info = Pa_GetDeviceInfo(i);  
+      input_parameters.device = Pa_GetHostApiInfo(device_info->hostApi)->defaultInputDevice;
+      printf("input_parameters.device: %i\n", input_parameters.device); fflush(stdout);
+    }
+  printf("Selected device #%i\n", input_parameters.device);
+  
   if (input_parameters.device == paNoDevice)
     {
-      fprintf(stderr, "Could not get input device: %s\n", Pa_GetErrorText(input_parameters.device));
-      return -1;
+      Pa_Terminate();
+      fprintf(stderr, "Èrror: No available input devices!");
+      return WONDERFUL_NODEV;
     }
 
-  printf("\t%i\n", input_parameters.device);
-  printf("\tGot it.\n"); fflush(stdout);
-  printf("\tNow, let's set up some parameters.\n"); fflush(stdout);
   input_parameters.channelCount = 1;
   input_parameters.sampleFormat = paFloat32;
-  printf("\tLooking good.\n"); fflush(stdout);
-  printf("\tthelatencysayswhat?\n"); fflush(stdout);
   input_parameters.suggestedLatency = Pa_GetDeviceInfo(input_parameters.device)->defaultLowInputLatency;
-  printf("\t\"What?\"\n"); fflush(stdout);
-  printf("\tSMACK!\n"); fflush(stdout);
   input_parameters.hostApiSpecificStreamInfo = NULL;
-  printf("\tOuch!\n"); fflush(stdout);
-  //printf("Opening stream\n"); fflush(stdout);
-  //printf("%i", stream);
-  printf("\tIs the format we are using supported?\n"); fflush(stdout);
+
   err = Pa_IsFormatSupported(&input_parameters, NULL, sample_rate);
+  printf("Err: %i\n", err);
   
-  if (paFormatIsSupported != paNoError)
+  if (err != paFormatIsSupported)
     {
+      Pa_Terminate();
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
-      return 1;
+      return WONDERFUL_ERROR;
     }
-  printf("\tIt is!\n"); fflush(stdout);
-  printf("\tStreamemon! I choose you!\n"); fflush(stdout);
+
   err = Pa_OpenStream( stream,
 		       &input_parameters,
 		       NULL,              // Output parameters
@@ -266,24 +271,21 @@ wonderful_init(inputData * data, PaStream ** stream,
 		       data);
   if (err != paNoError)
     {
+      Pa_Terminate();
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
-      return 1;
+      return WONDERFUL_ERROR;
     }
-  printf("\tGo!\n"); fflush(stdout);
+
   /* The callback function now runs in its own thread */
-  //printf("Starting stream\n"); fflush(stdout);
-  printf("\tUse your start attack!\n"); fflush(stdout);
   err = Pa_StartStream(*stream);
   if (err != paNoError)
     {
+      Pa_Terminate();
       printf("Portaudio error: %s\n", Pa_GetErrorText(err));
-      return 1;
+      return WONDERFUL_ERROR;
     }
-  printf("\tIt's super effective!\n"); fflush(stdout);
-  //printf("%i\n", stream);
-  //printf("Returning\n"); fflush(stdout);
-  printf("\tThat's enough! Let's return!\n"); fflush(stdout);
-  return 0;
+
+  return WONDERFUL_SUCCESS;
 }
 
 /**
@@ -345,24 +347,15 @@ wonderful_munch(inputData * data, complex * dest, unsigned int length)
 {
   int lenconsumed;
   complex * ret;
-  //printf("Dest is now: %i\n", dest+data->consumed); fflush(stdout);
   
   lenconsumed = ring_buffer_consume(data->samples, dest+data->consumed, length - data->consumed);
   data->consumed += lenconsumed;
-  //printf("%i ", lenconsumed);
-  //printf("Consumed %i samples total\n", consumed);
+
   if (data->consumed >= length)
     {
-      //print_array(dest, length);
-      //printf("%i\n", data->consumed);
-      //printf("lenconsumed: %i\n", lenconsumed);
       data->consumed = 0;
-      //printf("%i\n", consumed);
-      //ret = FFT(dest, length);
-      //print_array(dest, length);
       return FFT(dest, length);
     }
-  //printf("%i\n", consumed);
   return NULL;
 }
 
