@@ -13,6 +13,7 @@ import error
 
 import math
 import heapq
+import os
 
 ####################
 # Required Modules #
@@ -98,6 +99,8 @@ class GameScene(scene.TestScene):
         # The labels are also drawn rotated, which makes them less readable. 
         # I'll work on improving this, when I have time.
         self.label_batch.draw()
+        glTranslatef(0, 0, 1.0)
+        self.deathbar.draw()
         glDisable(GL_DEPTH_TEST)
 
         # Try to uncomment this and see why it is commented out.
@@ -169,7 +172,11 @@ class GameScene(scene.TestScene):
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
         self.guitar_neck = graphics.create_guitar_texture(3000)
-
+        self.deathbar = pyglet.sprite.Sprite(
+           pyglet.image.load(
+           os.path.join(options.data_dir, "thingy.png")),
+           the_danger_point, 0)
+    
         # Create the textures for all the notes
         self.death_notes = []            # Graphics for all notes, active or inactive
         for note in self.tab.all_notes:
