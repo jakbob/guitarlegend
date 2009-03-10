@@ -123,7 +123,7 @@ class GameScene(scene.TestScene):
         t = self.music.time
         self._check_tempochange(t)
         #let's see if it works
-        if t == self.lasttime:
+        if t == self.lasttime and False: #se till att det aldrig inträffar
             delta_time = self.offsync = dt/2 #move a little
         else:
             delta_time = t - self.lasttime - self.offsync
@@ -239,7 +239,7 @@ class GameScene(scene.TestScene):
         for note in self.active_sprites:
             # Movement during one second
             #vel = graphics.quarterlen * 1000000 / float(self.tempo) # Tempo is in microseconds
-            note.update(dt, self.tempo)#(time - self.lasttime))
+            note.update(dt, self.tempo)
             if note.sprite.x < the_danger_point and \
                note.sprite.x + note.sprite.width > the_danger_point:
                 self.the_edge.append(note)
