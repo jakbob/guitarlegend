@@ -146,10 +146,7 @@ cdef _munch():
         if ret == NULL: # Unsuccessful to perform the DFT
             return None # Better luck next time
         else:
-            print "Ret im is:", ret[_size-1].im
-            print "Ret re is:", ret[_size-1].re
             ret_list = complex_to_mag_list(_retdata, _size)
-            #print ret_list[4]
             return ret_list
 
 def munch():
