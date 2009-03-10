@@ -84,6 +84,11 @@ kb.test.tabtest = key.T
 kb.test.maintest = key.M
 kb.test.up = key.ESCAPE
 
+#########
+# Paths #
+#########
+data_dir = "data" #bettrify later
+
 #########################
 # Guitar scene settings #
 #########################
