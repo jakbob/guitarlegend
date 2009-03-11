@@ -43,6 +43,7 @@ FREQ_THRESHOLD = 200
 ##########################
 window_width = 800 #1024
 window_height = 600 #786
+fps = 30
 
 
 from pyglet.window import key
