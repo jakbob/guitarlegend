@@ -35,6 +35,7 @@ import wonderful
 import graphics
 import particlesystem
 from manager import game_manager
+from camera import Camera
 
 the_danger_point = 100 #the point where the notes should be played
 
@@ -55,9 +56,10 @@ class GameScene(scene.TestScene):
         self.name = "Ingame"
         self._setup_graphics()
 
+        self.camera = Camera((0,0), 5)
         self._load_file(soundfile, midifile)
         self.particles = particlesystem.ParticleSystem(velfactor=50)
-
+    
     def end(self):
         if self.music.playing:
             self.music.stop()
@@ -73,6 +75,7 @@ class GameScene(scene.TestScene):
         ## glOrtho(-width/2., width/2., -height/2., height/2., 0, 1000) # I should save this snippet somewhere else
         gluPerspective(30, width / float(height), .1, 10000)
         glMatrixMode(GL_MODELVIEW)
+        #self.camera.focus(width, height)
 
     def game_draw(self, window):
 
@@ -80,11 +83,16 @@ class GameScene(scene.TestScene):
                                                            # How about on_switch_to and on_witch_from functions?
         glPushMatrix()
         glLoadIdentity()
-        
+
         glEnable(GL_DEPTH_TEST)
+
+        #glTranslatef(0,0,-10.0)
+        #self.pointmeter.draw()   
+    
         glTranslatef(-window.width/2.0 + 100, 
                       -self.guitar_neck.height/2.0, 
-                      -900.0)  # Ugly magic number.
+                      -900.0)# Ugly magic number.
+        self.pointmeter.draw()
 
         # Draw the notes rotated, as per the user's preferences
         glRotatef(options.notes_x_rot, 1.0, 0.0, 0.0)
@@ -103,19 +111,20 @@ class GameScene(scene.TestScene):
         self.deathbar.draw()
         glDisable(GL_DEPTH_TEST)
 
-        # Try to uncomment this and see why it is commented out.
-        # There is something wrong with the particles, and I don't have
-        # the orc to find out what. particlesystem.py is like an italian
-        # restaurant.
+        #Try to uncomment this and see why it is commented out.
+        #There is something wrong with the particles, and I don't have
+        #the orc to find out what. particlesystem.py is like an italian
+        #restaurant.
         #glLoadIdentity()
         #glEnable(GL_DEPTH_TEST)
         #glTranslatef(-window.width/2.0 + 100, 
-        #              -self.guitar_neck.height/2.0, 
-        #              -880.0)  # Ugly magic number.
+                     #-self.guitar_neck.height/2.0, 
+                     #-880.0)  # Ugly magic number.
         #self.particles.draw()
 
-        #glDisable(GL_DEPTH_TEST)
+        glDisable(GL_DEPTH_TEST)
         glPopMatrix()
+        #self.camera.hud_mode(window.width, window.height)
 
     def do_logic(self, dt):
 
@@ -153,8 +162,10 @@ class GameScene(scene.TestScene):
         # happens next?
 
     def _setup_graphics(self):
-
-        glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
+        #äcklig grå färg
+        #glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
+        #svart:
+        glClearColor(0,0,0,0)
 
         glClearDepth(1.0)               # Prepare for 3d. Actually, this might as well 
                                         # be in on_resize, no? Or maybe not. I don't know.
@@ -176,6 +187,12 @@ class GameScene(scene.TestScene):
            pyglet.image.load(
            os.path.join(options.data_dir, "thingy.png")),
            the_danger_point, 0)
+        self.points = 0
+        self.pointmeter = pyglet.text.Label(str(self.points), font_size = 20,
+           bold = True, anchor_x = "right", anchor_y = "top", 
+           color = (200, 200, 20, 255),
+           x = 560, y = 270) #äckliga magiska konstanter men jag pallarnte
+           #x = self.camera.x, y = self.camera.y)
     
         # Create the textures for all the notes
         self.death_notes = []            # Graphics for all notes, active or inactive
@@ -295,7 +312,7 @@ class GameScene(scene.TestScene):
                 note.is_played()
                 #give points
                 self.points += 1 # This sounds bad
-                print self.points
+                self.pointmeter.text = str(self.points)
                 self.particles.explode(pos=(note.sprite.x,
                                             note.sprite.y, 0))
             else:

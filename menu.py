@@ -315,7 +315,6 @@ class SongSelect(BaseMenu):
             number %= len(self.items)
         if self.selected is not None:
             self.items[self.selected].lowlight()
-        print number
         self.items[number].highlight()
         self.selected = number
 
