@@ -304,7 +304,7 @@ class SongSelect(BaseMenu):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(45, width / float(height), 0, 10000)
+        gluPerspective(45, width / float(height), .1, 10000)
         glMatrixMode(GL_MODELVIEW)
 
     def _select(self, number):
