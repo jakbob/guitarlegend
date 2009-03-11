@@ -132,17 +132,24 @@ class GameScene(scene.TestScene):
         t = self.music.time
         self._check_tempochange(t)
         #let's see if it works
-        if t == self.lasttime and False: #se till att det aldrig inträffar
-            delta_time = self.offsync = dt/2 #move a little
+        if t == self.lasttime: 
+            delta_time = self.lastdelta #move a little
+            self.offsync += self.lastdelta
         else:
-            delta_time = t - self.lasttime - self.offsync
-            self.offsync = 0
+            delta_time = t - self.lasttime
+        if self.offsync > delta_time / 3:
+            delta_time -= self.offsync / 3
+            self.offsync -= self.offsync / 3
+        else:
+            delta_time -= self.offsync
+            self.offsync = 0.0
         try:
             self._update_notes(delta_time)
         except IndexError:
             pass
-        self.particles.update(t - self.lasttime)
+        self.particles.update(delta_time)
         self.lasttime = t
+        self.lastdelta = delta_time
         
         #sound = self._get_sound_input()
         #if sound:
@@ -156,10 +163,6 @@ class GameScene(scene.TestScene):
                              for (p, mag) in largest 
                             if mag > options.FREQ_THRESHOLD]
             print [midify(f) for f in  hertz_freqs]
-        # Here we should check if the song has ended
-        # Might I suggest that there is a pause between 
-        # that and the showing of the score or whatever
-        # happens next?
 
     def _setup_graphics(self):
         #äcklig grå färg
@@ -178,15 +181,15 @@ class GameScene(scene.TestScene):
         glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
     
     def _load_file(self, soundfile, midifile):
-        
+        print "Loading File. Please wait."
         self.tab = tab.Tab(midifile)
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
         self.guitar_neck = graphics.create_guitar_texture(3000)
-        self.deathbar = pyglet.sprite.Sprite(
-           pyglet.image.load(
-           os.path.join(options.data_dir, "thingy.png")),
-           the_danger_point, 0)
+        img = pyglet.image.load(
+           os.path.join(options.data_dir, "thingy.png"))
+        self.deathbar = pyglet.sprite.Sprite(img, 
+           the_danger_point + img.width / 2, 0)
         self.points = 0
         self.pointmeter = pyglet.text.Label(str(self.points), font_size = 20,
            bold = True, anchor_x = "right", anchor_y = "top", 
@@ -225,6 +228,7 @@ class GameScene(scene.TestScene):
         self.music = pyglet.media.StaticSource(music).play()
         self.lasttime = self.music.time    # The position in the song in the last frame
         self.offsync = 0
+        self.lastdelta = 0 #holds the last delta_time, used for smooth movement
         self.music._old_eos = self.music._on_eos
         def on_music_eos():
             self.music._old_eos()
