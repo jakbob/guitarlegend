@@ -35,7 +35,6 @@ import wonderful
 import graphics
 import particlesystem
 from manager import game_manager
-from camera import Camera
 
 the_danger_point = 100 #the point where the notes should be played
 
@@ -48,6 +47,55 @@ def midify(f):
     n = round(69.0 + 12.0 * math.log(f / 440.0, 2))
     return int(n)
 
+def uniq(iterable):
+    N = options.DFT_SIZE
+    SAMPLE_RATE = options.SAMPLE_RATE
+    rets = {}
+    for (num, amp) in iterable:
+        try:
+            p = midify(num * float(SAMPLE_RATE)/N)
+            if p < 0:
+                raise OverflowError("Bajs")
+        except OverflowError:
+            continue
+
+        if p in rets:
+            if rets[p] < amp:
+                rets[p] = amp
+        else:
+            rets[p] = amp
+    return rets
+
+def get_note_numbers(mag_list):
+    N = options.DFT_SIZE
+    MAG_THRESHOLD = options.MAG_THRESHOLD
+    
+    if mag_list is not None:
+        assert mag_list[:N/2][0] == mag_list[0]
+        note_numbers = uniq(enumerate(mag_list[:N/2]))
+        return [p for p in get_largest(note_numbers) if note_numbers[p] > MAG_THRESHOLD]
+    else:
+        return None
+
+def get_largest(l):
+    largest = heapq.nlargest(6, l, key=(lambda key: l[key]))
+    return largest
+
+def get_sound():
+    mag_list = wonderful.munch()
+    return get_note_numbers(mag_list)
+
+#try:
+#    while True:
+#        t = time.clock()
+#        s = get_sound()
+#        if s is not None:
+#            print s, "\t\tin", t-lasttime, "seconds"
+#        lasttime = t
+#
+#except KeyboardInterrupt:
+#    pass
+    
 class GameScene(scene.TestScene):
     """In this scene we test things. Mostly notes"""
 
@@ -56,7 +104,6 @@ class GameScene(scene.TestScene):
         self.name = "Ingame"
         self._setup_graphics()
 
-        self.camera = Camera((0,0), 5)
         self._load_file(soundfile, midifile)
         self.particles = particlesystem.ParticleSystem(velfactor=50)
     
@@ -151,19 +198,10 @@ class GameScene(scene.TestScene):
         self.lasttime = t
         self.lastdelta = delta_time
         
-        #sound = self._get_sound_input()
-        #if sound:
-        #    print sound
-        freqs = wonderful.munch()
-        if freqs is not None:
-            lowest_hearable = int(20*options.DFT_SIZE/float(options.SAMPLE_RATE))
-            relevant_freqs = freqs[lowest_hearable:options.DFT_SIZE/2]
-            largest = heapq.nlargest(6, enumerate(relevant_freqs), key=(lambda (num, amp): amp))
-            hertz_freqs = [(p + lowest_hearable) * float(options.SAMPLE_RATE) / options.DFT_SIZE
-                             for (p, mag) in largest 
-                            if mag > options.FREQ_THRESHOLD]
-            print [midify(f) for f in  hertz_freqs]
-
+        in_notes = get_sound()
+        print in_notes
+        self._compare_notes(in_notes)
+        
     def _setup_graphics(self):
         #äcklig grå färg
         #glClearColor(0x4b/255.0, 0x4b/255.0, 0x4b/255.0, 0)
@@ -252,7 +290,7 @@ class GameScene(scene.TestScene):
             self._update_active_notes(dt)
             if self.notecounter < len(self.death_notes):
                 self._set_active_notes(dt)
-            self.check_whos_playing([]) #såhär nånting?
+            #self.check_whos_playing([]) #såhär nånting?
 
     def _update_active_notes(self, dt):
         self.the_edge = [] #
@@ -298,19 +336,9 @@ class GameScene(scene.TestScene):
             self.active_sprites.append(note)
             self.notecounter += 1
 
-    def _get_sound_input(self):
-
-        freqs = wonderful.munch()
-        if freqs is not None:
-            lowest_hearable = int(20*options.DFT_SIZE/float(options.SAMPLE_RATE))
-            relevant_freqs = freqs[lowest_hearable:options.DFT_SIZE/2]
-            largest = heapq.nlargest(6, enumerate(relevant_freqs), key=(lambda (num, amp): amp))
-            hertz_freqs = [(p + lowest_hearable) * float(options.SAMPLE_RATE) / options.DFT_SIZE
-                             for (p, mag) in largest 
-                            if mag > options.FREQ_THRESHOLD]
-            return [midify(f) for f in  hertz_freqs]
-    
-    def check_whos_playing(self, notes_played):
+    def _compare_notes(self, notes_played):
+        if notes_played is None:
+            return
         for note in self.the_edge:
             if note.note.pitch in notes_played:
                 note.is_played()
