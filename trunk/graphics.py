@@ -111,7 +111,7 @@ class DeathNote:
         
     def is_played(self):
         self.played = True
-        #ändra färg här
+        self.sprite.color = options.played_note_color
     
     def missed(self):
         self.played = False
