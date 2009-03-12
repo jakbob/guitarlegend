@@ -44,6 +44,7 @@ Section "Dummy Section" DummySec
 	;; Files go here
 	File *.pyd
 	File /r data
+  File /r songs
 	File library.zip
 	File MSVCR71.dll
 	File python25.dll
