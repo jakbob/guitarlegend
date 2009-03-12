@@ -301,8 +301,8 @@ class GameScene(scene.TestScene):
             # Movement during one second
             #vel = graphics.quarterlen * 1000000 / float(self.tempo) # Tempo is in microseconds
             note.update(dt, self.tempo)
-            if note.sprite.x < the_danger_point and \
-               note.sprite.x + note.sprite.width > the_danger_point:
+            if note.sprite.x < the_danger_point - 10 and \
+               note.sprite.x + note.sprite.width > the_danger_point + 10:
                 self.the_edge.append(note)
             
     def _set_active_notes(self, dt):
