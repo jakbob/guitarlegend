@@ -7,7 +7,7 @@ SAMPLE_RATE = 8000#44100
 N = 2048
 wonderful.init(SAMPLE_RATE, N)
 
-THRESHOLD_K = 1600
+THRESHOLD_K = 1000
 MAG_THRESHOLD = float(N)/THRESHOLD_K # N samples, each between -1.0 and 1.0. The freqs[0] is the sum of all samples.
 lasttime = time.clock()
 
@@ -45,7 +45,8 @@ def uniq(iterable):
 
 def get_note_numbers(mag_list):
     if mag_list is not None:
-        note_numbers = uniq(enumerate(mag_list))
+        assert mag_list[:N/2][0] == mag_list[0]
+        note_numbers = uniq(enumerate(mag_list[:N/2]))
         return [p for p in get_largest(note_numbers) if note_numbers[p] > MAG_THRESHOLD]
     else:
         return None
@@ -65,7 +66,7 @@ try:
         t = time.clock()
         s = get_sound()
         if s is not None:
-            print s, " in %lf seconds", t-lasttime
+            print s, "\t\tin", t-lasttime, "seconds"
         lasttime = t
 
 except KeyboardInterrupt:
