@@ -36,7 +36,7 @@ SHOW_FRAMERATE = False
 
 SAMPLE_RATE = 44100
 DFT_SIZE = 8192
-MAG_THRESHOLD = 400
+MAG_THRESHOLD = 300
 
 ##########################
 #     Window settings    #
@@ -121,6 +121,7 @@ string_color_step = [ 0x050c08,   # e'
 string_brightness = -0x010101*3
 
 dead_note_color = (200, 200, 200)
+played_note_color = (180, 205, 30)
 
 note_label_size = 20
 note_label_color = (255,255,255,200) 

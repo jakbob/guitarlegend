@@ -108,8 +108,10 @@ class GameScene(scene.TestScene):
         self.particles = particlesystem.ParticleSystem(velfactor=50)
     
     def end(self):
-        if self.music.playing:
+        try:
             self.music.stop()
+        except ValueError:
+            pass #det blir knas ibland när låten stoppas 2 ggr
         print "in end, yo"
         #wonderful.terminate()
 
