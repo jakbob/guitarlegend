@@ -20,9 +20,9 @@ def parse_info(info_path):
         keyword = line.split()[0].strip(":").lower()
         information = "".join(line.split()[1:])
         if keyword == "song" or keyword == "name":
-            song = information
+            song = unicode(information, "utf8")
         elif keyword == "artist":
-            artist = information
+            artist = unicode(information, "utf8")
     return song, artist
 
 class MenuItem:
@@ -263,7 +263,6 @@ class SongSelect(BaseMenu):
                     
                 if data.has_key("sound") and data.has_key("midi") \
                         and data.has_key("info"):
-
                     if not data.has_key("image"):
                         img = defaultimage
                     else:
