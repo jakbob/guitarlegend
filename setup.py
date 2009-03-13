@@ -26,7 +26,7 @@ wonderful = Extension("wonderful.wonderful",
 setup(
   name = 'bosseonfire',
   version='0.1',
-  description="Guitar game using Fourier Transforms",
+  description="A Super Duper Cool Game",
   author="Jonne Mickelin, Jakob Florell",
   url="http://guitarlegend.googlecode.com",
   license="GPL v3",
@@ -36,6 +36,7 @@ setup(
             "icon_resources":[(0, "bosse.ico")],
             "dest_base": "Bosse On Fire"}],
   options={"py2exe": {"compressed": 1,
+                      "optimize": 2,
                        },
 			},
   

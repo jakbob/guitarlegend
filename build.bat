@@ -1,1 +1,1 @@
-python setup.py py2exe --includes pyglet.media.drivers.directsound
+python setup.py py2exe
