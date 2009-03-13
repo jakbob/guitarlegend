@@ -48,11 +48,11 @@ Section "Dummy Section" DummySec
 	File library.zip
 	File MSVCR71.dll
 	File python25.dll
-	File tcl84.dll
-	File tk84.dll
+	;File tcl84.dll
+	;File tk84.dll
 	File w9xpopen.exe
 	File "Bosse On Fire.exe"
-	File /r tcl
+	;File /r tcl
 	File avbin.dll
 
 	WriteUninstaller "$INSTDIR\uninstall.exe"
