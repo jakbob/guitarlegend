@@ -272,10 +272,11 @@ class SongSelect(BaseMenu):
                                              img, self.batch)
                     
                     songname, artist = parse_info(data["info"]) #kan förbättras
-                    songtext = TextMenuItem(None, img.width/2, 0, songname, self.batch)
+                    songtext = TextMenuItem(None, img.width/2, -img.height/2-10,
+                       songname, self.batch)
                     artisttext = TextMenuItem(None, img.width/2, 
-                       -songtext.content_height - 5, artist, self.batch)
-
+                       songtext.y - songtext.content_height - 5, artist, self.batch)
+                        #-songtext.content_height - 5
                     select_song = lambda d: lambda: game_manager.push(scene.GameScene(d["sound"], 
                                                                                       d["midi"]))
                     item = MenuItemGroup(select_song(data), 0, 0, 0, 
