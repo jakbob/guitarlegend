@@ -233,6 +233,6 @@ class ErrorScene(Scene):
         """Handles the scene's logic."""
         pass
 
-#from soundtestscene import SoundTestScene
+#from soundtestdscene import SoundTestScene
 from gamescene import GameScene
-#from threadedscene import ThreadedScene
+#from threadedsdcene import ThreadedScene
