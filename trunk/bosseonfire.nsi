@@ -51,11 +51,16 @@ Section "Dummy Section" DummySec
 	File tcl84.dll
 	File tk84.dll
 	File w9xpopen.exe
-	File main.exe
+	File "Bosse On Fire.exe"
 	File /r tcl
 	File avbin.dll
 
 	WriteUninstaller "$INSTDIR\uninstall.exe"
+  
+  CreateDirectory "$SMPROGRAMS\Bosse On Fire\"
+  CreateShortCut "$SMPROGRAMS\Bosse On Fire\Bosse On Fire.lnk" "$INSTDIR\Bosse On Fire.exe"
+  CreateShortCut "$SMPROGRAMS\Bosse On Fire\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+  
 SectionEnd
 
 ;------------------------
@@ -73,5 +78,7 @@ SectionEnd
 Section "Uninstall"
 	Delete "$INSTDIR\uninstall.exe"
 	RMDir /r "$INSTDIR" ; Unsafe if someone installs it in a folder with other files. I'll list all files explicitly soon.
-	
+	Delete "$SMPROGRAMS\Bosse On Fire\Bosse On Fire.lnk"
+  Delete "$SMPROGRAMS\Bosse On Fire\Uninstall.lnk"
+  RMDir  "$SMPROGRAMS\Bosse On Fire\"
 SectionEnd

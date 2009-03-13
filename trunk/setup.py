@@ -32,7 +32,9 @@ setup(
   license="GPL v3",
   packages=["", "wonderful"],
 
-  windows=["main.py"],
+  windows=[{"script": "main.py",
+            "icon_resources":[(0, "bosse.ico")],
+            "dest_base": "Bosse On Fire"}],
   options={"py2exe": {"compressed": 1,
                        },
 			},
