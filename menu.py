@@ -18,7 +18,7 @@ def parse_info(info_path):
     song = artist = ""
     for line in f:
         keyword = line.split()[0].strip(":").lower()
-        information = "".join(line.split()[1:])
+        information = " ".join(line.split()[1:])
         if keyword == "song" or keyword == "name":
             song = unicode(information, "utf8")
         elif keyword == "artist":
@@ -250,33 +250,32 @@ class SongSelect(BaseMenu):
                 for fil in os.listdir(path):
                     attr = None
                     
-                    if re.search("\.(mp3|ogg)$", fil): #ska sättas i options
+                    if re.search("(?!^\.)\.(mp3|ogg)$", fil): #ska sättas i options
                         attr = "sound"
-                    elif re.search("\.(mid|midi)$", fil):
+                    elif re.search("(?!^\.)\.(mid|midi)$", fil):
                         attr = "midi"
-                    elif re.search("\.(jpg|png|bmp)$", fil):
+                    elif re.search("(?!^\.)\.(jpg|png|bmp)$", fil):
                         attr = "image"
                     elif fil == "info.txt":
                         attr = "info"
                         
                     data[attr] = os.path.join(path, fil)
                     
-                if data.has_key("sound") and data.has_key("midi") \
-                        and data.has_key("info"):
+                if data.has_key("sound") and data.has_key("midi"):
                     if not data.has_key("image"):
                         img = defaultimage
                     else:
                         img = pyglet.image.load(data["image"])
-
+                    if not data.has_key("info"):
+                        songname = artist = ""
+                    else:
+                        songname, artist = parse_info(data["info"])                      
                     picture = SpriteMenuItem(None, 0, -img.height/2, 
                                              img, self.batch)
-                    
-                    songname, artist = parse_info(data["info"]) #kan förbättras
                     songtext = TextMenuItem(None, img.width/2, -img.height/2-10,
                        songname, self.batch)
                     artisttext = TextMenuItem(None, img.width/2, 
                        songtext.y - songtext.content_height - 5, artist, self.batch)
-                        #-songtext.content_height - 5
                     select_song = lambda d: lambda: game_manager.push(scene.GameScene(d["sound"], 
                                                                                       d["midi"]))
                     item = MenuItemGroup(select_song(data), 0, 0, 0, 
@@ -328,8 +327,7 @@ class SongSelect(BaseMenu):
             self.items[n].x = r * math.cos(v) + x_offset
             #self.items[n].y = 0
             self.items[n].z = -r * math.sin(v) + z_offset
-            self.items[n].yrot = (270 - v * 180 / math.pi)
-
+            self.items[n].yrot = (90 + v * 180 / math.pi)
         return self.items[number]
 
     def on_key_press(self, window, symbol, modifiers):
