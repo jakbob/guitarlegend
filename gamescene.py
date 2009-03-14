@@ -140,6 +140,7 @@ class GameScene(scene.TestScene):
                       -900.0)# Ugly magic number.
         self.pointmeter.draw()
         self.pointprocent.draw()
+        self.stringlabels.draw()
 
         # Draw the notes rotated, as per the user's preferences
         glRotatef(options.notes_x_rot, 1.0, 0.0, 0.0)
@@ -223,11 +224,25 @@ class GameScene(scene.TestScene):
         self.tab = tab.Tab(midifile)
         self.note_batch = pyglet.graphics.Batch()
         self.label_batch = pyglet.graphics.Batch()
+        
+        #load important images
         self.guitar_neck = graphics.create_guitar_texture(3000)
         img = pyglet.image.load(
            os.path.join(options.data_dir, "thingy.png"))
         self.deathbar = pyglet.sprite.Sprite(img, 
            the_danger_point + img.width / 2, 0)
+
+        #make important label
+        self.stringlabels = pyglet.graphics.Batch()
+        y = lambda string: (6 - string) / 6.0 * self.guitar_neck.height + 3.5
+        pyglet.text.Label("E", x=-15, y=y(1), batch=self.stringlabels)
+        pyglet.text.Label("B", x=-15, y=y(2), batch=self.stringlabels)
+        pyglet.text.Label("G", x=-15, y=y(3), batch=self.stringlabels)
+        pyglet.text.Label("D", x=-15, y=y(4), batch=self.stringlabels)
+        pyglet.text.Label("A", x=-15, y=y(5), batch=self.stringlabels)
+        pyglet.text.Label("E", x=-15, y=y(6), batch=self.stringlabels)
+
+        #do points stuff
         self.points = 0
         self.nonpoints = 0
         self.pointmeter = pyglet.text.Label(str(self.points), font_size = 20,
