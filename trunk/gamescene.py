@@ -134,14 +134,12 @@ class GameScene(scene.TestScene):
         glLoadIdentity()
 
         glEnable(GL_DEPTH_TEST)
-
-        #glTranslatef(0,0,-10.0)
-        #self.pointmeter.draw()   
     
         glTranslatef(-window.width/2.0 + 100, 
                       -self.guitar_neck.height/2.0, 
                       -900.0)# Ugly magic number.
         self.pointmeter.draw()
+        self.pointprocent.draw()
 
         # Draw the notes rotated, as per the user's preferences
         glRotatef(options.notes_x_rot, 1.0, 0.0, 0.0)
@@ -231,11 +229,15 @@ class GameScene(scene.TestScene):
         self.deathbar = pyglet.sprite.Sprite(img, 
            the_danger_point + img.width / 2, 0)
         self.points = 0
+        self.nonpoints = 0
         self.pointmeter = pyglet.text.Label(str(self.points), font_size = 20,
            bold = True, anchor_x = "right", anchor_y = "top", 
            color = (200, 200, 20, 255),
            x = 560, y = 270) #äckliga magiska konstanter men jag pallarnte
-           #x = self.camera.x, y = self.camera.y)
+        self.pointprocent = pyglet.text.Label("100%", font_size = 20,
+           bold = True, anchor_x = "right", anchor_y = "top", 
+           color = (200, 200, 20, 255),
+           x = self.pointmeter.x, y = self.pointmeter.y - 40)
     
         # Create the textures for all the notes
         self.death_notes = []            # Graphics for all notes, active or inactive
@@ -351,3 +353,10 @@ class GameScene(scene.TestScene):
                                             note.sprite.y, 0))
             else:
                 note.missed()
+                self.nonpoints += 1
+            try:
+                procent = float(self.points) / (self.points + self.nonpoints)
+            except ZeroDivisionError:
+                procent = 1.0
+            procent = int(procent * 100)
+            self.pointprocent.text = str(procent) + "%"
