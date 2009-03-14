@@ -44,9 +44,7 @@ class Note:
             + " Stop: " + str(self.stop) + ">"
     
     def __cmp__(self, other):
-
         return cmp(self.start, other.start)
-
 
 class Tab:
 
@@ -62,7 +60,7 @@ class Tab:
         self.ticksPerSec = f.ticksPerSecond
         self.ticksPerQuarter = f.ticksPerQuarterNote
 
-        #self.string=[[],[],[],[],[],[],] #array to hold all notes, grouped in strings
+        self.string=[[],[],[],[],[],[],] #array to hold all notes, grouped in strings
 
         self.all_notes = [] # List of all the notes. Should be sorted by time.
         self.tempo = []     # List of tempo changes
@@ -81,11 +79,10 @@ class Tab:
                     #datan finns i 24bit binary, \x00 är ett hack som fungerar bra
 
                 elif event.channel < 1 or event.channel > 6 or event.velocity == 0: 
-                    # Most of these events shuoldn't be in the file, but if they are, skip them.
+                    # Skip these events
                     pass
 
                 elif not startevent:
-
                     if event.type == "NOTE_ON":
                         startevent = event
 
@@ -99,7 +96,7 @@ class Tab:
                         if not startevent.time == event.time:
                           #removes problems when 2 notes play simultaniously
                             note = Note(startevent.pitch, startevent.channel, startevent.time, event.time)
-                            #self.string[event.channel-1].append(note)
+                            self.string[event.channel-1].append(note)
                             self.all_notes.append(note)
                         startevent = None
 
