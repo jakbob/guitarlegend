@@ -53,11 +53,11 @@ class DeathNote:
 
         img = pyglet.image.Texture.create(width, start_circle.height)
         
-        if width > end_circle.width: #temp, måste komma på bättre sätt
-            img.blit_into(end_circle, width - end_circle.width, 0, 0) # Put in the caps of the note first
-        img.blit_into(start_circle, 0, 0, 0)
-        
-        if width >= 2 * start_circle.width: # If the note is longer than that
+        if img.width <= start_circle.width + end_circle.width:
+            #image is too small, draw only caps
+            circle_len = img.width / 2
+        else:
+            #draw straight parts
             for offset in xrange(start_circle.width, 
                                  width - start_circle.width, 
                                  straight.width):
@@ -70,7 +70,15 @@ class DeathNote:
             if rest > 0:
                 region = straight.get_region(0, 0, rest, straight.height)
                 img.blit_into(region, start_circle.width + (offset + 1)*straight.width, 0, 0)
+            circle_len = end_circle.width
 
+        #now draw caps
+        img.blit_into(start_circle, 0, 0, 0)
+        #make note prettier
+        subset = end_circle.get_region(end_circle.width - circle_len, 0,
+           circle_len, end_circle.height)
+        img.blit_into(subset, width - circle_len, 0, 0)
+        
         return img
 
     def set_color(self):
