@@ -1,3 +1,6 @@
+import getopt
+import sys
+
 import midi
 
 #constants
@@ -23,7 +26,7 @@ def rearange(infile, outfile):
                 event.data = str(event.channel)
             if hasattr(event, "pitch"):
                 for string, code in keycodes.iteritems():
-                    if event.pitch > code:
+                    if event.pitch >= code:
                         if code == -1:
                             del event #perhaps it helps...
                         else:
@@ -39,6 +42,14 @@ def rearange(infile, outfile):
     mid.close()
 
 if __name__ == "__main__":
-    infile = "/home/jakob/Desktop/fire-and-flames.mid"
-    outfile = "data/fire-and-flames.mid"
+    infile = outfile = None
+
+    optlist, args = getopt.getopt(sys.argv[1:], "i:o:")
+    for flag, value in optlist:
+        if flag == "-i":
+            infile = value
+        elif flag == "-o":
+            outfile = value
+    if not (infile and outfile):
+        raise "Must specifile infile (-i) and outfile (-o)"
     rearange(infile, outfile)
