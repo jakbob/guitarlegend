@@ -34,9 +34,9 @@ SHOW_FRAMERATE = False
 #   Microphone settings  #
 ##########################
 
-SAMPLE_RATE = 44100
-DFT_SIZE = 8192
-MAG_THRESHOLD = 300
+SAMPLE_RATE = 22050
+DFT_SIZE = 8192#16384
+MAG_THRESHOLD = 50#300
 
 ##########################
 #     Window settings    #

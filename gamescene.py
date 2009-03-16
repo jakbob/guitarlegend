@@ -73,7 +73,7 @@ def get_note_numbers(mag_list):
     if mag_list is not None:
         assert mag_list[:N/2][0] == mag_list[0]
         note_numbers = uniq(enumerate(mag_list[:N/2]))
-        return [p for p in get_largest(note_numbers) if note_numbers[p] > MAG_THRESHOLD]
+        return [(p, note_numbers[p]) for p in get_largest(note_numbers) if note_numbers[p] > MAG_THRESHOLD and p > 70 * float(N) / options.SAMPLE_RATE]
     else:
         return None
 
@@ -112,8 +112,6 @@ class GameScene(scene.TestScene):
             self.music.stop()
         except ValueError:
             pass #det blir knas ibland när låten stoppas 2 ggr
-        print "in end, yo"
-        #wonderful.terminate()
 
     def on_resize(self, width, height):
 
@@ -200,8 +198,9 @@ class GameScene(scene.TestScene):
         self.lastdelta = delta_time
         
         in_notes = get_sound()
-        print in_notes
-        self._compare_notes(in_notes)
+        if in_notes is not None:
+            print in_notes
+            self._compare_notes([p for (p, mag) in in_notes])
         
     def _setup_graphics(self):
         #äcklig grå färg
@@ -235,10 +234,10 @@ class GameScene(scene.TestScene):
         #make important label
         self.stringlabels = pyglet.graphics.Batch()
         y = lambda string: (6 - string) / 6.0 * self.guitar_neck.height + 3.5
-        pyglet.text.Label("E", x=-15, y=y(1), batch=self.stringlabels)
-        pyglet.text.Label("B", x=-15, y=y(2), batch=self.stringlabels)
-        pyglet.text.Label("G", x=-15, y=y(3), batch=self.stringlabels)
-        pyglet.text.Label("D", x=-15, y=y(4), batch=self.stringlabels)
+        pyglet.text.Label("e'", x=-15, y=y(1), batch=self.stringlabels)
+        pyglet.text.Label("h", x=-15, y=y(2), batch=self.stringlabels)
+        pyglet.text.Label("g", x=-15, y=y(3), batch=self.stringlabels)
+        pyglet.text.Label("d", x=-15, y=y(4), batch=self.stringlabels)
         pyglet.text.Label("A", x=-15, y=y(5), batch=self.stringlabels)
         pyglet.text.Label("E", x=-15, y=y(6), batch=self.stringlabels)
 

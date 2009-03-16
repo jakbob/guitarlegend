@@ -119,7 +119,6 @@ class MenuItemGroup(MenuItem, pyglet.graphics.Group):
         glRotatef(self.yrot, 0, 1, 0)
         glTranslatef(-self.members[0].image.width/2, 0, 0)
 
-
     def unset_state(self):
         glDisable(GL_DEPTH_TEST)
         glPopMatrix()
@@ -307,8 +306,6 @@ class SongSelect(BaseMenu):
         glMatrixMode(GL_MODELVIEW)
 
     def _select(self, number):
-        #BaseMenu._select(self, number)
-
         
         if self.items:
             number %= len(self.items)
@@ -321,11 +318,9 @@ class SongSelect(BaseMenu):
         x_offset = options.window_width/2 - r# inte options!
         z_offset = -(2000 - r)
         for n in xrange(len(self.items)):
-            #i = (n - (len(self.items) - self.selected))
             i = n - self.selected
             v = 3 * math.pi / 2 + i * 2 * math.pi / len(self.items)
             self.items[n].x = r * math.cos(v) + x_offset
-            #self.items[n].y = 0
             self.items[n].z = -r * math.sin(v) + z_offset
             self.items[n].yrot = (90 + v * 180 / math.pi)
         return self.items[number]
