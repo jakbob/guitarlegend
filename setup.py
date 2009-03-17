@@ -4,8 +4,13 @@ from distutils.extension import Extension
 
 from Cython.Distutils import build_ext
 
-# Uncomment this line if you are building for windows
-import py2exe
+import sys
+
+wonderful_libraries = ["portaudio"]
+
+if sys.platform == "win32":
+    import py2exe
+    wonderful_libraries.append("winmm")
 
 class smart_install_data(install_data):
     def run(self):
@@ -20,7 +25,7 @@ wonderful = Extension("wonderful.wonderful",
                       sources=["wonderful/wonderful.pyx", 
                                "wonderful/dft.c", 
                                "wonderful/c_wonderful.c"],
-                      libraries=["portaudio", "winmm"],
+                      libraries=wonderful_libraries,
                       library_dirs=["wonderful"])
 
 setup(
