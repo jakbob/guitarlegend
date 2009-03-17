@@ -8,7 +8,7 @@
 ;------------------------
 ; Scrotum
 Name "Bosse on Fire"
-OutFile "bosseonfire-installer.exe"
+OutFile "bosseonfire-alpha1.0-installer.exe"
 
 InstallDir "$PROGRAMFILES\Bosse On Fire"
 
