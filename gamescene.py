@@ -199,7 +199,7 @@ class GameScene(scene.TestScene):
         
         in_notes = get_sound()
         if in_notes is not None:
-            print in_notes
+            #print in_notes
             self._compare_notes([p for (p, mag) in in_notes])
         
     def _setup_graphics(self):
@@ -234,10 +234,10 @@ class GameScene(scene.TestScene):
         #make important label
         self.stringlabels = pyglet.graphics.Batch()
         y = lambda string: (6 - string) / 6.0 * self.guitar_neck.height + 3.5
-        pyglet.text.Label("e'", x=-15, y=y(1), batch=self.stringlabels)
-        pyglet.text.Label("h", x=-15, y=y(2), batch=self.stringlabels)
-        pyglet.text.Label("g", x=-15, y=y(3), batch=self.stringlabels)
-        pyglet.text.Label("d", x=-15, y=y(4), batch=self.stringlabels)
+        pyglet.text.Label("E", x=-15, y=y(1), batch=self.stringlabels)
+        pyglet.text.Label("B", x=-15, y=y(2), batch=self.stringlabels)
+        pyglet.text.Label("G", x=-15, y=y(3), batch=self.stringlabels)
+        pyglet.text.Label("D", x=-15, y=y(4), batch=self.stringlabels)
         pyglet.text.Label("A", x=-15, y=y(5), batch=self.stringlabels)
         pyglet.text.Label("E", x=-15, y=y(6), batch=self.stringlabels)
 
